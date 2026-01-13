@@ -1,0 +1,63 @@
+{% extends 'aicashier/base.html' %}
+{% load static %}
+{% block content %}
+<div class="flex items-center gap-4 text-sm">
+            <a href="{% url 'home' %}" class="text-gray-300 hover:text-white font-medium transition">หน้าหลัก</a>
+            <a href="{% url 'overviews' %}" class="text-gray-300 hover:text-white font-medium transition">ข้อมูลการขาย</a>
+            <a href="{% url 'product_manage' %}" class="text-gray-300 hover:text-white font-medium transition">จัดการสินค้า</a>
+            <a href="{% url 'ai_settings' %}" class="text-gray-300 hover:text-white font-medium transition">ตั้งค่าการทำงานระบบเอไอ</a>
+        </div>
+<div class="min-h-screen bg-[#23243a] font-kanit py-8 px-4">
+	
+	<div class="flex justify-between items-center mb-8">
+		<h1 class="text-3xl font-bold text-[#b16cff]">จัดการสินค้า</h1>
+		<div class="flex gap-3">
+			<a href="{% url 'manage_category' %}" class="px-6 py-2 rounded-md bg-purple-600 hover:bg-purple-700 text-white font-medium transition">จัดการหมวดหมู่</a>
+			<a href="{% url 'featured_menu' %}" class="px-6 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium transition">จัดการรายการสินค้าแนะนำ</a>
+			<a href="{% url 'manage_promotion' %}" class="px-6 py-2 rounded-md bg-orange-600 hover:bg-orange-700 text-white font-medium transition">จัดการโปรโมชั่น</a>
+			<a href="{% url 'product_create' %}" class="px-6 py-2 rounded-md bg-green-600 hover:bg-green-700 text-white font-medium transition">เพิ่มสินค้า</a>
+		</div>
+	</div>
+	<div class="overflow-x-auto rounded-2xl shadow-lg">
+		<table class="min-w-full bg-[#393a5a] text-white rounded-2xl">
+			<thead>
+				<tr class="bg-[#393a5a] text-[#b16cff] text-lg">
+					<th class="py-4 px-4 text-left">รหัสสินค้า</th>
+					<th class="py-4 px-4 text-left">ชื่อ</th>
+					<th class="py-4 px-4 text-left">ราคา</th>
+					<th class="py-4 px-4 text-left">จำนวน</th>
+					<th class="py-4 px-4 text-left">จัดการ</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for product in products %}
+				<tr class="border-b border-[#23243a] hover:bg-[#2a2b45] transition">
+					<td class="py-3 px-4">
+						{% if product.product_code %}
+							<span class="px-3 py-1 bg-[#b16cff]/20 text-[#b16cff] rounded-full text-sm font-semibold">
+								{{ product.product_code }}
+							</span>
+						{% else %}
+							<span class="px-3 py-1 bg-gray-600/20 text-gray-400 rounded-full text-sm font-semibold">
+								ID: {{ product.id }}
+							</span>
+						{% endif %}
+					</td>
+					<td class="py-3 px-4">{{ product.name }}</td>
+					<td class="py-3 px-4">{{ product.price }}</td>
+					<td class="py-3 px-4">{{ product.quantity|default:0 }}</td>
+					<td class="py-3 px-4">
+						<a href="{% url 'product_edit' product.id %}" class="text-green-400 hover:underline mr-4">แก้ไข</a>
+						<a href="{% url 'product_delete' product.id %}" class="text-red-400 hover:underline">ลบ</a>
+					</td>
+				</tr>
+				{% empty %}
+				<tr>
+					<td colspan="5" class="py-6 text-center text-gray-400">No products found.</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}

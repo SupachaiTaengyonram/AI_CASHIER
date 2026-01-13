@@ -1,0 +1,13 @@
+{
+  "devDependencies": {
+    "autoprefixer": "^10.4.23",
+    "cross-env": "^10.0.0",
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "postcss-nested": "^7.0.2",
+    "postcss-simple-vars": "^7.0.1"
+  }
+}

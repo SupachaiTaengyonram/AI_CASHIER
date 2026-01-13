@@ -1,0 +1,233 @@
+{% extends 'aicashier/base.html' %}
+{% load static %}
+{% block content %}
+<div class="flex items-center gap-4 text-sm">
+    <a href="{% url 'home' %}" class="text-gray-300 hover:text-white font-medium transition">หน้าหลัก</a>
+    <a href="{% url 'overviews' %}" class="text-gray-300 hover:text-white font-medium transition">ข้อมูลการขาย</a>
+    <a href="{% url 'product_manage' %}" class="text-gray-300 hover:text-white font-medium transition">จัดการสินค้า</a>
+    <a href="{% url 'ai_settings' %}" class="text-gray-300 hover:text-white font-medium transition">ตั้งค่าการทำงานระบบเอไอ</a>
+</div>
+
+<div class="min-h-screen bg-[#23243a] font-kanit py-8 px-4">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-[#b16cff]">จัดการหมวดหมู่</h1>
+        <div class="flex gap-3">
+            <a href="{% url 'create_category' %}" class="px-6 py-2 rounded-md bg-green-600 hover:bg-green-700 text-white font-medium transition">สร้างหมวดหมู่ใหม่</a>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mb-8">
+        {% for message in messages %}
+        <div class="p-4 rounded-lg bg-{% if message.tags %}{{ message.tags }}{% else %}green{% endif %}-500/20 border border-{% if message.tags %}{{ message.tags }}{% else %}green{% endif %}-500 text-{% if message.tags %}{{ message.tags }}{% else %}green{% endif %}-400 mb-4">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Categories Table -->
+    <div class="overflow-x-auto rounded-2xl shadow-lg mb-12">
+        <table class="min-w-full bg-[#393a5a] text-white rounded-2xl">
+            <thead>
+                <tr class="bg-[#393a5a] text-[#b16cff] text-lg">
+                    <th class="py-4 px-4 text-left">หมวดหมู่</th>
+                    <th class="py-4 px-4 text-left">รายละเอียด</th>
+                    <th class="py-4 px-4 text-left">จำนวนสินค้า</th>
+                    <th class="py-4 px-4 text-left">จัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                <tr class="border-b border-[#23243a] hover:bg-[#2a2b45] transition">
+                    <td class="py-3 px-4 font-semibold text-white">{{ category.name }}</td>
+                    <td class="py-3 px-4 text-[#8b8ba8] text-sm">{{ category.description|truncatewords:10 }}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-3 py-1 bg-[#b16cff]/20 text-[#b16cff] rounded-full text-sm font-semibold">
+                            {{ category.product_count }} สินค้า
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 flex gap-2">
+                        <button type="button" class="text-blue-400 hover:underline text-sm" onclick="openEditModal(this)" data-id="{{ category.id }}" data-name="{{ category.name }}" data-description="{{ category.description }}">แก้ไข</button>
+                        <a href="{% url 'delete_category' category.id %}" class="text-red-400 hover:underline text-sm">ลบ</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="py-6 text-center text-gray-400">ยังไม่มีหมวดหมู่ กรุณาสร้างหมวดหมู่ใหม่</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Edit Category Modal -->
+<div id="editModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto">
+    <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20 w-full max-w-2xl my-8">
+        <h3 class="text-2xl font-bold text-[#b16cff] mb-4">แก้ไขหมวดหมู่</h3>
+        
+        <form id="editForm" method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Hidden field for product IDs -->
+            <input type="hidden" name="product_ids" id="productIds">
+            
+            <!-- Category Info -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[#b16cff] font-semibold block mb-2">ชื่อหมวดหมู่</label>
+                    <input type="text" name="name" id="categoryName" required class="w-full bg-[#393a5a] text-white border border-[#b16cff]/30 rounded-lg px-4 py-3 focus:outline-none focus:border-[#b16cff] transition">
+                </div>
+                
+                <div>
+                    <label class="text-[#b16cff] font-semibold block mb-2">รายละเอียด</label>
+                    <input type="text" name="description" id="categoryDescription" class="w-full bg-[#393a5a] text-white border border-[#b16cff]/30 rounded-lg px-4 py-3 focus:outline-none focus:border-[#b16cff] transition">
+                </div>
+            </div>
+
+            <!-- Products in Category -->
+            <div>
+                <label class="text-[#b16cff] font-semibold block mb-3">สินค้าในหมวดนี้</label>
+                <div class="bg-[#393a5a] rounded-lg p-4 max-h-64 overflow-y-auto">
+                    <div id="productsList" class="space-y-2">
+                        <!-- ส่วนที่จะเติมด้วย JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <label class="text-[#b16cff] font-semibold block mb-2">เพิ่มสินค้าเข้าหมวดนี้</label>
+                    <div class="flex gap-2">
+                        <select id="productToAdd" class="flex-1 bg-[#393a5a] text-white border border-[#b16cff]/30 rounded-lg px-4 py-2 focus:outline-none focus:border-[#b16cff] transition">
+                            <option value="">-- เลือกสินค้า --</option>
+                            {% for product in products %}
+                            <option value="{{ product.id }}">{{ product.name }} (฿{{ product.price }})</option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" onclick="addProductToCategory()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition">
+                            เพิ่ม
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-3">
+                <button type="submit" class="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition">
+                    บันทึก
+                </button>
+                <button type="button" onclick="closeEditModal()" class="flex-1 px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition">
+                    ยกเลิก
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let currentCategoryId = null;
+let categoryProducts = {};
+let allProductsData = [];
+
+// เตรียมข้อมูลสินค้า
+const productsJson = {{ products_json|safe }};
+allProductsData = productsJson;
+
+function openEditModal(button) {
+    const categoryId = button.dataset.id;
+    const categoryName = button.dataset.name;
+    const categoryDescription = button.dataset.description;
+    
+    currentCategoryId = categoryId;
+    categoryProducts = {};
+    
+    document.getElementById('categoryName').value = categoryName;
+    document.getElementById('categoryDescription').value = categoryDescription;
+    
+    // โหลดรายการสินค้าในหมวดนี้
+    loadCategoryProducts(categoryId);
+    
+    // ตั้ง action URL ให้ไปยัง category_edit
+    const form = document.getElementById('editForm');
+    form.action = `/categories/${categoryId}/edit/`;
+    
+    document.getElementById('editModal').classList.remove('hidden');
+}
+
+function loadCategoryProducts(categoryId) {
+    const productsInCategory = allProductsData.filter(p => p.category_id == categoryId);
+    
+    // เก็บสินค้าที่อยู่ในหมวดนี้
+    productsInCategory.forEach(p => {
+        categoryProducts[p.id] = p;
+    });
+    
+    renderProductsList();
+}
+
+function renderProductsList() {
+    const productsList = document.getElementById('productsList');
+    productsList.innerHTML = '';
+    
+    if (Object.keys(categoryProducts).length === 0) {
+        productsList.innerHTML = '<p class="text-[#8b8ba8] text-center py-4">ยังไม่มีสินค้า</p>';
+        return;
+    }
+    
+    Object.values(categoryProducts).forEach(product => {
+        const productItem = document.createElement('div');
+        productItem.className = 'flex justify-between items-center bg-[#23243a] p-3 rounded-lg';
+        productItem.innerHTML = `
+            <div>
+                <p class="text-white font-semibold">${product.name}</p>
+                <p class="text-[#8b8ba8] text-sm">฿${product.price}</p>
+            </div>
+            <button type="button" onclick="removeProductFromCategory(${product.id})" class="px-3 py-1 bg-red-600/20 text-red-400 hover:bg-red-600/40 rounded text-sm transition">
+                ลบ
+            </button>
+        `;
+        productsList.appendChild(productItem);
+    });
+}
+
+function addProductToCategory() {
+    const selectElement = document.getElementById('productToAdd');
+    const productId = parseInt(selectElement.value);
+    
+    if (!productId) return;
+    
+    const product = allProductsData.find(p => p.id === productId);
+    
+    if (product && !categoryProducts[productId]) {
+        categoryProducts[productId] = product;
+        renderProductsList();
+        selectElement.value = '';
+    }
+}
+
+function removeProductFromCategory(productId) {
+    delete categoryProducts[productId];
+    renderProductsList();
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.add('hidden');
+    currentCategoryId = null;
+    categoryProducts = {};
+}
+
+// ตั้ง product_ids ก่อน submit form
+document.getElementById('editForm').addEventListener('submit', function(e) {
+    const productIds = Object.keys(categoryProducts).join(',');
+    document.getElementById('productIds').value = productIds;
+});
+
+// ปิด modal เมื่อคลิกนอก modal
+document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeEditModal();
+    }
+});
+</script>
+{% endblock %}

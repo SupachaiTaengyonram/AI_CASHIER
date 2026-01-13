@@ -1,0 +1,497 @@
+@startuml classes_MyDiagram
+set namespaceSeparator none
+class "AISettings" as Project01.aicashier.models.AISettings {
+  closing_message : TextField
+  created_at : DateTimeField
+  featured_item_1 : ForeignKey
+  featured_item_2 : ForeignKey
+  featured_item_3 : ForeignKey
+  featured_item_4 : ForeignKey
+  greeting_message : TextField
+  is_active : BooleanField
+  promotion_text : TextField
+  sales_steps : TextField
+  updated_at : DateTimeField
+  get_settings()
+}
+class "AISettingsAdmin" as Project01.aicashier.admin.AISettingsAdmin {
+  fieldsets : tuple
+  has_add_permission(request)
+  has_delete_permission(request, obj)
+}
+class "AISettingsForm" as Project01.aicashier.forms.AISettingsForm {
+}
+class "AISettingsView" as Project01.aicashier.views.AISettingsView {
+  form_class
+  login_url : str
+  model
+  success_url : __proxy__
+  template_name : str
+  get_context_data()
+  get_object(queryset)
+}
+class "AIStatusToggleView" as Project01.aicashier.views.AIStatusToggleView {
+  fields : list
+  login_url : str
+  model
+  success_url : __proxy__
+  get_object(queryset)
+  post(request)
+}
+class "AicashierConfig" as Project01.aicashier.apps.AicashierConfig {
+  default_auto_field : str
+  name : str
+  ready()
+}
+class "AuthAndAccessTests" as Project01.aicashier.tests.AuthAndAccessTests {
+  test_customer_login_fail()
+  test_customer_login_success()
+  test_normal_user_cannot_access_admin_page()
+}
+class "BaseTestCase" as Project01.aicashier.tests.BaseTestCase {
+  admin_password : str
+  admin_user
+  home_url : str
+  login_url : str
+  product_create_url : str
+  product_manage_url : str
+  user
+  user_password : str
+  setUp()
+}
+class "Category" as Project01.aicashier.models.Category {
+  created_at : DateTimeField
+  description : TextField
+  name : CharField
+}
+class "CategoryCreateView" as Project01.aicashier.views.CategoryCreateView {
+  fields : list
+  model
+  success_url : __proxy__
+  template_name : str
+  form_valid(form)
+}
+class "CategoryDeleteView" as Project01.aicashier.views.CategoryDeleteView {
+  model
+  success_url : __proxy__
+  template_name : str
+  delete(request)
+}
+class "CategoryListView" as Project01.aicashier.views.CategoryListView {
+  context_object_name : str
+  model
+  template_name : str
+  get_context_data()
+  post(request)
+}
+class "CategoryUpdateView" as Project01.aicashier.views.CategoryUpdateView {
+  fields : list
+  model
+  object
+  success_url : __proxy__
+  template_name : str
+  post(request)
+}
+class "CheckPaymentStatusView" as Project01.aicashier.views.CheckPaymentStatusView {
+  login_url : str
+  get(request, payment_id)
+}
+class "Command" as Project01.aicashier.management.commands.sync_ai.Command {
+  help : str
+  handle()
+}
+class "ConfirmDisableAIView" as Project01.aicashier.views.ConfirmDisableAIView {
+  login_url : str
+  template_name : str
+  get_context_data()
+  post(request)
+}
+class "CustomLoginView" as Project01.aicashier.views.CustomLoginView {
+  form_valid(form)
+}
+class "Customer" as Project01.aicashier.models.Customer {
+  REQUIRED_FIELDS : list
+  USERNAME_FIELD : str
+  contact_number : CharField
+  date_joined : DateTimeField
+  email : EmailField
+  is_active : BooleanField
+  is_staff : BooleanField
+  objects
+  username : CharField
+}
+class "CustomerAdmin" as Project01.aicashier.admin.CustomerAdmin {
+  add_fieldsets : tuple
+  add_form
+  fieldsets : tuple
+  form
+  list_display : tuple
+  list_filter : tuple
+  ordering : tuple
+  search_fields : tuple
+}
+class "CustomerChangeAdminForm" as Project01.aicashier.admin.CustomerChangeAdminForm {
+  password : ReadOnlyPasswordHashField
+}
+class "CustomerCreateView" as Project01.aicashier.views.CustomerCreateView {
+  form_class
+  model
+  success_message : str
+  success_url : __proxy__
+  template_name : str
+}
+class "CustomerCreationAdminForm" as Project01.aicashier.admin.CustomerCreationAdminForm {
+  password1 : CharField
+  password2 : CharField
+  clean_password2()
+  save(commit)
+}
+class "CustomerDeleteView" as Project01.aicashier.views.CustomerDeleteView {
+  login_url : str
+  model
+  success_url : __proxy__
+  template_name : str
+}
+class "CustomerDetailView" as Project01.aicashier.views.CustomerDetailView {
+  context_object_name : str
+  login_url : str
+  model
+  template_name : str
+}
+class "CustomerForm" as Project01.aicashier.forms.CustomerForm {
+  confirm_password : CharField
+  password : CharField
+  clean()
+  save(commit)
+}
+class "CustomerListView" as Project01.aicashier.views.CustomerListView {
+  context_object_name : str
+  login_url : str
+  model
+  template_name : str
+}
+class "CustomerManager" as Project01.aicashier.models.CustomerManager {
+  create_superuser(username, email, contact_number, password)
+  create_user(username, email, contact_number, password)
+}
+class "CustomerModelTests" as Project01.aicashier.tests.CustomerModelTests {
+  test_create_customer()
+  test_create_superuser()
+}
+class "CustomerUpdateForm" as Project01.aicashier.forms.CustomerUpdateForm {
+}
+class "CustomerUpdateView" as Project01.aicashier.views.CustomerUpdateView {
+  form_class
+  login_url : str
+  model
+  success_url : __proxy__
+  template_name : str
+}
+class "DisableAIActionView" as Project01.aicashier.views.DisableAIActionView {
+  login_url : str
+  get(request)
+}
+class "DisableAIView" as Project01.aicashier.views.DisableAIView {
+  login_url : str
+  template_name : str
+  get(request)
+  get_context_data()
+  post(request)
+}
+class "FeaturedMenuView" as Project01.aicashier.views.FeaturedMenuView {
+  login_url : str
+  template_name : str
+  dispatch(request)
+  get_context_data()
+  post(request)
+}
+class "GeminiChatService" as Project01.aicashier.gemini_service.GeminiChatService {
+  ai_settings : NoneType
+  api_key : NoneType
+  chat_history : list
+  chat_session : ChatSession, NoneType
+  model : GenerativeModel
+  model_name : str
+  system_context : str
+  clear_history()
+  get_featured_products()
+  get_history()
+  get_product_recommendation(customer_needs: str, available_products: list) -> str
+  get_response(user_message: str, shop_context: str) -> str
+  get_response_with_rag(user_message: str) -> str
+  get_settings_info()
+}
+class "HomeView" as Project01.aicashier.views.HomeView {
+  context_object_name : str
+  login_url : str
+  template_name : str
+  get(request)
+  get_context_data()
+  get_queryset()
+}
+class "Meta" as Project01.aicashier.models.Category.Meta {
+  ordering : list
+  verbose_name_plural : str
+}
+class "Meta" as Project01.aicashier.models.Order.Meta {
+  ordering : list
+}
+class "Meta" as Project01.aicashier.models.AISettings.Meta {
+  verbose_name : str
+  verbose_name_plural : str
+}
+class "Meta" as Project01.aicashier.models.Payment.Meta {
+  ordering : list
+  verbose_name : str
+  verbose_name_plural : str
+}
+class "Meta" as Project01.aicashier.forms.ProductForm.Meta {
+  fields : list
+  model
+}
+class "Meta" as Project01.aicashier.forms.CustomerForm.Meta {
+  fields : list
+  model
+}
+class "Meta" as Project01.aicashier.forms.CustomerUpdateForm.Meta {
+  fields : list
+  model
+}
+class "Meta" as Project01.aicashier.forms.AISettingsForm.Meta {
+  fields : list
+  labels : dict
+  model
+}
+class "Meta" as Project01.aicashier.admin.CustomerCreationAdminForm.Meta {
+  fields : tuple
+  model
+}
+class "Meta" as Project01.aicashier.admin.CustomerChangeAdminForm.Meta {
+  fields : tuple
+  model
+}
+class "Migration" as Project01.aicashier.migrations.0001_initial.Migration {
+  dependencies : list
+  initial : bool
+  operations : list
+}
+class "NoCacheMiddleware" as Project01.aicashier.middleware.NoCacheMiddleware {
+  get_response
+}
+class "Order" as Project01.aicashier.models.Order {
+  ORDER_STATUS_CHOICES : list
+  created_at : DateTimeField
+  customer : ForeignKey
+  product : ForeignKey
+  quantity : PositiveIntegerField
+  status : CharField
+  total_price : DecimalField
+  updated_at : DateTimeField
+}
+class "OrderManagementView" as Project01.aicashier.views.OrderManagementView {
+  context_object_name : str
+  model
+  paginate_by : int
+  template_name : str
+  get_queryset()
+}
+class "OverviewsView" as Project01.aicashier.views.OverviewsView {
+  context_object_name : str
+  login_url : str
+  model
+  template_name : str
+  get_context_data()
+}
+class "Payment" as Project01.aicashier.models.Payment {
+  PAYMENT_METHOD_CHOICES : list
+  PAYMENT_STATUS_CHOICES : list
+  amount : DecimalField
+  confirmed_at : DateTimeField
+  created_at : DateTimeField
+  customer : ForeignKey
+  expires_at : DateTimeField
+  is_expired
+  notes : TextField
+  payment_method : CharField
+  payment_status : CharField
+  qr_code_data : TextField
+  reference_number : CharField
+  stripe_checkout_session_id : CharField
+  stripe_payment_link_id : CharField
+  stripe_payment_url : TextField
+  stripe_qr_code_url : URLField
+  stripe_response : JSONField
+  transaction_id : CharField
+  updated_at : DateTimeField
+}
+class "PaymentAdmin" as Project01.aicashier.admin.PaymentAdmin {
+  fieldsets : tuple
+  list_display : tuple
+  list_filter : tuple
+  readonly_fields : tuple
+  search_fields : tuple
+  has_add_permission(request)
+}
+class "PaymentSuccessView" as Project01.aicashier.views.PaymentSuccessView {
+  context_object_name : str
+  login_url : str
+  model
+  pk_url_kwarg : str
+  template_name : str
+  get_context_data()
+  get_object(queryset)
+}
+class "PaymentView" as Project01.aicashier.views.PaymentView {
+  get(request)
+  post(request)
+}
+class "Product" as Project01.aicashier.models.Product {
+  ai_information : TextField
+  category : ForeignKey
+  created_at : DateTimeField
+  description : TextField
+  image : ImageField
+  image_url : URLField
+  name : CharField
+  price : DecimalField
+  product_code : CharField
+  quantity : PositiveIntegerField
+  updated_at : DateTimeField
+}
+class "ProductAdmin" as Project01.aicashier.admin.ProductAdmin {
+  list_display : tuple
+  list_filter : tuple
+  search_fields : tuple
+}
+class "ProductCreateView" as Project01.aicashier.views.ProductCreateView {
+  form_class
+  model
+  success_url : __proxy__
+  template_name : str
+  form_valid(form)
+}
+class "ProductDeleteView" as Project01.aicashier.views.ProductDeleteView {
+  model
+  success_url : __proxy__
+  template_name : str
+  delete(request)
+}
+class "ProductForm" as Project01.aicashier.forms.ProductForm {
+  clean_product_code()
+}
+class "ProductListView" as Project01.aicashier.views.ProductListView {
+  context_object_name : str
+  model
+  template_name : str
+}
+class "ProductTests" as Project01.aicashier.tests.ProductTests {
+  test_admin_can_create_product()
+  test_user_cannot_create_product()
+}
+class "ProductUpdateView" as Project01.aicashier.views.ProductUpdateView {
+  form_class
+  model
+  success_url : __proxy__
+  template_name : str
+  form_valid(form)
+}
+class "ProfileUpdateView" as Project01.aicashier.views.ProfileUpdateView {
+  form_class
+  login_url : str
+  model
+  template_name : str
+  form_valid(form)
+  get_object()
+  get_success_url()
+}
+class "ProfileView" as Project01.aicashier.views.ProfileView {
+  context_object_name : str
+  login_url : str
+  model
+  template_name : str
+  get_object()
+}
+class "RAGService" as Project01.aicashier.rag_service.RAGService {
+  api_key : NoneType
+  chroma_client : Client
+  chroma_path
+  collection_name : str
+  embeddings : HuggingFaceEmbeddings
+  llm : GoogleGenerativeAI
+  text_splitter : RecursiveCharacterTextSplitter
+  vector_store : Chroma
+  add_product_to_rag(product)
+  add_to_cart_from_voice(user_message: str, request)
+  delete_product_from_rag(product_id)
+  extract_product_and_quantity(user_message: str)
+  find_product_by_name(product_name: str)
+  get_collection_stats()
+  parse_cart_command(user_message: str)
+  parse_cart_command_with_cart_context(user_message: str, cart: list)
+  rag_query(query: str, conversation_history: list) -> str
+  search_products(query: str, k: int)
+  update_product_in_rag(product)
+  voice_manage_cart(user_message: str, request)
+}
+class "SetPaymentAmountView" as Project01.aicashier.views.SetPaymentAmountView {
+  login_url : str
+  dispatch()
+  post(request)
+}
+class "StripePaymentStatusView" as Project01.aicashier.views.StripePaymentStatusView {
+  login_url : str
+  get(request, payment_id)
+}
+class "StripePaymentView" as Project01.aicashier.views.StripePaymentView {
+  login_url : str
+  template_name : str
+  get(request, payment_id)
+}
+class "StripeService" as Project01.aicashier.stripe_service.StripeService {
+  public_key : NoneType
+  secret_key : NoneType
+  create_payment_link(amount: float, description: str, metadata: dict, success_url: str, cancel_url: str) -> dict
+  get_payment_link_status(payment_link_id: str) -> dict
+}
+class "ThemeConfig" as Project01.theme.apps.ThemeConfig {
+  name : str
+}
+Project01.aicashier.tests.AuthAndAccessTests --|> Project01.aicashier.tests.BaseTestCase
+Project01.aicashier.tests.CustomerModelTests --|> Project01.aicashier.tests.BaseTestCase
+Project01.aicashier.tests.ProductTests --|> Project01.aicashier.tests.BaseTestCase
+Project01.aicashier.models.CustomerManager --* Project01.aicashier.models.Customer : objects
+Project01.aicashier.admin.CustomerChangeAdminForm --o Project01.aicashier.admin.CustomerAdmin : form
+Project01.aicashier.admin.CustomerCreationAdminForm --o Project01.aicashier.admin.CustomerAdmin : add_form
+Project01.aicashier.forms.AISettingsForm --o Project01.aicashier.views.AISettingsView : form_class
+Project01.aicashier.forms.CustomerForm --o Project01.aicashier.views.CustomerCreateView : form_class
+Project01.aicashier.forms.CustomerForm --o Project01.aicashier.views.CustomerUpdateView : form_class
+Project01.aicashier.forms.CustomerUpdateForm --o Project01.aicashier.views.ProfileUpdateView : form_class
+Project01.aicashier.forms.ProductForm --o Project01.aicashier.views.ProductCreateView : form_class
+Project01.aicashier.forms.ProductForm --o Project01.aicashier.views.ProductUpdateView : form_class
+Project01.aicashier.models.AISettings --o Project01.aicashier.forms.AISettingsForm.Meta : model
+Project01.aicashier.models.AISettings --o Project01.aicashier.views.AISettingsView : model
+Project01.aicashier.models.AISettings --o Project01.aicashier.views.AIStatusToggleView : model
+Project01.aicashier.models.Category --o Project01.aicashier.views.CategoryCreateView : model
+Project01.aicashier.models.Category --o Project01.aicashier.views.CategoryDeleteView : model
+Project01.aicashier.models.Category --o Project01.aicashier.views.CategoryListView : model
+Project01.aicashier.models.Category --o Project01.aicashier.views.CategoryUpdateView : model
+Project01.aicashier.models.Customer --o Project01.aicashier.admin.CustomerChangeAdminForm.Meta : model
+Project01.aicashier.models.Customer --o Project01.aicashier.admin.CustomerCreationAdminForm.Meta : model
+Project01.aicashier.models.Customer --o Project01.aicashier.forms.CustomerForm.Meta : model
+Project01.aicashier.models.Customer --o Project01.aicashier.forms.CustomerUpdateForm.Meta : model
+Project01.aicashier.models.Customer --o Project01.aicashier.views.CustomerCreateView : model
+Project01.aicashier.models.Customer --o Project01.aicashier.views.CustomerDeleteView : model
+Project01.aicashier.models.Customer --o Project01.aicashier.views.CustomerDetailView : model
+Project01.aicashier.models.Customer --o Project01.aicashier.views.CustomerListView : model
+Project01.aicashier.models.Customer --o Project01.aicashier.views.CustomerUpdateView : model
+Project01.aicashier.models.Customer --o Project01.aicashier.views.ProfileUpdateView : model
+Project01.aicashier.models.Customer --o Project01.aicashier.views.ProfileView : model
+Project01.aicashier.models.Order --o Project01.aicashier.views.OrderManagementView : model
+Project01.aicashier.models.Payment --o Project01.aicashier.views.PaymentSuccessView : model
+Project01.aicashier.models.Product --o Project01.aicashier.forms.ProductForm.Meta : model
+Project01.aicashier.models.Product --o Project01.aicashier.views.OverviewsView : model
+Project01.aicashier.models.Product --o Project01.aicashier.views.ProductCreateView : model
+Project01.aicashier.models.Product --o Project01.aicashier.views.ProductDeleteView : model
+Project01.aicashier.models.Product --o Project01.aicashier.views.ProductListView : model
+Project01.aicashier.models.Product --o Project01.aicashier.views.ProductUpdateView : model
+@enduml

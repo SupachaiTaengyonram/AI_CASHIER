@@ -1,0 +1,396 @@
+{% extends 'aicashier/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="flex items-center gap-4 text-sm">
+            <a href="{% url 'home' %}" class="text-gray-300 hover:text-white font-medium transition">หน้าหลัก</a>
+            <a href="{% url 'overviews' %}" class="text-gray-300 hover:text-white font-medium transition">ข้อมูลการขาย</a>
+            <a href="{% url 'product_manage' %}" class="text-gray-300 hover:text-white font-medium transition">จัดการสินค้า</a>
+            <a href="{% url 'ai_settings' %}" class="text-gray-300 hover:text-white font-medium transition">ตั้งค่าการทำงานระบบเอไอ</a>
+</div>
+<div class="min-h-screen bg-[#23243a] font-kanit py-8 px-4 sm:px-6 lg:px-8">
+    <!-- Header Section with Date/Time -->
+
+    <div class="flex justify-between items-start mb-8">
+        <div>
+            <h1 class="text-3xl sm:text-4xl font-bold text-[#b16cff] mb-2">ข้อมูลการขาย</h1>
+            <div class="text-[#8b8ba8] text-sm">
+                <p id="currentDate"></p>
+                <p id="currentTime" class="text-xs mt-1"></p>
+            </div>
+        </div>
+    
+    </div>
+
+    <!-- Statistics Cards Section -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <!-- Today's Sales Card -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20 hover:border-[#b16cff]/50 transition">
+            <p class="text-[#b16cff] font-semibold text-sm mb-2">ยอดขายวันนี้</p>
+            <p class="text-white text-3xl font-bold">{{ stats.total_revenue }}</p>
+            <p class="text-[#8b8ba8] text-xs mt-2">รวมทั้งสิ้น</p>
+        </div>
+
+        <!-- Today's Orders Card -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20 hover:border-[#b16cff]/50 transition">
+            <p class="text-[#b16cff] font-semibold text-sm mb-2">จำนวนออเดอร์</p>
+            <p class="text-white text-3xl font-bold">{{ stats.total_orders }}</p>
+            <p class="text-[#8b8ba8] text-xs mt-2">รวมทั้งสิ้น</p>
+        </div>
+
+        <!-- New Customers Card -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20 hover:border-[#b16cff]/50 transition">
+            <p class="text-[#b16cff] font-semibold text-sm mb-2">ลูกค้าใหม่</p>
+            <p class="text-white text-3xl font-bold">{{ stats.new_customers }}</p>
+            <p class="text-[#8b8ba8] text-xs mt-2">รวมทั้งสิ้น</p>
+        </div>
+
+        <!-- Products in Stock Card -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20 hover:border-[#b16cff]/50 transition">
+            <p class="text-[#b16cff] font-semibold text-sm mb-2">สินค้าคงเหลือ</p>
+            <p class="text-white text-3xl font-bold">{{ stats.products_in_stock }}</p>
+            <p class="text-[#8b8ba8] text-xs mt-2">รวมทั้งสิ้น</p>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Pie Chart - Best Seller -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20">
+            <h3 class="text-white font-semibold text-lg mb-4">ขายดีที่สุด</h3>
+            <div class="flex justify-center items-center" style="height: 300px;">
+                <canvas id="bestSellerChart"></canvas>
+            </div>
+            {% if top_products %}
+            <div class="mt-4 pt-4 border-t border-[#b16cff]/20">
+                <div class="text-xs space-y-2">
+                    {% for product in top_products %}
+                    <div class="flex justify-between text-[#8b8ba8] hover:text-white transition">
+                        <span>{{ product.name|truncatewords:2 }}</span>
+                        <span class="text-white font-semibold">{{ product.quantity }} orders</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Bar Chart - Pieces per Week -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20">
+            <h3 class="text-white font-semibold text-lg mb-4">จำนวนรายการต่อสัปดาห์</h3>
+            <div style="height: 300px; position: relative;">
+                <canvas id="weeklyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats and Monthly Chart -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Quick Stats -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20 lg:col-span-1">
+            <h3 class="text-white font-semibold text-lg mb-4">ภาพรวม</h3>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-[#8b8ba8] text-sm">สินค้าทั้งหมด</span>
+                    <span class="text-white font-semibold text-lg">{{ products|length }}</span>
+                </div>
+                <div class="h-1 bg-[#2a2d3c] rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-[#b16cff] to-[#7c3aed] w-3/4"></div>
+                </div>
+                
+                <div class="flex justify-between items-center pt-2">
+                    <span class="text-[#8b8ba8] text-sm">ลูกค้าทั้งหมด</span>
+                    <span class="text-white font-semibold text-lg">{{ total_customers }}</span>
+                </div>
+                <div class="h-1 bg-[#2a2d3c] rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-[#b16cff] to-[#7c3aed] w-1/2"></div>
+                </div>
+                
+                <div class="flex justify-between items-center pt-2">
+                    <span class="text-[#8b8ba8] text-sm">ราคาเฉลี่ย</span>
+                    <span class="text-white font-semibold text-lg">{{ avg_price }}</span>
+                </div>
+                <div class="h-1 bg-[#2a2d3c] rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-[#b16cff] to-[#7c3aed] w-2/3"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Line Chart - Pieces per Month -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20 lg:col-span-2">
+            <h3 class="text-white font-semibold text-lg mb-4">จำนวนรายการต่อเดือน</h3>
+            <div style="height: 300px; position: relative;">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20">
+        <h3 class="text-white font-semibold text-lg mb-4">สินค้าที่มีในคลัง</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-[#b16cff]/20">
+                        <th class="text-left py-3 px-4 text-[#b16cff] font-semibold">ชื่อสินค้า</th>
+                        <th class="text-left py-3 px-4 text-[#b16cff] font-semibold">ราคา</th>
+                        <th class="text-left py-3 px-4 text-[#b16cff] font-semibold">จำนวน</th>
+                        <th class="text-left py-3 px-4 text-[#b16cff] font-semibold">สถานะ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr class="border-b border-[#b16cff]/10 hover:bg-[#2a2d3c] transition">
+                        <td class="py-3 px-4 text-white">{{ product.name }}</td>
+                        <td class="py-3 px-4 text-white">฿{{ product.price }}</td>
+                        <td class="py-3 px-4 text-white">{{ product.quantity }}</td>
+                        <td class="py-3 px-4">
+                            {% if product.quantity > 0 %}
+                            <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-semibold">In Stock</span>
+                            {% else %}
+                            <span class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-xs font-semibold">Out of Stock</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="py-8 px-4 text-center text-[#8b8ba8]">No products found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Library -->
+
+
+<script>
+    // Color palette
+    const colors = {
+        primary: '#b16cff',
+        secondary: '#7c3aed',
+        success: '#22c55e',
+        danger: '#ef4444',
+        background: '#23243a',
+        border: '#3a3d5c',
+    };
+
+    // Best Seller Pie Chart
+    const bestSellerCtx = document.getElementById('bestSellerChart').getContext('2d');
+    const bestSellerData = JSON.parse('{{ pie_labels|escapejs }}');
+    const bestSellerValues = JSON.parse('{{ pie_data|escapejs }}');
+    
+    new Chart(bestSellerCtx, {
+        type: 'doughnut',
+        data: {
+            labels: bestSellerData,
+            datasets: [{
+                data: bestSellerValues,
+                backgroundColor: [
+                    'rgba(177, 108, 255, 0.8)',
+                    'rgba(124, 58, 237, 0.8)',
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                ],
+                borderColor: [
+                    'rgba(177, 108, 255, 1)',
+                    'rgba(124, 58, 237, 1)',
+                    'rgba(34, 197, 94, 1)',
+                    'rgba(239, 68, 68, 1)',
+                ],
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        color: '#8b8ba8',
+                        font: { size: 12 },
+                        padding: 15,
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                }
+            }
+        }
+    });
+
+    // Weekly Bar Chart
+    const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
+    const daysData = JSON.parse('{{ days|escapejs }}');
+    const weeklyValues = JSON.parse('{{ weekly_data|escapejs }}');
+    
+    new Chart(weeklyCtx, {
+        type: 'bar',
+        data: {
+            labels: daysData,
+            datasets: [{
+                label: 'จำนวนรายการ',
+                data: weeklyValues,
+                backgroundColor: 'rgba(177, 108, 255, 0.8)',
+                borderColor: 'rgba(177, 108, 255, 1)',
+                borderWidth: 2,
+                borderRadius: 6,
+            }]
+        },
+        options: {
+            indexAxis: 'x',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#8b8ba8',
+                        font: { size: 12 },
+                        padding: 15,
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(177, 108, 255, 0.1)',
+                        drawBorder: false,
+                    },
+                    ticks: {
+                        color: '#8b8ba8',
+                        stepSize: 1,
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false,
+                    },
+                    ticks: {
+                        color: '#8b8ba8',
+                    }
+                }
+            }
+        }
+    });
+
+    // Monthly Line Chart
+    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+    const monthlyValues = JSON.parse('{{ monthly_data|escapejs }}');
+    const monthlyLabels = JSON.parse('{{ monthly_labels|escapejs }}');
+    
+    new Chart(monthlyCtx, {
+        type: 'line',
+        data: {
+            labels: monthlyLabels,  // ใช้ labels แบบไดนามิก
+            datasets: [{
+                label: 'จำนวนรายการ',
+                data: monthlyValues,
+                borderColor: 'rgba(177, 108, 255, 1)',
+                backgroundColor: 'rgba(177, 108, 255, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 3,
+                pointHoverRadius: 6,
+                pointBackgroundColor: 'rgba(177, 108, 255, 1)',
+                pointBorderColor: 'rgba(255, 255, 255, 1)',
+                pointBorderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#8b8ba8',
+                        font: { size: 12 },
+                        padding: 15,
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(177, 108, 255, 0.1)',
+                        drawBorder: false,
+                    },
+                    ticks: {
+                        color: '#8b8ba8',
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false,
+                        drawBorder: false,
+                    },
+                    ticks: {
+                        color: '#8b8ba8',
+                        maxTicksLimit: 10,
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+<script>
+    // Display current date and time in Thai format
+    function updateDateTime() {
+        const now = new Date();
+        
+        // Thai day names
+        const thaiDays = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
+        
+        // Thai month names
+        const thaiMonths = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+                           'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+        
+        // Get date components
+        const day = thaiDays[now.getDay()];
+        const date = now.getDate();
+        const month = thaiMonths[now.getMonth()];
+        const year = now.getFullYear() + 543; // Buddhist calendar
+        
+        // Format: วันจันทร์ที่ 12 พฤศจิกายน พ.ศ. 2568
+        const dateString = `${day}ที่ ${date} ${month} พ.ศ. ${year}`;
+        
+        // Format time: HH:MM:SS
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const timeString = `เวลา ${hours}:${minutes}:${seconds} น.`;
+        
+        document.getElementById('currentDate').textContent = dateString;
+        document.getElementById('currentTime').textContent = timeString;
+    }
+    
+    // Update immediately and every second
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+</script>
+{% endblock %}

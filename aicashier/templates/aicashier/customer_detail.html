@@ -1,0 +1,15 @@
+{% extends 'aicashier/base.html' %}
+{% block content %}
+<div class="container mx-auto mt-8 max-w-lg">
+    <h1 class="text-3xl font-bold mb-4">Customer Detail</h1>
+    <ul class="mb-4">
+        <li><strong>Username:</strong> {{ customer.username }}</li>
+        <li><strong>Email:</strong> {{ customer.email }}</li>
+        <li><strong>Contact Number:</strong> {{ customer.contact_number }}</li>
+        <li><strong>Date Joined:</strong> {{ customer.date_joined }}</li>
+    </ul>
+    <a href="{% url 'customer_edit' customer.pk %}" class="text-yellow-600">Edit</a> |
+    <a href="{% url 'customer_delete' customer.pk %}" class="text-red-600">Delete</a> |
+    <a href="{% url 'customer_list' %}" class="text-blue-600">Back to List</a>
+</div>
+{% endblock %}

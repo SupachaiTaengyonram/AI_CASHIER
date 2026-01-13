@@ -1,0 +1,11 @@
+{% extends 'aicashier/base.html' %}
+{% block content %}
+<div class="container mx-auto mt-8 max-w-lg">
+    <h1 class="text-3xl font-bold mb-4">Delete Customer</h1>
+    <p>Are you sure you want to delete customer <strong>{{ object.username }}</strong>?</p>
+    <form method="post">{% csrf_token %}
+        <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded">Confirm Delete</button>
+        <a href="{% url 'customer_list' %}" class="ml-4 text-blue-600">Cancel</a>
+    </form>
+</div>
+{% endblock %}

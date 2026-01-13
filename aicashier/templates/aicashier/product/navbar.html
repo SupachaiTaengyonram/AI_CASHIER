@@ -1,0 +1,40 @@
+{% load static %}
+
+<div class="flex flex-col h-screen bg-[#23243a] font-kanit text-white overflow-hidden">
+    {% if user.is_staff %}
+        <div class="flex items-center gap-4 text-sm">
+            <a href="{% url 'home' %}" class="text-gray-300 hover:text-white font-medium transition">Home</a>
+            <a href="{% url 'overviews' %}" class="text-gray-300 hover:text-white font-medium transition">Overviews</a>
+            <a href="{% url 'product_manage' %}" class="text-gray-300 hover:text-white font-medium transition">Manage products</a>
+            <a href="{% url 'ai_settings' %}" class="text-gray-300 hover:text-white font-medium transition">AI Settings</a>
+        </div>
+        {% endif %}
+    <nav class="bg-[#23243a] py-3 px-8 flex items-center justify-between border-b border-[#393a5a] h-[70px] flex-shrink-0">
+    
+    <div class="flex items-center gap-8">
+        <a href="#" class="text-2xl font-bold text-[#b16cff]">AI CASHIER</a>
+    </div>
+    
+    <div class="flex items-center gap-4 flex-1 justify-center">
+        <input type="text" id="product-search" placeholder="🔍 ค้นหาสินค้า..." class="bg-[#3a3d5c] text-white border border-[#b16cff]/20 rounded-lg px-4 py-2 w-64 focus:outline-none focus:border-[#b16cff] transition text-sm">
+    </div>
+
+    <div class="flex items-center gap-4">
+        
+        
+        
+
+    <button class="text-white p-2 rounded-lg hover:bg-[#3a3d5c]">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+            </svg>
+    </button>
+    <button id="closeAiBtn" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition">Close AI</button>
+        <form method="post" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button type="submit" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition text-sm">
+        Sign Out
+    </button>
+</form>
+    </div>
+</nav>

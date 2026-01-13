@@ -1,0 +1,125 @@
+{% extends 'aicashier/base.html' %}
+{% load static %}
+{% block content %}
+<div class="min-h-screen bg-[#23243a] font-kanit py-8 px-4">
+	<div class="max-w-2xl mx-auto">
+		<div class="mb-8">
+			<a href="{% url 'manage_promotion' %}" class="text-[#b16cff] hover:underline">← กลับไปยังรายการโปรโมชั่น</a>
+		</div>
+
+		<div class="bg-[#2d2d4a] rounded-lg border border-[#393a5a] p-8">
+			<h1 class="text-3xl font-bold text-[#b16cff] mb-8">{{ title }}</h1>
+
+			<form method="post" enctype="multipart/form-data" class="space-y-6">
+				{% csrf_token %}
+
+				<!-- Title -->
+				<div>
+					<label for="{{ form.title.id_for_label }}" class="block text-[#b16cff] font-semibold mb-2">{{ form.title.label }}</label>
+					{{ form.title }}
+					{% if form.title.errors %}
+					<div class="text-red-400 text-sm mt-2">{{ form.title.errors }}</div>
+					{% endif %}
+				</div>
+
+				<!-- Description -->
+				<div>
+					<label for="{{ form.description.id_for_label }}" class="block text-[#b16cff] font-semibold mb-2">{{ form.description.label }}</label>
+					{{ form.description }}
+					{% if form.description.errors %}
+					<div class="text-red-400 text-sm mt-2">{{ form.description.errors }}</div>
+					{% endif %}
+				</div>
+
+				<!-- Image Upload -->
+				<div>
+					<label for="{{ form.image.id_for_label }}" class="block text-[#b16cff] font-semibold mb-2">{{ form.image.label }}</label>
+					{{ form.image }}
+					{% if form.image.help_text %}
+					<p class="text-gray-400 text-sm mt-2">{{ form.image.help_text }}</p>
+					{% endif %}
+					{% if form.image.errors %}
+					<div class="text-red-400 text-sm mt-2">{{ form.image.errors }}</div>
+					{% endif %}
+					
+					<!-- Preview existing image -->
+					{% if form.instance.image %}
+					<div class="mt-4">
+						<p class="text-gray-400 text-sm mb-2">รูปภาพปัจจุบัน:</p>
+					<div class="w-full max-w-md aspect-video bg-gradient-to-br from-[#b16cff]/30 to-[#7c3aed]/30 rounded-lg flex items-center justify-center overflow-hidden">
+						<img src="{{ form.instance.image.url }}" alt="{{ form.instance.title }}" class="w-full h-full object-cover">
+						</div>
+					</div>
+					{% endif %}
+				</div>
+
+				<!-- Image URL -->
+				<div>
+					<label for="{{ form.image_url.id_for_label }}" class="block text-[#b16cff] font-semibold mb-2">{{ form.image_url.label }}</label>
+					{{ form.image_url }}
+					<p class="text-gray-400 text-sm mt-2">หรือใส่ URL ของรูปภาพแทนการอัพโหลด</p>
+					{% if form.image_url.errors %}
+					<div class="text-red-400 text-sm mt-2">{{ form.image_url.errors }}</div>
+					{% endif %}
+				</div>
+
+				<!-- Display Order -->
+				<div>
+					<label for="{{ form.display_order.id_for_label }}" class="block text-[#b16cff] font-semibold mb-2">{{ form.display_order.label }}</label>
+					{{ form.display_order }}
+					<p class="text-gray-400 text-sm mt-2">เรียงลำดับจากน้อยไปมาก (0 = แสดงก่อน)</p>
+					{% if form.display_order.errors %}
+					<div class="text-red-400 text-sm mt-2">{{ form.display_order.errors }}</div>
+					{% endif %}
+				</div>
+
+				<!-- Is Active -->
+				<div class="flex items-center gap-3">
+					{{ form.is_active }}
+					<label for="{{ form.is_active.id_for_label }}" class="text-[#b16cff] font-semibold cursor-pointer">{{ form.is_active.label }}</label>
+					{% if form.is_active.errors %}
+					<div class="text-red-400 text-sm">{{ form.is_active.errors }}</div>
+					{% endif %}
+				</div>
+
+				<!-- Submit Button -->
+				<div class="flex gap-4 pt-6 border-t border-[#393a5a]">
+					<button type="submit" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition">
+						{{ button_text }}
+					</button>
+					<a href="{% url 'manage_promotion' %}" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition">
+						ยกเลิก
+					</a>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<style>
+	input[type="text"],
+	textarea,
+	input[type="number"],
+	input[type="url"],
+	input[type="file"],
+	select {
+		width: 100%;
+		padding: 8px 12px;
+		border-radius: 6px;
+		border: 1.5px solid #b16cff;
+		background-color: #393a5a;
+		color: #fff;
+	}
+
+	input[type="checkbox"] {
+		width: 18px;
+		height: 18px;
+		cursor: pointer;
+	}
+
+	textarea {
+		resize: vertical;
+		min-height: 80px;
+	}
+</style>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends 'aicashier/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-[#23243a] font-kanit py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8 flex items-center justify-between">
+            <div>
+                <h1 class="text-4xl font-bold text-[#b16cff] mb-2">ข้อมูลส่วนตัว</h1>
+                <p class="text-[#8b8ba8]">โปรไฟล์ของคุณ</p>
+            </div>
+            <a href="{% url 'home' %}" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition">
+                กลับสู่หน้าหลัก
+            </a>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="bg-[#3a3d5c] rounded-lg p-8 border border-[#b16cff]/20">
+            <div class="space-y-6">
+                <!-- Username -->
+                <div>
+                    <label class="text-[#b16cff] font-semibold block mb-2">ชื่อผู้ใช้</label>
+                    <div class="bg-[#2d2d4a] text-white rounded-lg px-4 py-3 border border-[#b16cff]/20">
+                        {{ customer.username }}
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label class="text-[#b16cff] font-semibold block mb-2">อีเมล</label>
+                    <div class="bg-[#2d2d4a] text-white rounded-lg px-4 py-3 border border-[#b16cff]/20">
+                        {{ customer.email }}
+                    </div>
+                </div>
+
+                <!-- Contact Number -->
+                <div>
+                    <label class="text-[#b16cff] font-semibold block mb-2">เบอร์ติดต่อ</label>
+                    <div class="bg-[#2d2d4a] text-white rounded-lg px-4 py-3 border border-[#b16cff]/20">
+                        {% if customer.contact_number %}
+                            {{ customer.contact_number }}
+                        {% else %}
+                            <span class="text-[#8b8ba8]">ยังไม่มีข้อมูล</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Join Date -->
+                <div>
+                    <label class="text-[#b16cff] font-semibold block mb-2">วันที่สมัคร</label>
+                    <div class="bg-[#2d2d4a] text-white rounded-lg px-4 py-3 border border-[#b16cff]/20">
+                        {{ customer.date_joined|date:"d/m/Y" }}
+                    </div>
+                </div>
+
+                <!-- Account Status -->
+                <div>
+                    <label class="text-[#b16cff] font-semibold block mb-2">สถานะบัญชี</label>
+                    <div class="bg-[#2d2d4a] text-white rounded-lg px-4 py-3 border border-[#b16cff]/20">
+                        {% if customer.is_active %}
+                            <span class="text-green-400">✅ ใช้งาน</span>
+                        {% else %}
+                            <span class="text-red-400">❌ ปิดใช้งาน</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-4 pt-4">
+                    <a href="{% url 'profile_edit' %}" class="flex-1 px-6 py-3 bg-[#b16cff] hover:bg-[#7c3aed] text-white font-bold rounded-lg transition text-center">
+                        แก้ไขโปรไฟล์
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mt-8 space-y-4">
+            {% for message in messages %}
+            <div class="p-4 rounded-lg bg-{% if message.tags %}{{ message.tags }}-500/20{% else %}blue-500/20{% endif %} border border-{% if message.tags %}{{ message.tags }}-500{% else %}blue-500{% endif %}">
+                <p class="text-white">{{ message }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

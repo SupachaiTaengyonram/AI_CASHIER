@@ -1,0 +1,178 @@
+{% extends 'aicashier/base.html' %}
+{% load static %}
+{% block content %}
+<div class="min-h-screen bg-[#23243a] font-kanit py-12 px-4 flex items-center justify-center">
+    <div class="max-w-md w-full text-center">
+        <!-- Success Icon -->
+        <div class="mb-8">
+            <div class="w-24 h-24 mx-auto bg-green-500/20 rounded-full flex items-center justify-center">
+                <span class="text-6xl animate-bounce"></span>
+            </div>
+        </div>
+
+        <!-- Success Message -->
+        <h1 class="text-4xl font-bold text-green-400 mb-2">ชำระเงินสำเร็จ!</h1>
+        <p class="text-[#8b8ba8] mb-8">ขอบคุณที่ใช้บริการของเรา</p>
+
+        <!-- Order Number Display (For Counter Staff) -->
+        {% if orders.0.order_type == 'counter' %}
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 mb-8 border-4 border-blue-400 shadow-lg">
+            <p class="text-blue-100 text-sm mb-2 font-semibold">หมายเลขออเดอร์ (เรียกลูกค้า)</p>
+            <p class="text-7xl font-bold text-white mb-2" id="order-number">
+                {% if orders.0.order_number %}
+                    {{ orders.0.order_number }}
+                {% else %}
+                    {{ orders.0.id }}
+                {% endif %}
+            </p>
+            <p class="text-blue-100 text-xs">🏪 หน้าร้าน</p>
+        </div>
+        {% endif %}
+
+        <!-- Payment Details -->
+        <div class="bg-[#2d2d4a] rounded-2xl border border-green-500/30 p-8 mb-8">
+            <!-- Amount -->
+            <div class="mb-6">
+                <p class="text-[#8b8ba8] text-sm mb-2">จำนวนเงินที่ชำระ</p>
+                <p class="text-4xl font-bold text-white">฿{{ payment.amount }}</p>
+            </div>
+
+            <div class="border-t border-[#393a5a] my-6"></div>
+
+            <!-- Reference -->
+            <div class="mb-6">
+                <p class="text-[#8b8ba8] text-sm mb-2">หมายเลขอ้างอิง</p>
+                <p class="text-white font-mono font-bold text-lg bg-[#3a3d5c] p-3 rounded">
+                    {{ payment.reference_number }}
+                </p>
+            </div>
+
+            <!-- Status -->
+            <div class="mb-6">
+                <p class="text-[#8b8ba8] text-sm mb-2">สถานะ</p>
+                <span class="inline-block px-4 py-2 bg-green-500/20 text-green-400 rounded-lg font-semibold">
+                    {{ payment.get_payment_status_display }}
+                </span>
+            </div>
+
+            <!-- Time -->
+            <div>
+                <p class="text-[#8b8ba8] text-sm mb-2">เวลา</p>
+                <p class="text-white font-mono">
+                    {{ payment.confirmed_at|date:"d/m/Y H:i:s" }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Receipt Info -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 mb-8 border border-[#b16cff]/20">
+            <h3 class="text-[#b16cff] font-bold mb-4"> ใบเสร็จ</h3>
+            <div class="space-y-3 text-left">
+                <div class="flex justify-between">
+                    <span class="text-[#8b8ba8]">หมายเลขออเดอร์:</span>
+                    <span class="text-white font-mono font-bold text-lg">
+                        {% if orders.0.order_number %}
+                            #{{ orders.0.order_number }}
+                        {% else %}
+                            #{{ orders.0.id }}
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-[#8b8ba8]">ID ธุรกรรม:</span>
+                    <span class="text-white font-mono">{{ payment.transaction_id|default:"ยังไม่มี" }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-[#8b8ba8]">วิธีชำระเงิน:</span>
+                    <span class="text-white">{{ payment.get_payment_method_display }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-[#8b8ba8]">สถานะ:</span>
+                    <span class="text-green-400 font-semibold">ยืนยันแล้ว</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Items Section -->
+        {% if orders %}
+        <div class="bg-[#3a3d5c] rounded-lg p-6 mb-8 border border-[#b16cff]/20">
+            <h3 class="text-[#b16cff] font-bold mb-4"> สินค้าที่สั่ง</h3>
+            <div class="space-y-3 max-h-64 overflow-y-auto">
+                {% for order in orders %}
+                  {% for item in order.items.all %}
+                  <div class="flex justify-between items-center pb-3 border-b border-[#4a4d6c]">
+                      <div class="flex-1">
+                          <p class="text-white font-semibold">{{ item.product.name }}</p>
+                          <p class="text-[#8b8ba8] text-sm">จำนวน: {{ item.quantity }} ชิ้น</p>
+                      </div>
+                      <div class="text-right">
+                          <p class="text-white font-bold">฿{{ item.subtotal }}</p>
+                          <p class="text-[#8b8ba8] text-xs">{{ item.price }} บาท/ชิ้น</p>
+                      </div>
+                  </div>
+                  {% endfor %}
+                {% endfor %}
+            </div>
+            
+            <!-- Total (นอก overflow div) -->
+            <div class="flex justify-between items-center pt-4 border-t-2 border-[#b16cff]/30 mt-4">
+                <span class="text-[#b16cff] font-bold text-lg">รวมทั้งสิ้น</span>
+                <span class="text-white font-bold text-2xl">฿{{ payment.amount }}</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Next Steps -->
+        <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-6 mb-8">
+            <h3 class="text-blue-400 font-bold mb-3"> ขั้นตอนต่อไป</h3>
+            <ol class="text-[#8b8ba8] text-sm space-y-2 text-left">
+                <li><span class="text-blue-400 font-bold">1.</span> ใบเสร็จจะถูกส่งไปยังอีเมลของคุณ</li>
+                <li><span class="text-blue-400 font-bold">2.</span> ทีมของเราจะเตรียมสินค้าของคุณ</li>
+                <li><span class="text-blue-400 font-bold">3.</span> คุณจะได้รับการแจ้งเตือนเมื่อพร้อมรับ</li>
+            </ol>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-3">
+            <a href="{% url 'home' %}" class="block w-full px-6 py-3 bg-gradient-to-r from-[#b16cff] to-[#7c3aed] hover:from-[#a259e6] hover:to-[#6d28d9] text-white font-bold rounded-lg transition">
+                กลับหน้าแรก
+            </a>
+            <button onclick="window.print()" class="w-full px-6 py-3 bg-[#3a3d5c] hover:bg-[#4a4d6c] text-white font-bold rounded-lg transition border border-[#b16cff]/20">
+                พิมพ์ใบเสร็จ
+            </button>
+        </div>
+
+        <!-- Contact Support -->
+        <div class="mt-8 text-[#8b8ba8] text-sm">
+            <p>หากมีปัญหา</p>
+            <p class="text-[#b16cff] font-semibold mt-1">supachai.ta.66@ubu.ac.th</p>
+        </div>
+    </div>
+</div>
+
+<!-- Print Stylesheet -->
+<style media="print">
+    * {
+        background: transparent !important;
+        color: black !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+    
+    body {
+        font-family: Arial, sans-serif;
+    }
+    
+    button {
+        display: none;
+    }
+</style>
+
+<script>
+    // ไม่ให้ back button ทำงาน
+    window.history.pushState(null, null, window.location.href);
+    window.onpopstate = function() {
+        window.history.pushState(null, null, window.location.href);
+    };
+</script>
+{% endblock %}

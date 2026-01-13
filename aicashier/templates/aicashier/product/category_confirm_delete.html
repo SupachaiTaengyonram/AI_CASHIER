@@ -1,0 +1,35 @@
+{% extends 'aicashier/base.html' %}
+{% load static %}
+{% block content %}
+<div class="min-h-screen bg-[#23243a] font-kanit py-8 px-4 flex items-center justify-center">
+    <div class="max-w-md w-full">
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-red-500/20">
+            <h1 class="text-2xl font-bold text-red-400 mb-4">⚠️ ยืนยันการลบ</h1>
+            <p class="text-[#8b8ba8] mb-6">คุณแน่ใจหรือว่าต้องการลบหมวด <strong class="text-white">"{{ object.name }}"</strong>?</p>
+            
+            {% if object.products.all %}
+            <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6">
+                <p class="text-red-400 text-sm mb-2">⚠️ หมวดนี้มีสินค้า {{ object.products.count }} รายการ</p>
+                <ul class="text-xs text-[#8b8ba8] list-disc list-inside">
+                    {% for product in object.products.all %}
+                    <li>{{ product.name }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <div class="flex gap-3">
+                    <button type="submit" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition">
+                        ยืนยันการลบ
+                    </button>
+                    <a href="{% url 'manage_category' %}" class="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition text-center">
+                        ยกเลิก
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends 'aicashier/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- ป้องกันกดปุ่มย้อนกลับ -->
+<script>
+    // ขัดกั้นการ back
+    window.history.pushState(null, null, window.location.href);
+    window.onpopstate = function() {
+        window.history.pushState(null, null, window.location.href);
+    };
+    
+    // ป้องกันการ reload และ access อื่น
+    let disabled_page_started = new Date().getTime();
+    
+    // ถ้านำเวลา > 30 นาที ให้เด้งกลับ home (เผื่อว่า session หมดเวลา)
+    setInterval(function() {
+        let elapsed = (new Date().getTime() - disabled_page_started) / 1000 / 60;
+        if (elapsed > 30) {
+            window.location.href = "{% url 'home' %}";
+        }
+    }, 60000);
+</script>
+<div class="min-h-screen bg-[#23243a] font-kanit flex items-center justify-center p-4">
+    <div class="max-w-md w-full">
+        <!-- Disable Status Card -->
+        <div class="bg-[#2d2d4a] rounded-2xl border-2 border-red-500/50 p-8 text-center shadow-2xl">
+            <!-- Icon -->
+            <div class="mb-6 text-6xl">🔴</div>
+            
+            <!-- Title -->
+            <h1 class="text-4xl font-bold text-red-500 mb-2">ปิดใช้งานชั่วคราว</h1>
+            <p class="text-[#8b8ba8] mb-8 text-lg">ระบบ AI ปิดใช้งานแล้ว</p>
+            
+            <!-- Message -->
+            <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-8">
+                <p class="text-red-300 font-semibold">
+                    ⚠️ ไม่สามารถใช้งานได้ในขณะนี้
+                </p>
+                <p class="text-[#8b8ba8] text-sm mt-2">
+                    กรุณาติดต่อผู้ดูแลระบบเพื่อเปิดใช้งาน
+                </p>
+            </div>
+
+            <!-- Enable Form -->
+            <div class="bg-[#393a5a] rounded-lg p-6 border border-[#b16cff]/20">
+                <h2 class="text-[#b16cff] font-bold mb-6 text-lg">เปิดใช้งาน AI</h2>
+                <form method="post" class="space-y-4">
+                    {% csrf_token %}
+                    
+                    <!-- Username -->
+                    <div>
+                        <label class="text-[#8b8ba8] text-sm font-semibold block mb-2">
+                            ชื่อผู้ใช้ (Admin)
+                        </label>
+                        <input 
+                            type="text" 
+                            name="username" 
+                            required
+                            autofocus
+                            class="w-full bg-[#2d2d4a] text-white border border-[#b16cff]/30 rounded-lg px-4 py-3 focus:outline-none focus:border-[#b16cff] transition"
+                            placeholder="ระบุชื่อผู้ใช้"
+                        >
+                    </div>
+                    
+                    <!-- Password -->
+                    <div>
+                        <label class="text-[#8b8ba8] text-sm font-semibold block mb-2">
+                            รหัสผ่าน
+                        </label>
+                        <input 
+                            type="password" 
+                            name="password" 
+                            required
+                            class="w-full bg-[#2d2d4a] text-white border border-[#b16cff]/30 rounded-lg px-4 py-3 focus:outline-none focus:border-[#b16cff] transition"
+                            placeholder="ระบุรหัสผ่าน"
+                        >
+                    </div>
+
+                    <!-- Messages -->
+                    {% if messages %}
+                    <div class="space-y-2">
+                        {% for message in messages %}
+                        <div class="text-sm {% if message.tags %}text-{{ message.tags }}-400{% else %}text-red-400{% endif %} bg-{% if message.tags %}{{ message.tags }}{% else %}red{% endif %}-500/10 border border-{% if message.tags %}{{ message.tags }}{% else %}red{% endif %}-500/30 rounded-lg px-3 py-2">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Button -->
+                    <button 
+                        type="submit"
+                        class="w-full bg-gradient-to-r from-[#b16cff] to-[#7c3aed] hover:from-[#9942cc] hover:to-[#6d28d9] text-white font-bold py-3 rounded-lg transition transform hover:scale-105 active:scale-95 mt-6"
+                    >
+                        เปิดใช้งาน
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="mt-8 text-center">
+            <p class="text-[#8b8ba8] text-sm">
+                หากลืมรหัสผ่าน กรุณาติดต่อผู้ดูแลระบบ
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        overflow-y: auto;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  # บริการสำหรับ MySQL Database
+  mysql_db:
+    image: mysql:8.0
+    container_name: mysql_server
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}  # <-- เปลี่ยนรหัสผ่านตรงนี้
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    networks:
+      - app-network
+
+  # บริการสำหรับ ChromaDB
+  chroma_db:
+    image: chromadb/chroma
+    container_name: chromadb_server
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    volumes:
+      # อัปเดต path ตรงนี้ให้ครอบคลุมข้อมูลทั้งหมด
+      - ./data/chroma:/chroma/chroma
+    networks:
+      - app-network
+
+
+# ส่วนจัดการเครือข่ายภายใน (Networks)
+networks:
+  app-network:
+    driver: bridge

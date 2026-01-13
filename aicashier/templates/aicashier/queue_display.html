@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คิวออเดอร์</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Kanit', sans-serif;
+            direction: rtl;
+            text-align: right;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(34, 197, 94, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(34, 197, 94, 0.8); }
+        }
+        
+        .animate-slideIn {
+            animation: slideInRight 0.5s ease-out;
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        .order-number {
+            font-size: 5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+    <div class="min-h-screen flex flex-col items-center justify-center p-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-6xl font-bold text-white mb-2">คิวออเดอร์</h1>
+            <p class="text-gray-400 text-2xl">ขอเรียกลูกค้าที่อยู่ในรายการด้านล่าง</p>
+        </div>
+
+        <!-- Completed Orders Section -->
+        <div class="w-full max-w-6xl">
+            <!-- Title -->
+            <div class="mb-8">
+                <h2 class="text-4xl font-bold text-green-400 mb-4">พร้อมแล้ว</h2>
+                <p class="text-gray-400 text-lg">{{ completed_orders|length }} ออเดอร์</p>
+
+            </div>
+
+            <!-- Orders Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-16">
+                {% for order in completed_orders %}
+                <div class="bg-gradient-to-br from-green-600 to-green-700 rounded-3xl p-8 text-center animate-slideIn pulse-glow border-4 border-green-400 order-card" data-order-id="{{ order.id }}">
+                    <div class="text-gray-200 text-sm mb-2 font-semibold">ออเดอร์ที่</div>
+                    <div class="order-number text-white">
+                        {{ order.order_number }}
+                    </div>
+                    <div class="mt-4 pt-4 border-t-2 border-green-300">
+                        <p class="text-green-100 font-semibold">{{ order.customer.username }}</p>
+                        <p class="text-xs text-green-200 mt-2">{{ order.created_at|date:"H:i:s" }}</p>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-12">
+                    <p class="text-gray-500 text-2xl">ไม่มีออเดอร์ที่พร้อม</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pending Orders Section -->
+            <div class="mb-8">
+                <h2 class="text-4xl font-bold text-yellow-400 mb-4">⏳ กำลังเตรียม</h2>
+                <p class="text-gray-400 text-lg">{{ pending_orders|length }} ออเดอร์</p>
+            </div>
+
+            <!-- Pending Orders List -->
+            <div class="space-y-3">
+                {% for order in pending_orders %}
+                <div class="bg-slate-700/50 rounded-2xl p-6 border-l-4 border-yellow-400 flex justify-between items-center">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-4">
+                            <div class="text-5xl font-bold text-yellow-300">
+                                #{{ order.order_number }}
+                            </div>
+                            <div>
+                                <p class="text-white text-lg font-semibold">{{ order.customer.username }}</p>
+                                <p class="text-gray-400 text-sm">{{ order.created_at|date:"H:i:s" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-gray-400 text-sm">สินค้า:</p>
+                        <p class="text-white text-xl font-bold">{{ order.items.count }} รายการ</p>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-12">
+                    <p class="text-gray-500 text-2xl">✨ ยินดีด้วย ไม่มีออเดอร์รอ!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto-refresh Script -->
+    <script>
+        // Refresh every 5 seconds to check for updates
+        setInterval(() => {
+            console.log('🔄 Refreshing queue display...');
+            location.reload();
+        }, 5000);
+
+        console.log('✅ Queue display page loaded');
+    </script>
+</body>
+</html>

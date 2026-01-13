@@ -1,0 +1,33 @@
+{% extends 'aicashier/base.html' %}
+{% block content %}
+<div class="container mx-auto mt-8">
+    <h1 class="text-3xl font-bold mb-4">Customer List</h1>
+    <a href="{% url 'sign_up' %}" class="bg-blue-500 text-white px-4 py-2 rounded">Add Customer</a>
+    <table class="min-w-full mt-4 bg-white rounded shadow">
+        <thead>
+            <tr>
+                <th class="py-2 px-4">Username</th>
+                <th class="py-2 px-4">Email</th>
+                <th class="py-2 px-4">Contact Number</th>
+                <th class="py-2 px-4">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td class="py-2 px-4">{{ customer.username }}</td>
+                <td class="py-2 px-4">{{ customer.email }}</td>
+                <td class="py-2 px-4">{{ customer.contact_number }}</td>
+                <td class="py-2 px-4">
+                    <a href="{% url 'customer_detail' customer.pk %}" class="text-blue-600">View</a> |
+                    <a href="{% url 'customer_edit' customer.pk %}" class="text-yellow-600">Edit</a> |
+                    <a href="{% url 'customer_delete' customer.pk %}" class="text-red-600">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center">No customers found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

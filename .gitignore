@@ -1,0 +1,75 @@
+# --- Secrets / Env ---
+.env
+.env.*
+!.env.example
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+.cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.pyre/
+.ruff_cache/
+__pypackages__/
+
+# --- Virtualenvs (ครอบคลุมชื่อ .env06 ของคุณ) ---
+.venv*/
+venv*/
+env*/
+.env*/
+pip-wheel-metadata/
+aicashier/models/*/
+*.safetensors
+*.bin
+*.onnx
+
+# --- Django ---
+# เก็บ migrations (สำคัญ!)
+*.log
+local_settings.py
+db.sqlite3
+*.sqlite3
+*.sqlite3-*
+media/
+staticfiles/          # ใช้สำหรับ STATIC_ROOT (ถ้าคุณตั้งเป็นชื่ออื่น ให้แก้ให้ตรง)
+# ถ้าคุณ build Tailwind ไปไว้ที่ STATIC_ROOT ให้ ignore ตรงนี้แทน
+
+# --- Node/Tailwind ---
+node_modules/
+# (แนะนำ "ไม่" ignore lock files เพื่อ reproducible builds)
+# package-lock.json
+# pnpm-lock.yaml
+# yarn.lock
+
+# --- IDE/Editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Docker / Compose ---
+# กันไฟล์ volume/ข้อมูลชั่วคราวที่เผลอวางใน repo
+*.pid
+*.sock
+docker-compose.override.yml
+
+# --- Other generated files ---
+*.bak
+*.tmp
+*.orig
+/data/
+
+

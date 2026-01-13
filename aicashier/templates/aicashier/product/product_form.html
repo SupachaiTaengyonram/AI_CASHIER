@@ -1,0 +1,89 @@
+{% extends 'aicashier/base.html' %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-[#23243a] font-kanit py-8 px-4">
+  <div class="bg-[#393a5a] rounded-2xl shadow-lg p-10 w-full max-w-2xl">
+    <h2 class="text-3xl font-bold text-[#b16cff] mb-8">{% if form.instance.pk %}แก้ไขรายการสินค้า{% else %}เพิ่มสินค้า{% endif %}</h2>
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      
+      <!-- Product Code -->
+      <div>
+        <label class="block text-[#b16cff] font-semibold text-sm mb-2">รหัสสินค้า (ไม่บังคับ)</label>
+        {{ form.product_code }}
+        {% if form.product_code.errors %}<span class="text-red-400 text-xs">{{ form.product_code.errors.0 }}</span>{% endif %}
+        <p class="text-[#8b8ba8] text-xs mt-1">{{ form.product_code.help_text|safe }}</p>
+      </div>
+      
+      <!-- Name -->
+      <div>
+        <label class="block text-[#b16cff] font-semibold text-sm mb-2">ชื่อสินค้า *</label>
+        {{ form.name }}
+        {% if form.name.errors %}<span class="text-red-400 text-xs">{{ form.name.errors.0 }}</span>{% endif %}
+      </div>
+      
+      <!-- Description -->
+      <div>
+        <label class="block text-[#b16cff] font-semibold text-sm mb-2">รายละเอียด</label>
+        {{ form.description }}
+        {% if form.description.errors %}<span class="text-red-400 text-xs">{{ form.description.errors.0 }}</span>{% endif %}
+      </div>
+      
+      <!-- Category -->
+      <div>
+        <label class="block text-[#b16cff] font-semibold text-sm mb-2">หมวดหมู่</label>
+        {{ form.category }}
+        {% if form.category.errors %}<span class="text-red-400 text-xs">{{ form.category.errors.0 }}</span>{% endif %}
+      </div>
+      
+      <!-- Price & Quantity -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[#b16cff] font-semibold text-sm mb-2">ราคา *</label>
+          {{ form.price }}
+          {% if form.price.errors %}<span class="text-red-400 text-xs">{{ form.price.errors.0 }}</span>{% endif %}
+        </div>
+        <div>
+          <label class="block text-[#b16cff] font-semibold text-sm mb-2">จำนวน *</label>
+          {{ form.quantity }}
+          {% if form.quantity.errors %}<span class="text-red-400 text-xs">{{ form.quantity.errors.0 }}</span>{% endif %}
+        </div>
+      </div>
+      
+      <!-- Image Upload -->
+      <div>
+        <label class="block text-[#b16cff] font-semibold text-sm mb-2">อัพโหลดรูปภาพสินค้า</label>
+        <div class="border-2 border-dashed border-[#b16cff]/30 rounded-lg p-6 hover:border-[#b16cff] transition">
+          {{ form.image }}
+          <p class="text-[#8b8ba8] text-xs mt-2">รองรับไฟล์: JPG, PNG, GIF (สูงสุด 5MB)</p>
+        </div>
+        {% if form.image.errors %}<span class="text-red-400 text-xs">{{ form.image.errors.0 }}</span>{% endif %}
+      </div>
+      
+      <!-- Image URL (Alternative) -->
+      <div>
+        <label class="block text-[#b16cff] font-semibold text-sm mb-2">หรือ ใส่ URL รูปภาพแทน</label>
+        {{ form.image_url }}
+        {% if form.image_url.errors %}<span class="text-red-400 text-xs">{{ form.image_url.errors.0 }}</span>{% endif %}
+      </div>
+      
+      <!-- AI Information -->
+      <div>
+        <label class="block text-[#b16cff] font-semibold text-sm mb-2">ข้อมูลเอไอ (สำหรับระบบเอไอ)</label>
+        {{ form.ai_information }}
+        {% if form.ai_information.errors %}<span class="text-red-400 text-xs">{{ form.ai_information.errors.0 }}</span>{% endif %}
+      </div>
+      
+      <!-- Buttons -->
+      <div class="flex gap-4 pt-4">
+        <button type="submit" class="flex-1 py-3 rounded-lg bg-gradient-to-r from-[#b16cff] to-[#7c3aed] text-white font-bold hover:from-[#a259e6] hover:to-[#6d28d9] transition">
+          {% if form.instance.pk %}บันทึกการแก้ไข{% else %}เพิ่มสินค้า{% endif %}
+        </button>
+        <a href="{% url 'product_manage' %}" class="flex-1 py-3 rounded-lg bg-gray-600 hover:bg-gray-700 text-white font-bold text-center transition">
+          ยกเลิก
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

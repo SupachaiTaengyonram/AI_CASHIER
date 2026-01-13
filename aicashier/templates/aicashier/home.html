@@ -1,0 +1,1311 @@
+{% extends 'aicashier/base.html' %}
+{% load static %}
+
+{% block navbar %}
+<nav class="bg-[#2d2d4a] py-3 px-4 sm:px-6 lg:px-8 flex flex-wrap md:flex-nowrap items-center justify-between border-b border-[#393a5a] min-h-[70px] flex-shrink-0 gap-2">
+    <div class="flex items-center gap-4 sm:gap-8 flex-shrink-0">
+        <a href="{% url 'home' %}" class="text-xl sm:text-2xl font-bold text-[#b16cff]">AI CASHIER</a>
+        <!-- แสดง role ของผู้ใช้ -->
+        {% if user.is_staff and user.staff_role == 'cashier' %}
+        <span class="text-xs sm:text-sm px-2 sm:px-3 py-1 bg-[#b16cff]/20 text-[#b16cff] rounded-full border border-[#b16cff]/30">หน้าร้าน</span>
+        {% elif user.is_staff and user.staff_role == 'order_manager' %}
+        <span class="text-xs sm:text-sm px-2 sm:px-3 py-1 bg-[#b16cff]/20 text-[#b16cff] rounded-full border border-[#b16cff]/30">พนักงาน</span>
+        {% else %}
+        <span class="text-xs sm:text-sm px-2 sm:px-3 py-1 bg-[#4a9d6f]/20 text-[#4a9d6f] rounded-full border border-[#4a9d6f]/30">ลูกค้า</span>
+        {% endif %}
+    </div>
+
+    <!-- เมนูขวา: ให้บีบลงแล้วขึ้นบรรทัดใหม่ได้บนจอเล็ก -->
+    <div class="flex items-center gap-2 sm:gap-4 order-2 md:order-3 w-full md:w-auto justify-end">
+        {% if not user.is_staff %}
+        <a href="{% url 'profile' %}" class="text-white p-2 rounded-lg hover:bg-[#3a3d5c] transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+            </svg>
+        </a>
+        {% endif %}
+        {% if user.is_staff and user.staff_role == 'cashier' %}
+        <a href="{% url 'ai_disable_action' %}" class="px-4 sm:px-6 py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-lg transition text-xs sm:text-sm">
+            ปิดการใช้งาน
+        </a>
+        {% elif user.is_staff and user.staff_role == 'order_manager' %}
+        <a href="{% url 'order_management' %}" class="px-3 sm:px-4 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold rounded-lg transition text-xs sm:text-sm">
+            คิวออเดอร์
+        </a>
+        {% endif %}
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="px-4 sm:px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition text-xs sm:text-sm">
+                ออกจากระบบ
+            </button>
+        </form>
+    </div>
+</nav>
+
+<!-- เมนู admin สำหรับจัดการระบบ (เฉพาะ admin ที่มี is_superuser) -->
+{% if user.is_superuser %}
+<div class="bg-[#23243a] px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-4 text-xs sm:text-sm border-b border-[#393a5a] overflow-x-auto custom-scrollbar">
+    <a href="{% url 'home' %}" class="text-gray-300 hover:text-white font-medium transition whitespace-nowrap">หน้าหลัก</a>
+    <a href="{% url 'overviews' %}" class="text-gray-300 hover:text-white font-medium transition whitespace-nowrap">ข้อมูลการขาย</a>
+    <a href="{% url 'product_manage' %}" class="text-gray-300 hover:text-white font-medium transition whitespace-nowrap">จัดการสินค้า</a>
+    <a href="{% url 'ai_settings' %}" class="text-gray-300 hover:text-white font-medium transition whitespace-nowrap">ตั้งค่าการทำงานระบบเอไอ</a>
+</div>
+{% endif %}
+{% endblock navbar %}
+
+
+{% block content %}
+<div class="min-h-[calc(100vh-70px)] lg:h-[calc(100vh-70px)] overflow-y-auto lg:overflow-hidden grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 lg:grid-rows-5 gap-4 lg:gap-6 p-3 sm:p-4 lg:p-6 font-kanit text-white">
+
+    <!-- แนะนำสินค้า -->
+    <div class="lg:row-span-2 bg-[#2d2d4a] rounded-lg border border-[#393a5a] p-3 flex flex-col gap-2 overflow-hidden h-full order-2 md:order-2 xl:order-1">
+        <h2 class="text-base font-bold text-[#b16cff] mb-1 flex-shrink-0">รายการสินค้าแนะนำ</h2>
+        <div class="flex-1 overflow-y-auto min-h-0 space-y-2 pr-1 custom-scrollbar">
+            {% if featured_items %}
+                {% for item in featured_items %}
+                <div class="w-full bg-[#3a3d5c] text-white py-2 px-3 rounded-lg transition border border-[#b16cff]/20 hover:border-[#b16cff]/40 flex gap-2 items-start group flex-shrink-0">
+                    <div class="w-12 h-12 bg-gradient-to-br from-[#b16cff]/30 to-[#7c3aed]/30 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-full h-full object-cover">
+                        {% elif item.image_url %}
+                        <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-full h-full object-cover">
+                        {% else %}
+                        <span class="text-lg">⭐</span>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1 min-w-0 flex flex-col justify-center">
+                        <p class="font-semibold text-white truncate text-xs">{{ item.name }}</p>
+                        <p class="text-[#b16cff] font-bold text-xs">฿{{ item.price }}</p>
+                    </div>
+                    <button class="add-to-cart-btn bg-[#b16cff] hover:bg-[#7c3aed] text-white font-semibold py-1 px-2 rounded transition text-xs flex-shrink-0 whitespace-nowrap" 
+                            data-product-id="{{ item.id }}" 
+                            data-product-name="{{ item.name }}" 
+                            data-product-price="{{ item.price }}">
+                        เพิ่ม
+                    </button>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-[#8b8ba8] text-xs text-center py-4">ไม่มีรายการแนะนำ</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- สินค้าทั้งหมด -->
+    <div class="md:col-span-2 xl:col-span-2 lg:row-span-2 bg-[#2d2d4a] rounded-lg border border-[#393a5a] flex flex-col overflow-hidden p-3 h-full order-1 md:order-1 xl:order-2">
+        <div class="grid grid-cols-2 gap-3 h-full">
+            <!-- ฝั่งซ้าย: สินค้า -->
+            <div class="flex flex-col overflow-hidden border border-[#393a5a] rounded-lg p-2 bg-[#23243a]">
+                <h2 class="text-sm font-bold text-[#b16cff] mb-2 flex-shrink-0">สินค้าทั้งหมด</h2>
+                
+                <!-- Search input -->
+                <input 
+                    type="text" 
+                    id="product-search" 
+                    placeholder="🔍 ค้นหา..." 
+                    class="w-full bg-[#3a3d5c] text-white border border-[#b16cff]/20 rounded-lg px-2 py-1 mb-2 focus:outline-none focus:border-[#b16cff] transition text-xs flex-shrink-0"
+                >
+                
+                <div class="flex gap-2 mb-2 pb-2 border-b border-[#393a5a] overflow-x-auto flex-shrink-0 custom-scrollbar">
+                    <button class="category-btn category-all px-2 py-1 bg-[#b16cff] text-white rounded-lg text-xs font-semibold flex-shrink-0 transition" data-category="all">
+                        ทั้งหมด
+                    </button>
+                    {% for category in categories %}
+                    <button class="category-btn px-2 py-1 bg-[#3a3d5c] text-[#8b8ba8] rounded-lg text-xs font-semibold hover:bg-[#4a4d6c] flex-shrink-0 transition" data-category="{{ category.id }}">
+                        {{ category.name }}
+                    </button>
+                    {% endfor %}
+                </div>
+                
+                <div class="flex-1 overflow-y-auto min-h-0 pr-1 space-y-1 custom-scrollbar">
+                    {% for product in products %}
+                    <div class="product-card bg-[#3a3d5c] rounded-lg p-1.5 border border-[#b16cff]/30 hover:border-[#b16cff] transition flex gap-2 items-center" data-product-name="{{ product.name }}" data-category-id="{% if product.category %}{{ product.category.id }}{% else %}none{% endif %}">
+                        
+                        <div class="w-14 h-14 bg-gradient-to-br from-[#b16cff]/30 to-[#7c3aed]/30 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                            {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                            {% elif product.image_url %}
+                            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                            {% else %}
+                            <span class="text-xl"></span> 
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex-1 flex flex-col justify-between min-w-0">
+                            <div>
+                                <p class="font-semibold text-white text-xs truncate">{{ product.name }}</p>
+                                <p class="text-[#b16cff] font-bold text-xs">฿{{ product.price }}</p>
+                            </div>
+                            <button class="add-to-cart-btn w-full bg-[#b16cff] hover:bg-[#7c3aed] text-white font-semibold py-0.5 rounded transition text-xs" 
+                                    data-product-id="{{ product.id }}" 
+                                    data-product-name="{{ product.name }}" 
+                                    data-product-price="{{ product.price }}">
+                                เพิ่ม
+                            </button>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-[#8b8ba8] text-center text-xs py-2">ไม่มีสินค้า</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ฝั่งขวา: โปรโมชั่น -->
+            <div class="flex flex-col overflow-hidden border border-[#393a5a] rounded-lg p-2 bg-[#23243a]">
+                <h2 class="text-sm font-bold text-[#b16cff] mb-2 flex-shrink-0">โปรโมชั่น</h2>
+                
+                <div class="flex-1 overflow-y-auto min-h-0 pr-1 space-y-2 custom-scrollbar">
+                    {% if promotions %}
+                        {% for promo in promotions %}
+                        <div class="bg-[#3a3d5c] rounded-lg overflow-hidden border border-[#b16cff]/20 flex flex-col flex-shrink-0">
+                            <div class="w-full aspect-video bg-gradient-to-br from-[#b16cff]/30 to-[#7c3aed]/30 flex items-center justify-center overflow-hidden">
+                                {% if promo.image %}
+                                <img src="{{ promo.image.url }}" alt="{{ promo.title }}" class="w-full h-full object-cover">
+                                {% elif promo.image_url %}
+                                <img src="{{ promo.image_url }}" alt="{{ promo.title }}" class="w-full h-full object-cover">
+                                {% else %}
+                                <span class="text-3xl">📢</span>
+                                {% endif %}
+                            </div>
+                            <div class="p-2 flex flex-col justify-between flex-1">
+                                <div>
+                                    <p class="font-semibold text-white text-xs line-clamp-1">{{ promo.title }}</p>
+                                    {% if promo.description %}
+                                    <p class="text-[#8b8ba8] text-xs line-clamp-1 mt-1">{{ promo.description }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div class="flex items-center justify-center h-full">
+                        <p class="text-[#8b8ba8] text-center text-xs">ไม่มีโปรโมชั่น</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- แชท -->
+    <div class="lg:row-span-3 bg-[#2d2d4a] rounded-lg border border-[#393a5a] flex flex-col overflow-hidden p-3 h-full order-5 xl:order-3">
+        <div class="flex items-center justify-between mb-2 flex-shrink-0">
+            <h2 class="text-base font-bold text-[#b16cff]">สอบถามพนักงานขาย</h2>
+            <button id="clear-chat-btn" class="text-xs bg-[#393a5a] hover:bg-red-600/30 text-[#8b8ba8] hover:text-red-400 px-2 py-1 rounded transition" title="ล้างประวัติการสนทนา">
+                ลบประวัติการสนทนา
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto min-h-0 mb-2 bg-[#1a1a2e] rounded p-2 custom-scrollbar">
+            <div id="chat-messages" class="space-y-2 flex flex-col">
+                <div class="text-[#8b8ba8] text-center text-xs py-2">เริ่มต้นการสนทนา...</div>
+            </div>
+        </div>
+        <div class="flex gap-1 flex-shrink-0">
+            <input type="text" id="chat-input" placeholder="พิมพ์ข้อความ..." class="flex-1 bg-[#3a3d5c] text-white border border-[#b16cff]/20 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-[#b16cff]">
+            <button id="chat-send-btn" class="bg-[#b16cff] hover:bg-[#7c3aed] text-white font-semibold px-3 py-1.5 rounded transition text-xs">
+                ส่ง
+            </button>
+        </div>
+    </div>
+
+    <!-- ปุ่ม AI Order -->
+    <div class="lg:row-span-5 flex flex-col items-center justify-center gap-2 h-full order-3 md:order-3 xl:order-4">
+        <button id="ai-order-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold rounded-full w-48 h-48 sm:w-56 sm:h-56 lg:w-72 lg:h-72 xl:w-80 xl:h-80 text-lg sm:text-2xl flex items-center justify-center text-center shadow-lg transform transition hover:scale-105 duration-300">
+            <span id="ai-btn-text">สั่งสินค้า<br>ด้วยเสียง</span>
+        </button>
+        <p class="text-white text-xs sm:text-sm font-semibold text-center">แตะปุ่ม เพื่อเริ่มสั่งสินค้าด้วยเสียง ใช้คำสั่งเสียงดังนี้</p>
+        <p class="text-green-300 text-xs sm:text-sm font-semibold text-center">เพิ่มสินค้าเข้าตะกร้าใช้คำว่า "เพิ่ม"</p>
+        <p class="text-red-300 text-xs sm:text-sm font-semibold text-center">ลด หรือ ลบ ในสินค้าเข้าตะกร้าใช้คำว่า "ลบ"</p>
+    </div>
+
+    <!-- ตะกร้าสินค้า -->
+    <div class="lg:row-span-3 bg-[#2d2d4a] border border-[#393a5a] p-2 flex flex-col rounded-lg overflow-hidden h-full order-4 xl:order-5">
+        <div class="mb-2 flex-shrink-0">
+            <h2 class="text-[#b16cff] font-bold text-base mb-1">รายการสินค้าที่เลือก</h2>
+            <div class="bg-[#3a3d5c] rounded-lg p-2 border border-[#b16cff]/20">
+                <p class="text-[#8b8ba8] text-xs">จำนวนรายการ</p>
+                <p class="text-white text-lg font-bold"><span id="cart-count">0</span> รายการ</p>
+            </div>
+        </div>
+        <div class="flex-1 overflow-y-auto mb-2 min-h-0 custom-scrollbar">
+            <div id="cart-items" class="space-y-1">
+                <p class="text-[#8b8ba8] text-center text-xs py-2">ยังไม่มีรายการ</p>
+            </div>
+        </div>
+        <div class="border-t border-[#393a5a] mb-2 flex-shrink-0"></div>
+        <div class="mb-2 flex-shrink-0">
+            <div class="flex justify-between">
+                <span class="text-[#8b8ba8] text-xs">รวมทั้งสิ้น:</span>
+                <span class="text-white font-bold text-sm">฿<span id="total-price">0.00</span></span>
+            </div>
+        </div>
+        <div class="space-y-1 flex-shrink-0">
+            <button id="test-add-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 rounded-lg transition border border-[#b16cff]/20 text-xs" style="display: none;">
+                ทดสอบเพิ่มสินค้า
+            </button>
+            <button id="clear-cart-btn" class="w-full bg-[#3a3d5c] hover:bg-[#4a4d6c] text-white font-semibold py-1 rounded-lg transition border border-[#b16cff]/20 text-xs">
+                ลบรายการทั้งหมด
+            </button>
+            <button id="payment-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg transition text-sm" onclick="handlePaymentClick(event)">
+                ชำระเงิน
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<div id="closeAiModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-[#3a3d5c] rounded-lg p-4 max-w-md w-full border border-[#b16cff]/20">
+        <h3 class="text-[#b16cff] font-bold text-base mb-3">ปิด AI Cashier</h3>
+        <p class="text-[#8b8ba8] mb-3 text-sm">กรุณาใส่ชื่อผู้ใช้และรหัสผ่าน เพื่อยืนยัน</p>
+        
+        <form method="post" action="{% url 'close_ai' %}" class="space-y-3">
+            {% csrf_token %}
+            <div>
+                <label class="text-[#b16cff] text-xs font-semibold">ชื่อผู้ใช้</label>
+                <input type="text" name="username" class="w-full bg-[#23243a] text-white border border-[#b16cff]/20 rounded px-3 py-2 mt-1 focus:outline-none focus:border-[#b16cff] text-sm" required>
+            </div>
+            <div>
+                <label class="text-[#b16cff] text-xs font-semibold">รหัสผ่าน</label>
+                <input type="password" name="password" class="w-full bg-[#23243a] text-white border border-[#b16cff]/20 rounded px-3 py-2 mt-1 focus:outline-none focus:border-[#b16cff] text-sm" required>
+            </div>
+            <div class="flex gap-2">
+                <button type="button" id="cancel-close-ai" class="flex-1 bg-[#3a3d5c] hover:bg-[#4a4d6c] text-white font-semibold py-1.5 rounded transition text-xs">
+                    ยกเลิก
+                </button>
+                <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-1.5 rounded transition text-xs">
+                    ปิด AI
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* ปรับแต่ง Scrollbar ให้สวยงามและไม่รก */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #2d2d4a; 
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #5b5d7e; 
+        border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #b16cff; 
+    }
+</style>
+
+<script>
+    // ### ส่วนที่เพิ่มใหม่: จัดการปุ่ม AI Voice Order ###
+    const aiBtn = document.getElementById('ai-order-btn');
+    const aiBtnText = document.getElementById('ai-btn-text');
+    let isListening = false;
+    let recognition = null;
+    
+    // ### Conversation History (สำหรับ voice และ chat) ###
+    let conversationHistory = [];
+    try {
+        const saved = localStorage.getItem('chatHistory');
+        if (saved) {
+            conversationHistory = JSON.parse(saved);
+            console.log('[CHAT]  Loaded history from storage:', conversationHistory.length, 'messages');
+        }
+    } catch (e) {
+        console.warn('[CHAT]  Failed to load history from storage:', e);
+        conversationHistory = [];
+    }
+
+    function saveChatHistory() {
+        try {
+            localStorage.setItem('chatHistory', JSON.stringify(conversationHistory));
+            console.log('[CHAT]  Saved history to storage');
+        } catch (e) {
+            console.warn('[CHAT]  Failed to save history:', e);
+        }
+    }
+    
+    // Initialize Web Speech API
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    // Initialize recognition with error handling
+    function initializeRecognition() {
+        if (!SpeechRecognition) {
+            console.error('[VOICE] SpeechRecognition not supported');
+            return null;
+        }
+        
+        try {
+            const rec = new SpeechRecognition();
+            rec.lang = 'th-TH'; // Thai language
+            rec.continuous = false;
+            rec.interimResults = true; // เปิด interim results เพื่อดูว่าระบบบันทึกอะไร
+            rec.maxAlternatives = 3; // เพิ่มจาก 1 เป็น 3 เพื่อให้มีตัวเลือกหลายตัว
+            
+            console.log('[VOICE] ✓ Recognition initialized');
+            
+            //  กำหนด event handlers เมื่อ recognition สร้างสำเร็จ
+            rec.onstart = () => {
+                console.log('[VOICE] Recording started');
+                isListening = true;
+                // Set timeout to auto-stop after 10 seconds
+                clearTimeout(window.voiceTimeout);
+                window.voiceTimeout = setTimeout(() => {
+                    console.log('[VOICE]  Auto-stopping after timeout');
+                    if (isListening && recognition) {
+                        recognition.stop();
+                    }
+                }, 10000); // 10 seconds
+            };
+            
+            rec.onresult = function(event) {
+                console.log('[VOICE]  Result event, results count:', event.results.length);
+                let transcript = '';
+                let interimTranscript = '';
+                let bestResult = null;
+                let bestConfidence = 0;
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const result = event.results[i];
+                    const text = result[0].transcript;
+                    const confidence = result[0].confidence * 100;
+                    
+                    if (result.isFinal) {
+                        console.log(`[VOICE]  FINAL Result ${i}: "${text}" (confidence: ${confidence.toFixed(2)}%)`);
+                        transcript += text + ' ';
+                        
+                        // เก็บ final result ที่มี confidence สูงที่สุด
+                        if (confidence > bestConfidence) {
+                            bestConfidence = confidence;
+                            bestResult = text;
+                        }
+                    } else {
+                        console.log(`[VOICE]  interim Result ${i}: "${text}" (confidence: ${confidence.toFixed(2)}%)`);
+                        interimTranscript += text + ' ';
+                    }
+                }
+                
+                transcript = transcript.trim();
+                
+                if (transcript) {
+                    console.log('[VOICE] ✓ Final transcript:', transcript, '(best confidence:', bestConfidence.toFixed(2) + '%)');
+                    // ส่งคำขอไป API
+                    sendVoiceMessage(transcript);
+                } else if (interimTranscript) {
+                    console.log('[VOICE]  Only interim results (might still record more):', interimTranscript);
+                } else {
+                    console.warn('[VOICE]  No results captured');
+                }
+            };
+            
+            rec.onerror = function(event) {
+                console.error('[VOICE]  Speech recognition error:', event.error);
+                isListening = false;
+                aiBtnText.innerHTML = 'สั่งสินค้า<br>กับพนักงานขาย';
+                aiBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                aiBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'animate-pulse');
+                aiBtn.disabled = false;
+                
+                let errorMessage = 'เกิดข้อผิดพลาด: ';
+                switch(event.error) {
+                    case 'network':
+                        errorMessage += 'ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต';
+                        break;
+                    case 'no-speech':
+                        errorMessage += 'ไม่ได้บันทึกเสียง (พูดให้ชัด และใจเย็นๆ ลองใหม่)';
+                        break;
+                    case 'not-allowed':
+                        errorMessage += 'ยังไม่ได้อนุญาตการใช้ไมโครโฟน (ตรวจสอบการตั้งค่าเบราว์เซอร์)';
+                        break;
+                    case 'audio-capture':
+                        errorMessage += 'ไม่พบอุปกรณ์บันทึกเสียง (ตรวจสอบไมโครโฟน)';
+                        break;
+                    case 'aborted':
+                        errorMessage += 'ยกเลิกโดยผู้ใช้';
+                        break;
+                    default:
+                        errorMessage += event.error;
+                }
+                console.error('[VOICE] Error details:', errorMessage);
+            };
+            
+            rec.onend = function() {
+                console.log('[VOICE]  Recording ended');
+                isListening = false;
+                clearTimeout(window.voiceTimeout); // ล้าง timeout
+                aiBtnText.innerHTML = 'สั่งสินค้า<br>กับพนักงานขาย';
+                aiBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                aiBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'animate-pulse');
+                aiBtn.disabled = false;
+            };
+            
+            return rec;
+        } catch (e) {
+            console.error('[VOICE]  Error initializing recognition:', e);
+            return null;
+        }
+    }
+    
+    // สร้าง recognition object
+    recognition = initializeRecognition();
+    
+    // ดึงรายการเสียง (Voices) เมื่อพร้อม
+    if ('speechSynthesis' in window) {
+        // จำนวนครั้งที่พยายาม โหลด voices
+        let voicesLoadAttempts = 0;
+        
+        function loadVoices() {
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length > 0) {
+                console.log('[TTS] Voices loaded:', voices.length);
+                // เลือกเสียง Thai ถ้ามี
+                const thaiVoices = voices.filter(v => v.lang.includes('th'));
+                if (thaiVoices.length > 0) {
+                    console.log('[TTS] Found Thai voice:', thaiVoices[0].name);
+                } else {
+                    console.log('[TTS] No Thai voice found, will use default');
+                }
+            } else if (voicesLoadAttempts < 3) {
+                voicesLoadAttempts++;
+                console.log('[TTS] Retrying voices load...');
+                setTimeout(loadVoices, 500);
+            }
+        }
+        
+        // เรียก loadVoices เมื่อ voices พร้อม
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+        loadVoices(); // เรียก once เลย
+    }
+
+    //  Click handler สำหรับปุ่ม
+    aiBtn.addEventListener('click', function() {
+        if (!recognition) {
+            alert('ขออภัยครับ เบราว์เซอร์ของคุณไม่รองรับการบันทึกเสียง');
+            console.error('[VOICE] Recognition is null');
+            return;
+        }
+        
+        if (!isListening) {
+            try {
+                console.log('[VOICE]  Starting recording...');
+                isListening = true;
+                aiBtnText.innerHTML = 'กำลังรับฟัง...'; 
+                aiBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                aiBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'animate-pulse');
+                aiBtn.disabled = true;
+                
+                // Reset recognition state
+                try {
+                    recognition.abort();
+                } catch (e) {
+                    console.log('[VOICE] (abort not needed)');
+                }
+                
+                // เรื่มการบันทึก
+                recognition.start();
+                console.log('[VOICE] ✓ Recording started');
+            } catch (e) {
+                console.error('[VOICE]  Error starting recognition:', e);
+                isListening = false;
+                aiBtnText.innerHTML = 'สั่งสินค้า<br>กับพนักงานขาย';
+                aiBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                aiBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'animate-pulse');
+                aiBtn.disabled = false;
+                alert('ไม่สามารถเริ่มบันทึกได้: ' + e.message);
+            }
+        } else {
+            try {
+                console.log('[VOICE]  Stopping recording...');
+                recognition.stop();
+                console.log('[VOICE]  Stop command sent');
+            } catch (e) {
+                console.error('[VOICE]  Error stopping recognition:', e);
+                isListening = false;
+                aiBtnText.innerHTML = 'สั่งสินค้า<br>กับพนักงานขาย';
+                aiBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                aiBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'animate-pulse');
+                aiBtn.disabled = false;
+            }
+        }
+    });
+    
+    // ส่งข้อความเสียงไป API
+    function sendVoiceMessage(userMessage) {
+        console.log('[VOICE]  Sending message to API:', userMessage);
+        console.log('[VOICE]  With conversation history:', conversationHistory.length, 'messages');
+        aiBtn.disabled = true;
+        
+        fetch('/api/voice-order/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+            },
+            body: JSON.stringify({ 
+                user_message: userMessage,
+                conversation_history: conversationHistory.slice(0, -1)  // ตัดข้อความปัจจุบัน
+            }),
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            console.log('[VOICE] ✓ Response received, status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('[VOICE]  API Response:', data);
+            if (data.success) {
+                console.log('[VOICE] ✓ AI Response:', data.message);
+                
+                // ถ้าจัดการตะกร้าสำเร็จ ให้รีโหลดตะกร้า
+                if (data.cart && data.cart.success) {
+                    console.log('[VOICE] Cart updated successfully:', data.cart.message);
+                    console.log('[VOICE]  Reloading cart...');
+                    loadCart();
+                } else if (data.cart) {
+                    console.log('[VOICE]  Cart response:', data.cart.message);
+                    // ถึงแม้ไม่สำเร็จก็ยังอยากรีโหลดเพื่อให้เห็นสถานะปัจจุบัน
+                    loadCart();
+                } else {
+                    console.log('[VOICE]  No cart action');
+                }
+                
+                // พูดคำตอบ
+                console.log('[VOICE]  Speaking response...');
+                speakResponse(data.message);
+                
+                // แสดงในแชท
+                addChatMessage(userMessage, true);
+                addChatMessage(data.message, false);
+            } else {
+                console.error('[VOICE]  API Error:', data.error);
+                alert('เกิดข้อผิดพลาด: ' + (data.error || 'ไม่ทราบสาเหตุ'));
+            }
+        })
+        .catch(error => {
+            console.error('[VOICE]  Fetch error:', error);
+            alert('ไม่สามารถเชื่อมต่อได้ในขณะนี้');
+        })
+        .finally(() => {
+            console.log('[VOICE] ✓ sendVoiceMessage complete, enabling button');
+            aiBtn.disabled = false;
+        });
+    }
+    function cleanAiText(text) {
+        if (!text) return '';
+
+    // ถ้าเป็นแค่ * กับช่องว่าง (เช่น "***", "**", "  ***  ") ให้ถือว่าไม่มีข้อความ
+        if (/^[\s*]+$/.test(text)) {
+            return '';
+        }
+
+    // เอา asterisks ทั้งหมดออก (ห้ามมี * เด็ดขาด)
+        let cleaned = text.replace(/\*+/g, '');
+
+    // ตัดช่องว่างหัวท้าย
+        cleaned = cleaned.trim();
+
+        return cleaned;
+}
+    // ใช้ Web Speech API เพื่อพูดข้อความ (TTS) - with retry logic
+    function speakResponse(text) {
+        // ถ้า browser ไม่รองรับ TTS
+        if (!('speechSynthesis' in window)) {
+            console.warn('[TTS]  Text-to-speech not supported in this browser');
+            console.log('[TTS] Text to display:', text);
+            return;
+        }
+    
+        // --- 🧹 ล้างข้อความก่อนพูด ---
+        if (text === null || text === undefined) {
+            text = '';
+        }
+    
+        // แปลงให้เป็น string แล้วกรองสัญลักษณ์ดอกจันออก
+        let cleaned = String(text)
+            // ตัดพวก "***", "*****", "**" ออก
+            .replace(/\*{2,}/g, ' ')
+            // ยุบช่องว่างหลายตัวให้เหลือตัวเดียว
+            .replace(/\s+/g, ' ')
+            .trim();
+    
+        // ถ้าล้างแล้วไม่เหลืออะไร (เช่น เดิมเป็นแค่ "***") → ไม่ต้องพูด
+        if (!cleaned) {
+            console.log('[TTS]  Skip star-only / empty text:', JSON.stringify(text));
+            return;
+        }
+    
+        try {
+            // ยกเลิกการพูดที่อยู่ก่อนหน้า
+            if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
+                console.log('[TTS]  Cancelling previous speech');
+                window.speechSynthesis.cancel();
+            }
+        
+            const utterance = new SpeechSynthesisUtterance(cleaned);            
+            // ตั้งค่าพื้นฐาน
+            utterance.lang = 'th-TH'; // Thai language
+            utterance.rate = 1.1; // เร็วกว่า (ธรรมชาติ)
+            utterance.pitch = 0.8; // เสียงต่ำกว่าเพื่อให้เป็นเสียงผู้ชาย
+            utterance.volume = 1.0;
+            
+            // ลองเลือกเสียง Thai ผู้ชาย ถ้ามี
+            try {
+                const voices = window.speechSynthesis.getVoices();
+                console.log('[TTS] Available voices:', voices.length);
+                
+                if (voices.length > 0) {
+                    // ลองหาเสียง Thai ผู้ชายก่อน
+                    let thaiVoice = voices.find(v => v.lang && (v.lang === 'th-TH' || v.lang === 'th' || v.lang.startsWith('th')) && !v.name.includes('Female'));
+                    
+                    // ถ้าไม่ได้เสียง Thai ให้ลองหา Google Thai male
+                    if (!thaiVoice) {
+                        thaiVoice = voices.find(v => v.name && v.name.includes('Thai') && !v.name.includes('Female'));
+                    }
+                    
+                    // ถ้ายังไม่ได้ ให้ลองเสียง Thai ตัวใดก็ได้
+                    if (!thaiVoice) {
+                        thaiVoice = voices.find(v => v.lang && (v.lang === 'th-TH' || v.lang === 'th' || v.lang.startsWith('th')));
+                    }
+                    
+                    // Fallback: ใช้เสียง default ที่เกี่ยวกับภาษา
+                    if (!thaiVoice && voices.length > 0) {
+                        // ใช้เสียงแรก ที่ไม่ใช่ English
+                        thaiVoice = voices.find(v => v.lang && !v.lang.startsWith('en')) || voices[0];
+                    }
+                    
+                    if (thaiVoice) {
+                        utterance.voice = thaiVoice;
+                        console.log('[TTS]  Using male voice:', thaiVoice.name, '(' + (thaiVoice.lang || 'unknown') + ')');
+                    } else {
+                        console.warn('[TTS]  No Thai voice found, using system default');
+                    }
+                } else {
+                    console.warn('[TTS]  No voices available yet (will use default)');
+                }
+            } catch (e) {
+                console.warn('[TTS]  Error selecting voice:', e);
+            }
+            
+            // Event handlers
+            utterance.onstart = () => {
+                console.log('[TTS] Speaking started');
+            };
+            
+            utterance.onend = () => {
+                console.log('[TTS] Speaking ended');
+            };
+            
+            utterance.onpause = () => {
+                console.log('[TTS] Speaking paused');
+            };
+            
+            utterance.onresume = () => {
+                console.log('[TTS] Speaking resumed');
+            };
+            
+            utterance.onerror = (event) => {
+                console.error('[TTS]  Speech synthesis error:', event.error);
+                // Retry with default settings
+                if (event.error !== 'network' && event.error !== 'synthesis-unavailable') {
+                    console.log('[TTS] Retrying with default voice...');
+                    const retryUtterance = new SpeechSynthesisUtterance(text);
+                    retryUtterance.rate = 1.2;
+                    retryUtterance.pitch = 0.8;
+                    try {
+                        window.speechSynthesis.speak(retryUtterance);
+                    } catch (e) {
+                        console.error('[TTS] Retry failed:', e);
+                    }
+                }
+            };
+            
+            // พูด
+            console.log('[TTS] Starting speech synthesis (male voice, rate 1.2)...');
+            window.speechSynthesis.speak(utterance);
+            
+        } catch (e) {
+            console.error('[TTS] Fatal error in speakResponse:', e);
+        }
+    }
+
+    // ### จัดการตะกร้าสินค้า ###
+    // ดึงรายการตะกร้าจาก server
+    function loadCart() {
+        console.log('[CART] loadCart() called');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        if (csrfToken) {
+            headers['X-CSRFToken'] = csrfToken;
+        }
+        
+        fetch('/api/cart/', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ action: 'get' }),
+            credentials: 'same-origin'  // ส่ง cookies ไปด้วย
+        })
+        .then(response => {
+            console.log('[CART] Response status:', response.status);
+            if (!response.ok) {
+                console.error('[CART] HTTP error:', response.status);
+                throw new Error('HTTP ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('[CART] Response data:', data);
+            if (data.success) {
+                console.log('[CART] ✓ Success! Cart items:', data.cart);
+                updateCartDisplay(data.cart, data.total || 0);
+            } else {
+                console.error('[CART] ❌ API error:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('[CART] ❌ Fetch error:', error);
+            console.error('[CART] Stack:', error.stack);
+        });
+    }
+
+    // อัพเดทการแสดงผลตะกร้า
+    function updateCartDisplay(cartItems, total) {
+        console.log('[CART] updateCartDisplay START');
+        
+        const cartItemsDiv = document.getElementById('cart-items');
+        const cartCountSpan = document.getElementById('cart-count');
+        const totalPriceSpan = document.getElementById('total-price');
+
+        if (!cartItemsDiv || !cartCountSpan || !totalPriceSpan) {
+            console.error('[CART] ERROR: Elements not found!');
+            return;
+        }
+
+        // อัพเดทจำนวนรายการ
+        try {
+            cartCountSpan.textContent = cartItems.length;
+        } catch (e) {
+            console.error('[CART] Error updating count:', e);
+        }
+
+        try {
+            totalPriceSpan.textContent = total.toFixed(2);
+        } catch (e) {
+            console.error('[CART] Error updating total:', e);
+        }
+
+        // ล้างรายการเก่า
+        try {
+            cartItemsDiv.innerHTML = '';
+        } catch (e) {
+            console.error('[CART] Error clearing:', e);
+        }
+
+        if (cartItems.length === 0) {
+            try {
+                cartItemsDiv.innerHTML = '<p class="text-[#8b8ba8] text-center text-xs py-2">ยังไม่มีรายการ</p>';
+            } catch (e) {
+                console.error('[CART] Error setting empty message:', e);
+            }
+            return;
+        }
+
+        // แสดงแต่ละรายการ
+        cartItems.forEach((item, idx) => {
+            try {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'bg-[#393a5a] p-1.5 rounded-lg border border-[#b16cff]/10 flex justify-between items-center text-xs';
+                itemDiv.innerHTML = `
+                    <div class="flex-1 min-w-0">
+                        <p class="text-white font-semibold truncate">${item.product_name}</p>
+                        <p class="text-[#8b8ba8] text-xs">${item.quantity}x ฿${item.price.toFixed(2)}</p>
+                    </div>
+                    <div class="ml-1 flex items-center gap-1">
+                        <span class="text-white font-bold whitespace-nowrap">฿${(item.price * item.quantity).toFixed(2)}</span>
+                        <button class="decrease-btn bg-[#3a3d5c] hover:bg-[#5b5d7e] text-white px-1.5 rounded transition" data-product-id="${item.product_id}">−</button>
+                        <span class="text-white font-semibold min-w-[24px] text-center">${item.quantity}</span>
+                        <button class="increase-btn bg-[#b16cff] hover:bg-[#7c3aed] text-white px-1.5 rounded transition" data-product-id="${item.product_id}">+</button>
+                        <button class="remove-btn bg-red-600/20 hover:bg-red-600/40 text-red-400 px-1 rounded transition" data-product-id="${item.product_id}">✕</button>
+                    </div>
+                `;
+                cartItemsDiv.appendChild(itemDiv);
+
+                // เพิ่ม event listener ให้ปุ่มลบ
+                itemDiv.querySelector('.remove-btn').addEventListener('click', function() {
+                    removeFromCart(item.product_id);
+                });
+
+                // เพิ่ม event listener ให้ปุ่มเพิ่มจำนวน
+                itemDiv.querySelector('.increase-btn').addEventListener('click', function() {
+                    updateCartQuantity(item.product_id, item.quantity + 1);
+                });
+
+                // เพิ่ม event listener ให้ปุ่มลดจำนวน
+                itemDiv.querySelector('.decrease-btn').addEventListener('click', function() {
+                    if (item.quantity > 1) {
+                        updateCartQuantity(item.product_id, item.quantity - 1);
+                    } else {
+                        removeFromCart(item.product_id);
+                    }
+                });
+            } catch (e) {
+                console.error(`[CART] Error rendering item ${idx + 1}:`, e);
+            }
+        });
+    }
+
+    // เพิ่มสินค้าลงตะกร้า
+    function addToCart(productId, productName, price, quantity = 1) {
+        console.log(`[CART] addToCart called: ${productName} (ID:${productId}) x${quantity}`);
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        if (csrfToken) {
+            headers['X-CSRFToken'] = csrfToken;
+        } else {
+            console.warn('[CART] ⚠️ No CSRF token found!');
+        }
+        
+        console.log('[CART] Sending request to /api/cart/', {
+            action: 'add',
+            product_id: productId,
+            quantity: quantity
+        });
+        
+        fetch('/api/cart/', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ 
+                action: 'add',
+                product_id: productId,
+                quantity: quantity
+            }),
+            credentials: 'same-origin'  // ส่ง cookies ไปด้วย
+        })
+        .then(response => {
+            console.log('[CART] Response status:', response.status);
+            console.log('[CART] Response headers:', response.headers);
+            return response.json().catch(err => {
+                console.error('[CART] Failed to parse JSON:', err);
+                return null;
+            });
+        })
+        .then(data => {
+            if (!data) {
+                console.error('[CART] ❌ Response was not valid JSON');
+                alert('เกิดข้อผิดพลาด: ได้รับข้อมูลที่ไม่ถูกต้อง');
+                return;
+            }
+            
+            console.log('[CART] Response data:', data);
+            
+            if (data.success) {
+                console.log('[CART] ✓ Added successfully, reloading cart');
+                loadCart(); // รีโหลดตะกร้า
+                // แสดงข้อความ success
+                const msg = data.message || `เพิ่ม ${productName} แล้ว`;
+                console.log('[CART] Success message:', msg);
+                // สามารถแสดง toast notification ได้ที่นี่
+            } else {
+                console.error('[CART] ❌ API returned error:', data.error);
+                alert(`ไม่สามารถเพิ่มสินค้าได้: ${data.error || 'ไม่ทราบสาเหตุ'}`);
+            }
+        })
+        .catch(error => {
+            console.error('[CART] ❌ Fetch error:', error);
+            console.error('[CART] Error stack:', error.stack);
+            alert('เกิดข้อผิดพลาด: ' + error.message);
+        });
+    }
+
+    // ลบสินค้าจากตะกร้า
+    function removeFromCart(productId) {
+        fetch('/api/cart/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+            },
+            body: JSON.stringify({ 
+                action: 'remove',
+                product_id: productId
+            }),
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadCart(); // รีโหลดตะกร้า
+            }
+        })
+        .catch(error => console.error('Remove from cart error:', error));
+    }
+
+    // อัพเดทจำนวนสินค้าในตะกร้า
+    function updateCartQuantity(productId, newQuantity) {
+        console.log(`[CART] updateCartQuantity: product ${productId} to quantity ${newQuantity}`);
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        if (csrfToken) {
+            headers['X-CSRFToken'] = csrfToken;
+        }
+        
+        fetch('/api/cart/', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ 
+                action: 'update',
+                product_id: productId,
+                quantity: newQuantity
+            }),
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('[CART] Quantity updated successfully');
+                loadCart(); // รีโหลดตะกร้า
+            }
+        })
+        .catch(error => console.error('[CART] Update quantity error:', error));
+    }
+
+    // ล้างตะกร้า
+    document.getElementById('clear-cart-btn')?.addEventListener('click', function() {
+        if (confirm('คุณแน่ใจหรือไม่ที่จะลบรายการทั้งหมด?')) {
+            fetch('/api/cart/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+                },
+                body: JSON.stringify({ action: 'clear' }),
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadCart(); // รีโหลดตะกร้า
+                }
+            })
+            .catch(error => console.error('Clear cart error:', error));
+        }
+    });
+
+
+
+    // โหลดตะกร้าเมื่อเพจโหลด
+    document.addEventListener('DOMContentLoaded', function() {
+        loadCart();
+    });
+
+    // เพิ่มสินค้าจากปุ่ม "add-to-cart-btn" ไปยัง server cart
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('add-to-cart-btn')) {
+            e.stopPropagation(); // ป้องกันการ propagate ไปยัง element แม่
+            // หาปุ่ม add-to-cart-btn ที่ถูกคลิก (เผื่อคลิกโดนลูกของปุ่ม)
+            const btn = e.target.closest('.add-to-cart-btn');
+            if (btn) {
+                 const productId = parseInt(btn.dataset.productId);
+                 const productName = btn.dataset.productName;
+                 const productPrice = parseFloat(btn.dataset.productPrice);
+                 addToCart(productId, productName, productPrice, 1);
+            }
+        }
+    }, true);
+
+    // ===== Payment Handler Function =====
+    function handlePaymentClick(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        console.log('[PAYMENT] CLICKED - handlePaymentClick called');
+        
+        const cartCount = document.getElementById('cart-count');
+        const totalPrice = document.getElementById('total-price');
+        
+        console.log('[PAYMENT] Cart count:', cartCount?.textContent);
+        console.log('[PAYMENT] Total price:', totalPrice?.textContent);
+        
+        if (!cartCount || cartCount.textContent === '0') {
+            alert('กรุณาเลือกสินค้าก่อน');
+            return;
+        }
+        
+        const totalAmount = parseFloat(totalPrice.textContent);
+        if (isNaN(totalAmount) || totalAmount <= 0) {
+            alert('จำนวนเงินไม่ถูกต้อง');
+            return;
+        }
+        
+        console.log('[PAYMENT] Amount validated:', totalAmount);
+        
+        // Get CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        console.log('[PAYMENT] CSRF token exists:', csrfToken.length > 0);
+        
+        console.log('[PAYMENT] Sending request to /set-payment-amount/');
+        
+        // Set session and redirect to payment
+        fetch('/set-payment-amount/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({amount: totalAmount}),
+            credentials: 'include'
+        })
+        .then(response => {
+            console.log('[PAYMENT] Response received, status:', response.status);
+            if (!response.ok) {
+                console.error('[PAYMENT] HTTP error, status:', response.status);
+                return response.text().then(text => {
+                    console.error('[PAYMENT] Response text:', text);
+                    throw new Error('HTTP ' + response.status);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('[PAYMENT] JSON parsed:', data);
+            if (data.success) {
+                console.log('[PAYMENT] Success! Redirecting to /payment/');
+                window.location.href = '/payment/';
+            } else {
+                console.error('[PAYMENT] API returned error:', data.error);
+                alert('ผิดพลาด: ' + (data.error || 'ไม่ทราบ'));
+            }
+        })
+        .catch(error => {
+            console.error('[PAYMENT] Fetch error:', error.message);
+            console.error('[PAYMENT] Stack:', error.stack);
+            alert('ผิดพลาด: ' + error.message);
+        });
+    }
+    
+    // ### จัดการ Modal ###
+    const modal = document.getElementById('closeAiModal');
+    const closeAiBtn = document.querySelector('a[href*="ai_disable_action"]'); // จับปุ่มจาก href
+    const cancelBtn = document.getElementById('cancel-close-ai');
+    
+    function showModal(e) {
+        if(e) e.preventDefault();
+        modal.classList.remove('hidden');
+    }
+    
+    function hideModal() {
+        modal.classList.add('hidden');
+    }
+    
+    if (closeAiBtn) {
+        closeAiBtn.addEventListener('click', showModal);
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', hideModal);
+    }
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            hideModal();
+        }
+    });
+    
+
+    // ### ค้นหาสินค้า ###
+    const searchInput = document.getElementById('product-search');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        const products = document.querySelectorAll('.product-card'); 
+        
+        products.forEach(product => {
+            const productName = product.dataset.productName.toLowerCase();
+            if (productName.includes(searchTerm)) {
+                product.style.display = 'flex'; 
+            } else {
+                product.style.display = 'none';
+            }
+        });
+    });
+
+    // ### แชท ###
+    const chatInput = document.getElementById('chat-input');
+    const chatSendBtn = document.getElementById('chat-send-btn');
+    const clearChatBtn = document.getElementById('clear-chat-btn');
+    const chatMessages = document.getElementById('chat-messages');
+    let isSending = false;
+    
+    // conversationHistory ถูกโหลดข้างบน ที่เริ่มต้น voice section แล้ว
+
+    function addChatMessage(message, isUser = false) {
+        if (chatMessages.children.length === 1 && chatMessages.children[0].textContent.includes('เริ่มต้น')) {
+            chatMessages.innerHTML = '';
+        }
+    const displayText = isUser ? message : cleanAiText(message);
+
+    // ถ้าเป็นข้อความจาก AI แล้วล้างแล้วไม่เหลืออะไร เช่น "***" ก็ไม่ต้องสร้าง bubble
+        if (!isUser && !displayText) {
+            console.log('[CHAT] ⏭ Skip displaying placeholder AI message:', JSON.stringify(message));
+            return;
+        }
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
+        
+        const msgBubble = document.createElement('div');
+        msgBubble.className = `max-w-xs px-3 py-2 rounded-lg text-xs ${
+            isUser 
+                ? 'bg-[#b16cff] text-white rounded-br-none' 
+                : 'bg-[#3a3d5c] text-white border border-[#b16cff]/30 rounded-bl-none'
+        }`;
+        msgBubble.textContent = displayText;
+        
+        msgDiv.appendChild(msgBubble);
+        chatMessages.appendChild(msgDiv);
+        
+        // เพิ่มข้อความลงในประวัติ (เฉพาะสำหรับ AI response เท่านั้น)
+        // user message ได้เพิ่มแล้วใน event listener
+        if (!isUser) {
+            conversationHistory.push({
+                role: 'assistant',
+                content: message
+            });
+            saveChatHistory();  // บันทึกลงใน localStorage
+        }
+        
+        chatMessages.parentElement.scrollTop = chatMessages.parentElement.scrollHeight;
+    }
+
+    chatSendBtn.addEventListener('click', function() {
+        const message = chatInput.value.trim();
+        if (message === '' || isSending) return;
+        
+        // เพิ่มข้อความผู้ใช้ลงใน history ทันที
+        conversationHistory.push({
+            role: 'user',
+            content: message
+        });
+        saveChatHistory();  // บันทึกลงใน localStorage
+        
+        addChatMessage(message, true);  // แสดงบน UI
+        chatInput.value = '';
+        isSending = true;
+        chatSendBtn.disabled = true;
+        
+        console.log('[CHAT] Sending message:', message);
+        console.log('[CHAT] Current history:', conversationHistory.length, 'messages');
+        console.log('[CHAT] Full history:', JSON.stringify(conversationHistory, null, 2));
+        
+        // ส่ง history โดยไม่รวมข้อความปัจจุบันที่เพิ่งเพิ่ม (เพราะต้องการเช่นนี้ backend)
+        const historyToSend = conversationHistory.slice(0, -1);  // ตัดข้อความปัจจุบันออกเพราะว่า API จะได้รับ message แยกต่างหาก
+        
+        console.log('[CHAT] Sending history with', historyToSend.length, 'messages');
+        
+        // เรียก API แชท
+        fetch('/api/chat/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+            },
+            body: JSON.stringify({ 
+                message: message,
+                conversation_history: historyToSend
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                addChatMessage(data.message, false);
+            } else {
+                addChatMessage('ขออภัยครับ เกิดข้อผิดพลาด: ' + (data.error || 'ไม่ทราบสาเหตุ'), false);
+            }
+        })
+        .catch(error => {
+            console.error('Chat error:', error);
+            addChatMessage('ขออภัยครับ ไม่สามารถเชื่อมต่อได้ในขณะนี้', false);
+        })
+        .finally(() => {
+            isSending = false;
+            chatSendBtn.disabled = false;
+        });
+    });
+
+    // Clear chat history
+    clearChatBtn.addEventListener('click', function() {
+        if (confirm('คุณแน่ใจหรือว่าต้องการล้างประวัติการสนทนา?')) {
+            conversationHistory = [];
+            localStorage.removeItem('chatHistory');
+            chatMessages.innerHTML = '<div class="text-[#8b8ba8] text-center text-xs py-2">เริ่มต้นการสนทนา...</div>';
+            console.log('[CHAT] Chat history cleared');
+        }
+    });
+
+    chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !isSending) {
+            chatSendBtn.click();
+        }
+    });
+
+    // ### Category Filter ###
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // ลบ active class จากปุ่มทั้งหมด
+            document.querySelectorAll('.category-btn').forEach(b => {
+                b.classList.remove('bg-[#b16cff]', 'text-white');
+                b.classList.add('bg-[#3a3d5c]', 'text-[#8b8ba8]');
+            });
+            
+            // เพิ่ม active class ให้ปุ่มปัจจุบัน
+            this.classList.remove('bg-[#3a3d5c]', 'text-[#8b8ba8]');
+            this.classList.add('bg-[#b16cff]', 'text-white');
+            
+            const categoryId = this.dataset.category;
+            const products = document.querySelectorAll('.product-card');
+            
+            if (categoryId === 'all') {
+                // แสดงทั้งหมด
+                products.forEach(product => {
+                    product.style.display = 'flex';
+                });
+            } else {
+                // filter ตามหมวด
+                products.forEach(product => {
+                    const productCategoryId = product.dataset.categoryId;
+                    if (productCategoryId === categoryId) {
+                        product.style.display = 'flex';
+                    } else {
+                        product.style.display = 'none';
+                    }
+                });
+            }
+        });
+    });
+    
+    // ป้องกัน back button และ cache
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+    
+    // ตรวจสอบ AI status ทุก 5 วินาที
+    setInterval(function() {
+        fetch('{% url "home" %}', {
+            method: 'HEAD',
+            cache: 'no-store'
+        }).catch(error => {
+            console.log('Connection check');
+        });
+    }, 5000);
+</script>
+{% endblock %}

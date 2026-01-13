@@ -1,0 +1,74 @@
+{% extends 'aicashier/base.html' %}
+{% load static %}
+{% block content %}
+<div class="flex items-center gap-4 text-sm">
+    <a href="{% url 'home' %}" class="text-gray-300 hover:text-white font-medium transition">หน้าหลัก</a>
+    <a href="{% url 'overviews' %}" class="text-gray-300 hover:text-white font-medium transition">ข้อมูลการขาย</a>
+    <a href="{% url 'product_manage' %}" class="text-gray-300 hover:text-white font-medium transition">จัดการสินค้า</a>
+    <a href="{% url 'ai_settings' %}" class="text-gray-300 hover:text-white font-medium transition">ตั้งค่าการทำงานระบบเอไอ</a>
+</div>
+<div class="min-h-screen bg-[#23243a] font-kanit py-8 px-4">
+	
+	<div class="flex justify-between items-center mb-8">
+		<h1 class="text-3xl font-bold text-[#b16cff]">จัดการโปรโมชั่น</h1>
+		<a href="{% url 'create_promotion' %}" class="px-6 py-2 rounded-md bg-green-600 hover:bg-green-700 text-white font-medium transition">เพิ่มโปรโมชั่น</a>
+	</div>
+
+	{% if promotions %}
+	<div class="overflow-x-auto rounded-2xl shadow-lg">
+		<table class="min-w-full bg-[#393a5a] text-white rounded-2xl">
+			<thead>
+				<tr class="bg-[#393a5a] text-[#b16cff] text-lg">
+					<th class="py-4 px-4 text-left">รูปภาพ</th>
+					<th class="py-4 px-4 text-left">ชื่อโปรโมชั่น</th>
+					<th class="py-4 px-4 text-left">รายละเอียด</th>
+					<th class="py-4 px-4 text-left">ลำดับแสดง</th>
+					<th class="py-4 px-4 text-left">สถานะ</th>
+					<th class="py-4 px-4 text-left">จัดการ</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for promotion in promotions %}
+				<tr class="border-b border-[#23243a] hover:bg-[#2a2b45] transition">
+					<td class="py-3 px-4">
+						<div class="w-32 aspect-video bg-gradient-to-br from-[#b16cff]/30 to-[#7c3aed]/30 rounded-lg flex items-center justify-center overflow-hidden">
+							{% if promotion.image %}
+							<img src="{{ promotion.image.url }}" alt="{{ promotion.title }}" class="w-full h-full object-cover">
+							{% elif promotion.image_url %}
+							<img src="{{ promotion.image_url }}" alt="{{ promotion.title }}" class="w-full h-full object-cover">
+							{% else %}
+							<span class="text-2xl">📢</span>
+							{% endif %}
+						</div>
+					</td>
+					<td class="py-3 px-4">{{ promotion.title }}</td>
+					<td class="py-3 px-4">
+						<span class="text-sm text-gray-300 truncate max-w-md block">{{ promotion.description|truncatewords:5 }}</span>
+					</td>
+					<td class="py-3 px-4">
+						<span class="px-3 py-1 bg-blue-600/20 text-blue-400 rounded-full text-sm font-semibold">{{ promotion.display_order }}</span>
+					</td>
+					<td class="py-3 px-4">
+						{% if promotion.is_active %}
+						<span class="px-3 py-1 bg-green-600/20 text-green-400 rounded-full text-sm font-semibold">เปิดใช้งาน</span>
+						{% else %}
+						<span class="px-3 py-1 bg-red-600/20 text-red-400 rounded-full text-sm font-semibold">ปิดใช้งาน</span>
+						{% endif %}
+					</td>
+					<td class="py-3 px-4">
+						<a href="{% url 'promotion_edit' promotion.id %}" class="text-green-400 hover:underline mr-4">แก้ไข</a>
+						<a href="{% url 'delete_promotion' promotion.id %}" class="text-red-400 hover:underline">ลบ</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	{% else %}
+	<div class="bg-[#3a3d5c] rounded-lg p-8 text-center">
+		<p class="text-gray-400 text-lg">ยังไม่มีโปรโมชั่น</p>
+		<a href="{% url 'create_promotion' %}" class="mt-4 inline-block px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md transition">เพิ่มโปรโมชั่นแรก</a>
+	</div>
+	{% endif %}
+</div>
+{% endblock %}

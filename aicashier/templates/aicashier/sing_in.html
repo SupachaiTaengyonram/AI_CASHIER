@@ -1,0 +1,64 @@
+{% extends 'aicashier/base.html' %}
+{% load static %}
+{% block navbar %}
+<nav class="bg-[#23243a] py-4 px-8 flex items-center">
+  <span class="text-2xl font-bold text-[#b16cff] tracking-wide">AI CASHIER</span>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-[#23243a] font-kanit">
+  <div class="flex flex-col md:flex-row bg-[#23243a] rounded-3xl shadow-lg overflow-hidden w-full max-w-5xl">
+    <!-- Left: Image -->
+    <div class="md:w-1/2 flex items-center justify-center p-8">
+      <img src="{% static 'images/leaf-8144517_1920.jpg' %}" alt="plant"
+           class="rounded-2xl object-cover w-[600px] h-[700px] shadow-lg" />
+    </div>
+
+    <!-- Right: Form -->
+    <div class="md:w-1/2 flex flex-col justify-center p-10">
+      <div class="mb-8">
+        <h2 class="text-white text-2xl font-normal">ยินดีต้อนรับสู่ <span class="text-[#b16cff] font-medium">AI CASHIER</span></h2>
+        <h1 class="text-white text-6xl font-bold mt-2 mb-2">เข้าสู่ระบบ</h1>
+      </div>
+
+      <form method="post" action="{% url 'login' %}" class="space-y-4">
+        {% csrf_token %}
+        {% if form.errors %}
+          <p class="text-red-400 text-sm">ชื่อผู้ใช้ หรือ รหัสผ่าน ไม่ถูกต้อง</p>
+        {% endif %}
+
+        <div>
+          <label class="block text-gray-300 text-sm mb-1">ชื่อผู้ใช้</label>
+          <input name="username" type="text" required
+                 value="{{ form.username.value|default:'' }}"
+                 class="w-full rounded-md px-4 py-2 bg-[#393a5a] text-white focus:outline-none focus:ring-2 focus:ring-[#b16cff]"
+                 placeholder="Username" />
+        </div>
+
+        <div>
+          <label class="block text-gray-300 text-sm mb-1">รหัสผ่าน</label>
+          <input name="password" type="password" required
+                 class="w-full rounded-md px-4 py-2 bg-[#393a5a] text-white focus:outline-none focus:ring-2 focus:ring-[#b16cff]"
+                 placeholder="Password" />
+          <div class="flex justify-end mt-1">
+            <!-- ใส่ URL reset password ได้ภายหลัง -->
+            <a href="{% url 'password_reset' %}" class="text-xs text-gray-400 hover:underline">ลืมรหัสผ่าน</a>
+          </div>
+        </div>
+
+        <!-- รองรับ redirect ถ้ามี ?next=/path -->
+        <input type="hidden" name="next" value="{{ next|default:'' }}">
+
+        <button type="submit"
+                class="w-full mt-4 py-3 rounded-md bg-gradient-to-r from-[#b16cff] to-[#6f6cff] text-white text-lg font-medium hover:from-[#a259e6] hover:to-[#5a5ae6] transition">
+          เข้าสู่ระบบ
+        </button>
+        <div class="flex items-center justify-between mt-4">
+          <p class="text-gray-300 text-xs">ยังไม่มีบัญชี?</p>
+          <a href="{% url 'sign_up' %}" class="text-[#b16cff] text-xs hover:underline">สมัครสมาชิก</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

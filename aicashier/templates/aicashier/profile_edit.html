@@ -1,0 +1,99 @@
+{% extends 'aicashier/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-[#23243a] font-kanit py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8 flex items-center justify-between">
+            <div>
+                <h1 class="text-4xl font-bold text-[#b16cff] mb-2">แก้ไขข้อมูลส่วนตัว</h1>
+                <p class="text-[#8b8ba8]">อัปเดตข้อมูลของคุณ</p>
+            </div>
+            <a href="{% url 'profile' %}" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition">
+                กลับสู่โปรไฟล์
+            </a>
+        </div>
+
+        <!-- Edit Form -->
+        <div class="bg-[#3a3d5c] rounded-lg p-8 border border-[#b16cff]/20">
+            <form method="post" enctype="application/x-www-form-urlencoded" class="space-y-6">
+                {% csrf_token %}
+
+                <!-- Username -->
+                <div>
+                    <label class="text-[#b16cff] font-semibold block mb-2">ชื่อผู้ใช้</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                    <p class="text-red-400 text-sm mt-1">{{ form.username.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label class="text-[#b16cff] font-semibold block mb-2">อีเมล</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <p class="text-red-400 text-sm mt-1">{{ form.email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Contact Number -->
+                <div>
+                    <label class="text-[#b16cff] font-semibold block mb-2">เบอร์ติดต่อ</label>
+                    {{ form.contact_number }}
+                    {% if form.contact_number.errors %}
+                    <p class="text-red-400 text-sm mt-1">{{ form.contact_number.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-4 pt-6">
+                    <button type="submit" class="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition">
+                        บันทึกการเปลี่ยนแปลง
+                    </button>
+                    <a href="{% url 'profile' %}" class="flex-1 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition text-center">
+                        ยกเลิก
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mt-8 space-y-4">
+            {% for message in messages %}
+            <div class="p-4 rounded-lg bg-{% if message.tags %}{{ message.tags }}-500/20{% else %}green-500/20{% endif %} border border-{% if message.tags %}{{ message.tags }}-500{% else %}green-500{% endif %}">
+                <p class="text-white">{{ message }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    textarea {
+        width: 100%;
+        background-color: #393a5a;
+        color: #fff;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        border: 1.5px solid #b16cff;
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="tel"]:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #b16cff;
+        box-shadow: 0 0 0 3px rgba(177, 108, 255, 0.1);
+    }
+</style>
+{% endblock %}

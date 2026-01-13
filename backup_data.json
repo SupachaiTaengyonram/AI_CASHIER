@@ -1,0 +1,255 @@
+⏳ กำลังโหลดโมเดลค้นหาภาษาไทย (Local Embedding)...
+✓ Using local HuggingFace embeddings
+✓ Vector store initialized (collection: products_collection)
+✓ Using Google Gemini LLM
+ChromaDB already has 4 products loaded, skipping reload
+✓ RAG Service initialized successfully
+Gemini Service initialized successfully.
+✓ AI Settings loaded from database
+
+--- AI Settings Information ---
+Status: 🟢 Active
+Greeting: สวัสดีครับ! ยินดีต้อนรับสู่ร้าน AI CASHIER...
+Promotion: เรามีโปรโมชั่นพิเศษ: ซื้อ ครบ 100 ลด 2%...
+Featured Products: 4 items
+✓ RAG Service initialized and products loaded
+[
+{
+  "model": "aicashier.customer",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$NQ4akho6FoSpZysXUKi0LC$p0foEvgNiXvO18KgbUQT3q9/KeoDA6xkIwVS0SozSq4=",
+    "last_login": "2025-12-10T06:58:08.461Z",
+    "is_superuser": true,
+    "username": "admin",
+    "email": "supachai.ta.66@ubu.ac.th",
+    "contact_number": "0910349600",
+    "is_active": true,
+    "is_staff": true,
+    "date_joined": "2025-11-26T02:37:41.470Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "aicashier.customer",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$xir74CNXECmCtMVsg3EkeM$ooWAqiY6ivehJLM98bLbqSxCmBTtf5T40yAI7+CQXUY=",
+    "last_login": "2025-11-26T09:42:37.746Z",
+    "is_superuser": false,
+    "username": "test",
+    "email": "test01@gmail.com",
+    "contact_number": "0000000000",
+    "is_active": true,
+    "is_staff": false,
+    "date_joined": "2025-11-26T09:42:31.794Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "aicashier.customer",
+  "pk": 4,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$q23JVDHORrtgmNiSzmIIZf$JLgSn4NOLrvBcCbf2Yw7/APQpdvZ2829ZMjbVSGCbdY=",
+    "last_login": "2025-11-26T11:08:40.165Z",
+    "is_superuser": false,
+    "username": "testuser",
+    "email": "test@test.com",
+    "contact_number": "0910349600",
+    "is_active": true,
+    "is_staff": false,
+    "date_joined": "2025-11-26T10:02:24.329Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "aicashier.customer",
+  "pk": 5,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$WHscjzqPaq87NUTO52t3vh$bM64wrBISX2DBMhaZh3k3zq+ekHbSy3+C22LSHKWqLw=",
+    "last_login": "2025-11-26T12:55:43.038Z",
+    "is_superuser": false,
+    "username": "Orapin",
+    "email": "vhkp410@gmail.com",
+    "contact_number": "Boonpong",
+    "is_active": true,
+    "is_staff": false,
+    "date_joined": "2025-11-26T12:04:25.951Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "aicashier.category",
+  "pk": 1,
+  "fields": {
+    "name": "ผลไม้",
+    "description": "พร้อมทาน",
+    "created_at": "2025-11-26T02:40:06.671Z"
+  }
+},
+{
+  "model": "aicashier.category",
+  "pk": 2,
+  "fields": {
+    "name": "น้ำผลไม้",
+    "description": "",
+    "created_at": "2025-11-26T13:26:31.294Z"
+  }
+},
+{
+  "model": "aicashier.product",
+  "pk": 2,
+  "fields": {
+    "product_code": "WT0001",
+    "name": "น้ำมะนาว",
+    "description": "น้ำมะนาวสดใหม่จากตลาด",
+    "category": 2,
+    "price": "15.00",
+    "quantity": 8,
+    "image_url": null,
+    "image": "products/IMG_0025.jpeg",
+    "ai_information": "",
+    "created_at": "2025-11-26T02:36:04.663Z",
+    "updated_at": "2025-12-10T06:59:10.129Z"
+  }
+},
+{
+  "model": "aicashier.product",
+  "pk": 4,
+  "fields": {
+    "product_code": "AT0001",
+    "name": "ส้มโอ",
+    "description": "อร่อยมาก เปรี้ยว สดชื่น",
+    "category": 1,
+    "price": "25.00",
+    "quantity": 5,
+    "image_url": null,
+    "image": "products/IMG_0018.png",
+    "ai_information": "",
+    "created_at": "2025-11-26T02:36:04.713Z",
+    "updated_at": "2025-11-26T13:32:01.142Z"
+  }
+},
+{
+  "model": "aicashier.product",
+  "pk": 5,
+  "fields": {
+    "product_code": "AT0002",
+    "name": "แตงโม",
+    "description": "ได้ครึ่งลูก ผ่าพร้อมทาน",
+    "category": 1,
+    "price": "25.00",
+    "quantity": 15,
+    "image_url": null,
+    "image": "products/IMG_0020.jpeg",
+    "ai_information": "",
+    "created_at": "2025-11-26T13:29:38.086Z",
+    "updated_at": "2025-11-26T13:32:19.292Z"
+  }
+},
+{
+  "model": "aicashier.product",
+  "pk": 6,
+  "fields": {
+    "product_code": "AT0003",
+    "name": "ทับทิม",
+    "description": "1 ลูก กะเทาะเม็ด",
+    "category": 1,
+    "price": "35.00",
+    "quantity": 12,
+    "image_url": null,
+    "image": "products/IMG_0019.jpeg",
+    "ai_information": "",
+    "created_at": "2025-11-26T13:30:38.941Z",
+    "updated_at": "2025-11-26T13:32:38.008Z"
+  }
+},
+{
+  "model": "aicashier.product",
+  "pk": 7,
+  "fields": {
+    "product_code": "AT0004",
+    "name": "มะม่วง",
+    "description": "1 ลูก พร้อมทาน",
+    "category": 1,
+    "price": "20.00",
+    "quantity": 25,
+    "image_url": null,
+    "image": "products/IMG_0021.jpeg",
+    "ai_information": "",
+    "created_at": "2025-11-26T13:34:01.983Z",
+    "updated_at": "2025-11-26T13:34:01.983Z"
+  }
+},
+{
+  "model": "aicashier.product",
+  "pk": 8,
+  "fields": {
+    "product_code": "AT0005",
+    "name": "เสาวรส",
+    "description": "ได้ ครึ่งโล",
+    "category": 1,
+    "price": "35.00",
+    "quantity": 9,
+    "image_url": null,
+    "image": "products/IMG_0022.jpeg",
+    "ai_information": "",
+    "created_at": "2025-11-26T13:35:35.504Z",
+    "updated_at": "2025-11-26T15:18:28.650Z"
+  }
+},
+{
+  "model": "aicashier.product",
+  "pk": 9,
+  "fields": {
+    "product_code": "WT0002",
+    "name": "น้ำแตงโม",
+    "description": "",
+    "category": 2,
+    "price": "30.00",
+    "quantity": 25,
+    "image_url": null,
+    "image": "products/IMG_0026.jpeg",
+    "ai_information": "",
+    "created_at": "2025-11-26T13:36:44.552Z",
+    "updated_at": "2025-11-26T13:38:28.392Z"
+  }
+},
+{
+  "model": "aicashier.product",
+  "pk": 10,
+  "fields": {
+    "product_code": "WT0003",
+    "name": "น้ำทับทิม",
+    "description": "น้ำทับทิมเป็นแก้ว แยกน้ำเเข็ง",
+    "category": 2,
+    "price": "25.00",
+    "quantity": 30,
+    "image_url": null,
+    "image": "products/IMG_0023.jpeg",
+    "ai_information": "",
+    "created_at": "2025-11-26T13:37:57.063Z",
+    "updated_at": "2025-11-26T13:38:40.764Z"
+  }
+},
+{
+  "model": "aicashier.product",
+  "pk": 11,
+  "fields": {
+    "product_code": "WT0004",
+    "name": "น้ำเสาวรส",
+    "description": "1แก้ว",
+    "category": 2,
+    "price": "25.00",
+    "quantity": 49,
+    "image_url": null,
+    "image": "products/IMG_0028.jpeg",
+    "ai_information": "",
+    "created_at": "2025-11-26T13:56:20.524Z",
+    "updated_at": "2025-12-10T06:47:09.737Z"
+  }
+}

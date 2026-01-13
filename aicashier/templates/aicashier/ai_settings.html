@@ -1,0 +1,201 @@
+{% extends 'aicashier/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="flex items-center gap-4 text-sm">
+            <a href="{% url 'home' %}" class="text-gray-300 hover:text-white font-medium transition">หน้าหลัก</a>
+            <a href="{% url 'overviews' %}" class="text-gray-300 hover:text-white font-medium transition">ข้อมูลการขาย</a>
+            <a href="{% url 'product_manage' %}" class="text-gray-300 hover:text-white font-medium transition">จัดการสินค้า</a>
+            <a href="{% url 'ai_settings' %}" class="text-gray-300 hover:text-white font-medium transition">ตั้งค่าการทำงานระบบเอไอ</a>
+</div>
+<div class="min-h-screen bg-[#23243a] font-kanit py-8 px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-[#b16cff] mb-2">ตั้งค่าการทำงานระบบเอไอ</h1>
+        <p class="text-[#8b8ba8]">ตั้งค่าการทำงานระบบเอไอ</p>
+    </div>
+
+
+    <!-- AI Status Toggle Button -->
+    <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20 mb-8">
+        <div class="flex justify-between items-center">
+            <div>
+                <h3 class="text-white font-semibold text-lg mb-2">สถานะระบบเอไอ</h3>
+                <p class="text-[#8b8ba8] text-sm">
+                    {% if object.is_active %}
+                        <span class="text-green-400">กำลังทำงาน</span>
+                    {% else %}
+                        <span class="text-red-400">ปิดใช้งาน</span>
+                    {% endif %}
+                </p>
+            </div>
+            <button type="button" class="px-6 py-2 rounded-md bg-purple-600 hover:bg-purple-700 text-white font-medium transition" 
+                    onclick="document.getElementById('toggleAIModal').classList.remove('hidden')">
+                {% if object.is_active %}
+                    ปิด AI
+                {% else %}
+                    เปิด AI
+                {% endif %}
+            </button>
+        </div>
+    </div>
+
+    <!-- AI Settings Form -->
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Greeting Message -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20">
+            <h3 class="text-white font-semibold text-lg mb-4">ข้อความทักทายเริ่มแรก</h3>
+            <div class="form-group">
+                <label class="text-[#b16cff] font-medium mb-2 block">{{ form.greeting_message.label }}</label>
+                {{ form.greeting_message }}
+                <p class="text-[#8b8ba8] text-xs mt-2">ข้อความที่ เอไอ จะใช้ทักทายลูกค้า</p>
+            </div>
+        </div>
+
+        <!-- Promotion Text -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20">
+            <h3 class="text-white font-semibold text-lg mb-4">ข้อความโปรโมชั่น</h3>
+            <div class="form-group">
+                <label class="text-[#b16cff] font-medium mb-2 block">{{ form.promotion_text.label }}</label>
+                {{ form.promotion_text }}
+                <p class="text-[#8b8ba8] text-xs mt-2">โปรโมชั่นที่ เอไอ จะแนะนำกับลูกค้า</p>
+            </div>
+        </div>
+
+        <!-- Sales Steps -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20">
+            <h3 class="text-white font-semibold text-lg mb-4">ลำดับขั้นตอนการขาย</h3>
+            <div class="form-group">
+                <label class="text-[#b16cff] font-medium mb-2 block">{{ form.sales_steps.label }}</label>
+                {{ form.sales_steps }}
+                <p class="text-[#8b8ba8] text-xs mt-2">ระบุแต่ละขั้นตอนคั่นด้วยบรรทัดใหม่</p>
+            </div>
+        </div>
+
+        <!-- Voice Commands for Adding/Removing Items -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20">
+            <h3 class="text-white font-semibold text-lg mb-4"> คำสั่งเสียงจัดการสินค้า</h3>
+            <div class="form-group">
+                <label class="text-[#b16cff] font-medium mb-2 block">{{ form.voice_commands.label }}</label>
+                {{ form.voice_commands }}
+                <p class="text-[#8b8ba8] text-xs mt-2">
+                    คำสั่งเสียงที่ใช้เพิ่ม/ลบสินค้า เขียนในรูปแบบ: <span class="text-[#b16cff]">คำภาษาไทย|คำภาษาอังกฤษ</span><br>
+                    ตัวอย่าง: เพิ่ม|add, ลบ|remove, เอาออก|delete<br>
+                    <span class="text-yellow-400">แต่ละคำคั่นด้วยบรรทัดใหม่</span>
+                </p>
+                <div class="mt-3 p-3 bg-[#2a2c45] rounded border border-[#b16cff]/10">
+                    <p class="text-[#b16cff] text-xs font-semibold mb-2">💡 ตัวอย่างคำสั่ง:</p>
+                    <p class="text-[#8b8ba8] text-xs">เพิ่ม (add) → เพิ่มสินค้า 1 ชิ้น</p>
+                    <p class="text-[#8b8ba8] text-xs">ลบ (remove) → ลบสินค้าออกจากตะกร้า</p>
+                    <p class="text-[#8b8ba8] text-xs">เอาออก (delete) → ลบสินค้าที่เลือก</p>
+                    <p class="text-[#8b8ba8] text-xs">ลดจำนวน (decrease) → ลดจำนวนสินค้า 1 ชิ้น</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Closing Message -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20">
+            <h3 class="text-white font-semibold text-lg mb-4">คำลงท้าย</h3>
+            <div class="form-group">
+                <label class="text-[#b16cff] font-medium mb-2 block">{{ form.closing_message.label }}</label>
+                {{ form.closing_message }}
+                <p class="text-[#8b8ba8] text-xs mt-2">ข้อความท้ายสุดหลังจากขายสินค้า</p>
+            </div>
+        </div>
+
+        <!-- Featured Items Section -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20">
+            <h3 class="text-white font-semibold text-lg mb-4">รายการสินค้าแนะนำ (4 รายการ)</h3>
+            
+            <!-- Featured Item 1 -->
+            <div class="mb-4">
+                <label class="text-[#b16cff] font-medium mb-2 block">สินค้าแนะนำที่ 1</label>
+                {{ form.featured_item_1 }}
+                <p class="text-[#8b8ba8] text-xs mt-2">เลือกสินค้าที่จะแนะนำลำดับที่ 1</p>
+            </div>
+
+            <!-- Featured Item 2 -->
+            <div class="mb-4">
+                <label class="text-[#b16cff] font-medium mb-2 block">สินค้าแนะนำที่ 2</label>
+                {{ form.featured_item_2 }}
+                <p class="text-[#8b8ba8] text-xs mt-2">เลือกสินค้าที่จะแนะนำลำดับที่ 2</p>
+            </div>
+
+            <!-- Featured Item 3 -->
+            <div class="mb-4">
+                <label class="text-[#b16cff] font-medium mb-2 block">สินค้าแนะนำที่ 3</label>
+                {{ form.featured_item_3 }}
+                <p class="text-[#8b8ba8] text-xs mt-2">เลือกสินค้าที่จะแนะนำลำดับที่ 3</p>
+            </div>
+            <!-- Featured Item 4 -->
+            <div class="mb-4">
+                <label class="text-[#b16cff] font-medium mb-2 block">สินค้าแนะนำที่ 4</label>
+                {{ form.featured_item_4 }}
+                <p class="text-[#8b8ba8] text-xs mt-2">เลือกสินค้าที่จะแนะนำลำดับที่ 4</p>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex gap-4">
+            <button type="submit" class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition">
+                บันทึกตั้งค่า
+            </button>
+            <a href="{% url 'home' %}" class="px-8 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition">
+                ยกเลิก
+            </a>
+        </div>
+    </form>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mt-8">
+        {% for message in messages %}
+        <div class="p-4 rounded-lg bg-{% if message.tags %}{{ message.tags }}-500/20{% else %}blue-500/20{% endif %} border border-{% if message.tags %}{{ message.tags }}-500{% else %}blue-500{% endif %} mb-4">
+            <p class="text-white">{{ message }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Toggle AI Modal -->
+<div id="toggleAIModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-[#3a3d5c] rounded-lg p-8 border border-[#b16cff]/20 max-w-md w-full mx-4">
+        <h3 class="text-white font-bold text-lg mb-4">ยืนยันตัวตน Admin</h3>
+        <p class="text-[#8b8ba8] mb-6">กรุณาใส่ชื่อผู้ใช้และรหัสผ่าน Admin เพื่อเปลี่ยนสถานะ เอไอ</p>
+        
+        <form method="post" action="{% url 'ai_toggle' %}" class="space-y-4">
+            {% csrf_token %}
+            
+            <!-- Username -->
+            <div>
+                <label class="text-[#b16cff] font-medium block mb-2">ชื่อผู้ใช้ Admin</label>
+                <input type="text" name="admin_username" required 
+                       class="w-full bg-[#393a5a] text-white border border-[#b16cff]/30 rounded px-4 py-2 focus:border-[#b16cff] focus:outline-none"
+                       placeholder="admin username">
+            </div>
+            
+            <!-- Password -->
+            <div>
+                <label class="text-[#b16cff] font-medium block mb-2">รหัสผ่าน Admin</label>
+                <input type="password" name="admin_password" required 
+                       class="w-full bg-[#393a5a] text-white border border-[#b16cff]/30 rounded px-4 py-2 focus:border-[#b16cff] focus:outline-none"
+                       placeholder="admin password">
+            </div>
+            
+            <!-- Buttons -->
+            <div class="flex gap-4 mt-6">
+                <button type="submit" class="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded transition">
+                    ยืนยัน
+                </button>
+                <button type="button" onclick="document.getElementById('toggleAIModal').classList.add('hidden')" 
+                        class="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded transition">
+                    ยกเลิก
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

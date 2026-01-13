@@ -1,0 +1,110 @@
+{% extends 'aicashier/base.html' %}
+{% load static %}
+{% block content %}
+<div class="flex items-center gap-4 text-sm">
+    <a href="{% url 'home' %}" class="text-gray-300 hover:text-white font-medium transition">หน้าหลัก</a>
+    <a href="{% url 'overviews' %}" class="text-gray-300 hover:text-white font-medium transition">ข้อมูลการขาย</a>
+    <a href="{% url 'product_manage' %}" class="text-gray-300 hover:text-white font-medium transition">จัดการสินค้า</a>
+    <a href="{% url 'ai_settings' %}" class="text-gray-300 hover:text-white font-medium transition">ตั้งค่าการทำงานระบบเอไอ</a>
+</div>
+
+<div class="min-h-screen bg-[#23243a] font-kanit py-8 px-4">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-[#b16cff]">จัดการสินค้าแนะนำ</h1>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mb-8">
+        {% for message in messages %}
+        <div class="p-4 rounded-lg bg-green-500/20 border border-green-500 text-green-400 mb-4">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Featured Menu Form -->
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20">
+            <h2 class="text-xl font-bold text-[#b16cff] mb-6">รายสินค้าแนะนำ (4 รายการ)</h2>
+            
+            <!-- Featured Item 1 -->
+            <div class="mb-6">
+                <label class="text-[#b16cff] font-semibold block mb-2">สินค้าแนะนำที่ 1</label>
+                <select name="featured_item_1" class="w-full bg-[#393a5a] text-white border border-[#b16cff]/30 rounded-lg px-4 py-2 focus:outline-none focus:border-[#b16cff] transition">
+                    <option value="none">-- ไม่เลือก --</option>
+                    {% for product in products %}
+                    <option value="{{ product.id }}" {% if featured_item_1.id == product.id %}selected{% endif %}>
+                        {{ product.name }} (฿{{ product.price }})
+                    </option>
+                    {% endfor %}
+                </select>
+                {% if featured_item_1 %}
+                <p class="text-[#8b8ba8] text-sm mt-2">ปัจจุบัน: <span class="text-[#b16cff] font-semibold">{{ featured_item_1.name }}</span></p>
+                {% endif %}
+            </div>
+
+            <!-- Featured Item 2 -->
+            <div class="mb-6">
+                <label class="text-[#b16cff] font-semibold block mb-2">สินค้าแนะนำที่ 2</label>
+                <select name="featured_item_2" class="w-full bg-[#393a5a] text-white border border-[#b16cff]/30 rounded-lg px-4 py-2 focus:outline-none focus:border-[#b16cff] transition">
+                    <option value="none">-- ไม่เลือก --</option>
+                    {% for product in products %}
+                    <option value="{{ product.id }}" {% if featured_item_2.id == product.id %}selected{% endif %}>
+                        {{ product.name }} (฿{{ product.price }})
+                    </option>
+                    {% endfor %}
+                </select>
+                {% if featured_item_2 %}
+                <p class="text-[#8b8ba8] text-sm mt-2">ปัจจุบัน: <span class="text-[#b16cff] font-semibold">{{ featured_item_2.name }}</span></p>
+                {% endif %}
+            </div>
+
+            <!-- Featured Item 3 -->
+            <div class="mb-6">
+                <label class="text-[#b16cff] font-semibold block mb-2">สินค้าแนะนำที่ 3</label>
+                <select name="featured_item_3" class="w-full bg-[#393a5a] text-white border border-[#b16cff]/30 rounded-lg px-4 py-2 focus:outline-none focus:border-[#b16cff] transition">
+                    <option value="none">-- ไม่เลือก --</option>
+                    {% for product in products %}
+                    <option value="{{ product.id }}" {% if featured_item_3.id == product.id %}selected{% endif %}>
+                        {{ product.name }} (฿{{ product.price }})
+                    </option>
+                    {% endfor %}
+                </select>
+                {% if featured_item_3 %}
+                <p class="text-[#8b8ba8] text-sm mt-2">ปัจจุบัน: <span class="text-[#b16cff] font-semibold">{{ featured_item_3.name }}</span></p>
+                {% endif %}
+            </div>
+
+            <!-- Featured Item 4 -->
+            <div class="mb-6">
+                <label class="text-[#b16cff] font-semibold block mb-2">สินค้าแนะนำที่ 4</label>
+                <select name="featured_item_4" class="w-full bg-[#393a5a] text-white border border-[#b16cff]/30 rounded-lg px-4 py-2 focus:outline-none focus:border-[#b16cff] transition">
+                    <option value="none">-- ไม่เลือก --</option>
+                    {% for product in products %}
+                    <option value="{{ product.id }}" {% if featured_item_4.id == product.id %}selected{% endif %}>
+                        {{ product.name }} (฿{{ product.price }})
+                    </option>
+                    {% endfor %}
+                </select>
+                {% if featured_item_4 %}
+                <p class="text-[#8b8ba8] text-sm mt-2">ปัจจุบัน: <span class="text-[#b16cff] font-semibold">{{ featured_item_4.name }}</span></p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-4">
+            <button type="submit" class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition">
+                บันทึกสินค้าแนะนำ
+            </button>
+            <a href="{% url 'product_manage' %}" class="px-8 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition">
+                ยกเลิก
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'aicashier/base.html' %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-[#23243a] font-kanit">
+  <div class="bg-[#393a5a] rounded-2xl shadow-lg p-10 w-full max-w-xl text-center">
+    <h2 class="text-2xl font-bold text-[#b16cff] mb-6">ลบรายการสินค้า</h2>
+    <p class="text-white mb-8">คุณแน่ใจหรือว่าต้องการลบรายการสินค้า <span class="text-[#b16cff] font-semibold">{{ object.name }}</span>?</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="w-full py-3 rounded-md bg-gradient-to-r from-red-500 to-red-700 text-white text-lg font-medium hover:from-red-600 hover:to-red-800 transition mb-4">ลบ</button>
+      <a href="{% url 'product_manage' %}" class="block text-[#b16cff] hover:underline">ยกเลิก</a>
+    </form>
+  </div>
+</div>
+{% endblock %}
