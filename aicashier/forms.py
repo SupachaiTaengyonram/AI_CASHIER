@@ -76,8 +76,8 @@ class AISettingsForm(forms.ModelForm):
         for field in self.fields.values():
             if isinstance(field.widget, forms.Textarea):
                 field.widget.attrs.update({
-                    'style': 'background-color:#393a5a;color:#fff;border-radius:6px;padding:8px 12px;border:1.5px solid #b16cff;min-height:100px;',
-                    'rows': 4,
+                    'style': 'background-color:#393a5a;color:#fff;border-radius:6px;padding:8px 12px;border:1.5px solid #b16cff;min-height:80px;',
+                    'rows': 2,
                 })
             elif isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs.update({
@@ -94,14 +94,16 @@ class AISettingsForm(forms.ModelForm):
     
     class Meta:
         model = AISettings
-        fields = ['is_active', 'greeting_message', 'promotion_text', 'sales_steps', 'closing_message', 'voice_commands', 'featured_item_1', 'featured_item_2', 'featured_item_3', 'featured_item_4']
+        fields = ['is_active', 'greeting_message', 'promotion_text', 'sales_steps', 'closing_message', 'voice_commands_add', 'voice_commands_decrease', 'voice_commands_delete', 'featured_item_1', 'featured_item_2', 'featured_item_3', 'featured_item_4']
         labels = {
             'is_active': 'เปิดใช้งาน AI',
             'greeting_message': 'ข้อความทักทายเริ่มแรก',
             'promotion_text': 'ข้อความโปรโมชั่น',
             'sales_steps': 'ลำดับขั้นตอนการขาย',
             'closing_message': 'คำลงท้าย',
-            'voice_commands': 'คำสั่งเสียงจัดการสินค้า',
+            'voice_commands_add': 'คำสั่งเสียง: เพิ่มสินค้า',
+            'voice_commands_decrease': 'คำสั่งเสียง: ลดจำนวน',
+            'voice_commands_delete': 'คำสั่งเสียง: ลบสินค้า',
             'featured_item_1': 'เมนูแนะนำที่ 1',
             'featured_item_2': 'เมนูแนะนำที่ 2',
             'featured_item_3': 'เมนูแนะนำที่ 3',

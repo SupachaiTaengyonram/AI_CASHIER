@@ -1431,9 +1431,30 @@ def voice_order_api(request):
         print(f"[VOICE]  Received: {user_message[:50]}...")
         print(f"[VOICE]  Conversation history: {len(conversation_history)} messages")
         
-        # ตรวจสอบว่ากำลังสั่งซื้อหรือแค่ถามคำถาม (รองรับเพิ่ม/ลด/ลบ)
-        order_keywords = ["เพิ่ม", "สั่ง", "ซื้อ", "ให้", "ลง", "ใส่", "ลด", "ลบ", "เอาออก", "ถอด", "ลดลง"]
-        is_order = any(keyword in user_message for keyword in order_keywords)
+        # ตรวจสอบว่ากำลังสั่งซื้อหรือแค่ถามคำถาม (ดึงจาก AISettings database)
+        # รวมคำสั่งจาก voice_commands_add, voice_commands_decrease, voice_commands_delete
+        try:
+            ai_settings = AISettings.get_settings()
+            order_keywords = []
+            
+            # รวมทุกประเภทคำสั่ง
+            if ai_settings.voice_commands_add:
+                order_keywords.extend(ai_settings.voice_commands_add.split('|'))
+            if ai_settings.voice_commands_decrease:
+                order_keywords.extend(ai_settings.voice_commands_decrease.split('|'))
+            if ai_settings.voice_commands_delete:
+                order_keywords.extend(ai_settings.voice_commands_delete.split('|'))
+            
+            # Normalize: lowercase, strip whitespace
+            order_keywords = [kw.strip().lower() for kw in order_keywords if kw.strip()]
+            print(f"[VOICE] Order keywords from DB: {order_keywords}")
+        except Exception as e:
+            print(f"[VOICE] Error loading keywords from DB: {e}, using defaults")
+            # Fallback หากดึงจาก DB ล้มเหลว
+            order_keywords = ["เพิ่ม", "สั่ง", "ซื้อ", "ให้", "ลง", "ใส่", "ลด", "ลบ", "เอาออก", "ถอด", "ลดลง", "ดาว"]
+        
+        # ตรวจสอบว่ามีคำสั่งใน message (compare lowercase)
+        is_order = any(keyword in user_message.lower() for keyword in order_keywords)
         
         cart_response = None
         
@@ -1473,10 +1494,14 @@ def voice_order_api(request):
         if cart_response and cart_response.get('success'):
             ai_response = cart_response.get('message', ai_response)
         
+        # ส่ง actual session cart กลับไป
+        session_cart = request.session.get('cart', [])
+        
         return JsonResponse({
             'success': True,
             'message': ai_response,
-            'cart': cart_response,
+            'cart': session_cart,  # ส่ง actual session cart
+            'cart_response': cart_response,  # เก็บ cart_response แยกไว้
             'timestamp': timezone.now().isoformat()
         })
     
@@ -1516,9 +1541,13 @@ def voice_cart_api(request):
             return JsonResponse({'success': False, 'message': 'command required'}, status=400)
         
         print(f"[Voice Cart] Command: {command}")
+        print(f"[Voice Cart] Request session: {request.session}")
+        print(f"[Voice Cart] Cart in session: {request.session.get('cart', [])}")
         
         # ใช้ RAG Service เพื่อจัดการตะกร้า
         result = rag_service.voice_manage_cart(command, request)
+        
+        print(f"[Voice Cart] Result: {result}")
         
         return JsonResponse(result)
     

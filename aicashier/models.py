@@ -205,13 +205,19 @@ class AISettings(models.Model):
     )
     
     # Voice Commands for Adding/Removing Items
-    voice_commands = models.TextField(
-        default="""เพิ่ม|add
-ลบ|remove
-เอาออก|delete
-ลดจำนวน|decrease
-ลด|reduce""",
-        help_text="คำสั่งเสียงสำหรับการเพิ่ม/ลบสินค้า (แต่ละคำคั่นด้วย newline เป็น 'คำภาษาไทย|คำภาษาอังกฤษ')"
+    voice_commands_add = models.TextField(
+        default="เพิ่ม|add|ใส่|put|สั่ง|order|ซื้อ|buy",
+        help_text="คำสั่งเสียงสำหรับ เพิ่มสินค้า (แต่ละคำคั่นด้วย |)"
+    )
+    
+    voice_commands_decrease = models.TextField(
+        default="ลด|decrease|ลดจำนวน|reduce|ลดลง|down",
+        help_text="คำสั่งเสียงสำหรับ ลดจำนวนสินค้า (แต่ละคำคั่นด้วย |)"
+    )
+    
+    voice_commands_delete = models.TextField(
+        default="ลบ|delete|เอาออก|remove|หยิบออก|pick|ถอด|extract",
+        help_text="คำสั่งเสียงสำหรับ ลบสินค้า (แต่ละคำคั่นด้วย |)"
     )
     
     # Metadata

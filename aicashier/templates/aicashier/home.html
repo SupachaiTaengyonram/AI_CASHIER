@@ -762,14 +762,14 @@
         .then(data => {
             console.log('[CART] Response data:', data);
             if (data.success) {
-                console.log('[CART] ✓ Success! Cart items:', data.cart);
+                console.log('[CART] Success! Cart items:', data.cart);
                 updateCartDisplay(data.cart, data.total || 0);
             } else {
-                console.error('[CART] ❌ API error:', data.error);
+                console.error('[CART]  API error:', data.error);
             }
         })
         .catch(error => {
-            console.error('[CART] ❌ Fetch error:', error);
+            console.error('[CART]  Fetch error:', error);
             console.error('[CART] Stack:', error.stack);
         });
     }
@@ -870,7 +870,7 @@
         if (csrfToken) {
             headers['X-CSRFToken'] = csrfToken;
         } else {
-            console.warn('[CART] ⚠️ No CSRF token found!');
+            console.warn('[CART]  No CSRF token found!');
         }
         
         console.log('[CART] Sending request to /api/cart/', {
@@ -914,12 +914,12 @@
                 console.log('[CART] Success message:', msg);
                 // สามารถแสดง toast notification ได้ที่นี่
             } else {
-                console.error('[CART] ❌ API returned error:', data.error);
+                console.error('[CART]  API returned error:', data.error);
                 alert(`ไม่สามารถเพิ่มสินค้าได้: ${data.error || 'ไม่ทราบสาเหตุ'}`);
             }
         })
         .catch(error => {
-            console.error('[CART] ❌ Fetch error:', error);
+            console.error('[CART]  Fetch error:', error);
             console.error('[CART] Error stack:', error.stack);
             alert('เกิดข้อผิดพลาด: ' + error.message);
         });
@@ -1155,7 +1155,7 @@
 
     // ถ้าเป็นข้อความจาก AI แล้วล้างแล้วไม่เหลืออะไร เช่น "***" ก็ไม่ต้องสร้าง bubble
         if (!isUser && !displayText) {
-            console.log('[CHAT] ⏭ Skip displaying placeholder AI message:', JSON.stringify(message));
+            console.log('[CHAT]  Skip displaying placeholder AI message:', JSON.stringify(message));
             return;
         }
         const msgDiv = document.createElement('div');

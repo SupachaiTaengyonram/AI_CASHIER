@@ -92,6 +92,10 @@ class AISettingsAdmin(admin.ModelAdmin):
             "fields": ("featured_item_1", "featured_item_2", "featured_item_3"),
             "description": "เลือกเมนู 3 รายการที่จะแสดงบนหน้าหลัก"
         }),
+        ("Voice Commands for Cart Management", {
+            "fields": ("voice_commands_add", "voice_commands_decrease", "voice_commands_delete"),
+            "description": "คำสั่งเสียงสำหรับจัดการตะกร้า (แต่ละคำคั่นด้วย |)<br>เมื่อบันทึก voice commands จะ auto-reload ในระบบ"
+        }),
     )
     
     def has_add_permission(self, request):

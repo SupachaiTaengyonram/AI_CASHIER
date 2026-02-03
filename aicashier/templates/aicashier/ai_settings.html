@@ -2,6 +2,22 @@
 {% load static %}
 
 {% block content %}
+<style>
+    .voice-textarea {
+        background-color: #393a5a !important;
+        color: #fff !important;
+        border-radius: 6px !important;
+        padding: 8px 12px !important;
+        border: 1.5px solid #b16cff !important;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+    }
+    
+    .voice-textarea:focus {
+        border-color: #7c3aed !important;
+        box-shadow: 0 0 0 3px rgba(177, 108, 255, 0.1) !important;
+    }
+</style>
 <div class="flex items-center gap-4 text-sm">
             <a href="{% url 'home' %}" class="text-gray-300 hover:text-white font-medium transition">หน้าหลัก</a>
             <a href="{% url 'overviews' %}" class="text-gray-300 hover:text-white font-medium transition">ข้อมูลการขาย</a>
@@ -74,24 +90,55 @@
             </div>
         </div>
 
-        <!-- Voice Commands for Adding/Removing Items -->
+        <!-- Voice Commands for Managing Cart -->
         <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20">
-            <h3 class="text-white font-semibold text-lg mb-4"> คำสั่งเสียงจัดการสินค้า</h3>
-            <div class="form-group">
-                <label class="text-[#b16cff] font-medium mb-2 block">{{ form.voice_commands.label }}</label>
-                {{ form.voice_commands }}
-                <p class="text-[#8b8ba8] text-xs mt-2">
-                    คำสั่งเสียงที่ใช้เพิ่ม/ลบสินค้า เขียนในรูปแบบ: <span class="text-[#b16cff]">คำภาษาไทย|คำภาษาอังกฤษ</span><br>
-                    ตัวอย่าง: เพิ่ม|add, ลบ|remove, เอาออก|delete<br>
-                    <span class="text-yellow-400">แต่ละคำคั่นด้วยบรรทัดใหม่</span>
-                </p>
-                <div class="mt-3 p-3 bg-[#2a2c45] rounded border border-[#b16cff]/10">
-                    <p class="text-[#b16cff] text-xs font-semibold mb-2">💡 ตัวอย่างคำสั่ง:</p>
-                    <p class="text-[#8b8ba8] text-xs">เพิ่ม (add) → เพิ่มสินค้า 1 ชิ้น</p>
-                    <p class="text-[#8b8ba8] text-xs">ลบ (remove) → ลบสินค้าออกจากตะกร้า</p>
-                    <p class="text-[#8b8ba8] text-xs">เอาออก (delete) → ลบสินค้าที่เลือก</p>
-                    <p class="text-[#8b8ba8] text-xs">ลดจำนวน (decrease) → ลดจำนวนสินค้า 1 ชิ้น</p>
+            <h3 class="text-white font-semibold text-lg mb-4">⚙️ คำสั่งเสียงจัดการตะกร้า</h3>
+            
+            <!-- Add Command Section -->
+            <div class="mb-6 p-4 bg-[#2a2c45] rounded border-l-4 border-green-500">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="inline-block w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold text-sm">+</span>
+                    <label class="text-green-400 font-semibold">{{ form.voice_commands_add.label }}</label>
                 </div>
+                {{ form.voice_commands_add }}
+                <p class="text-[#8b8ba8] text-xs mt-2">
+                    คำสั่งเสียงสำหรับ <span class="text-green-400 font-semibold">เพิ่มสินค้า</span> เขียนแต่ละคำคั่นด้วย | เช่น: เพิ่ม|add|ใส่|put|สั่ง|order|ซื้อ|buy
+                </p>
+            </div>
+
+            <!-- Decrease Command Section -->
+            <div class="mb-6 p-4 bg-[#2a2c45] rounded border-l-4 border-yellow-500">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="inline-block w-8 h-8 bg-yellow-500 text-white rounded-full flex items-center justify-center font-bold text-sm">−</span>
+                    <label class="text-yellow-400 font-semibold">{{ form.voice_commands_decrease.label }}</label>
+                </div>
+                {{ form.voice_commands_decrease }}
+                <p class="text-[#8b8ba8] text-xs mt-2">
+                    คำสั่งเสียงสำหรับ <span class="text-yellow-400 font-semibold">ลดจำนวนสินค้า</span> เขียนแต่ละคำคั่นด้วย | เช่น: ลด|decrease|ลดจำนวน|reduce|ลดลง|down
+                </p>
+            </div>
+
+            <!-- Delete Command Section -->
+            <div class="mb-4 p-4 bg-[#2a2c45] rounded border-l-4 border-red-500">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="inline-block w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold text-sm">✕</span>
+                    <label class="text-red-400 font-semibold">{{ form.voice_commands_delete.label }}</label>
+                </div>
+                {{ form.voice_commands_delete }}
+                <p class="text-[#8b8ba8] text-xs mt-2">
+                    คำสั่งเสียงสำหรับ <span class="text-red-400 font-semibold">ลบสินค้า</span> เขียนแต่ละคำคั่นด้วย | เช่น: ลบ|delete|เอาออก|remove|หยิบออก|pick|ถอด
+                </p>
+            </div>
+
+            <!-- Help Box -->
+            <div class="mt-4 p-3 bg-[#393a5a] rounded border border-[#b16cff]/10">
+                <p class="text-[#b16cff] text-xs font-semibold mb-2">💡 วิธีการใช้:</p>
+                <ul class="text-[#8b8ba8] text-xs space-y-1">
+                    <li>✓ แต่ละคำคั่นด้วย <span class="text-[#b16cff]">|</span> เช่น: เพิ่ม|add|ใส่|ซื้อ</li>
+                    <li>✓ รองรับภาษาไทยและอังกฤษ</li>
+                    <li>✓ สามารถเพิ่มคำใหม่ได้มากเท่าที่ต้องการ</li>
+                    <li>✓ ระบบจะอ่านคำทั้งหมดและตรงกับ action ที่ตั้งไว้</li>
+                </ul>
             </div>
         </div>
 

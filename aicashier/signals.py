@@ -3,19 +3,26 @@
 import logging
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from .models import Product, Order
+from .models import Product, Order, AISettings
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Import rag_service carefully with error handling
-rag_service = None
-try:
-    from .rag_service import rag_service
-except ImportError as e:
-    logger.error(f"Could not import rag_service: {e}")
-except Exception as e:
-    logger.error(f"Error initializing rag_service: {e}")
+# rag_service instance - initialized lazily when first needed
+_rag_service = None
+
+def get_rag_service():
+    """Get or initialize the RAG service instance"""
+    global _rag_service
+    if _rag_service is None:
+        try:
+            from . import rag_service as rag_module
+            _rag_service = rag_module.rag_service
+            print("[Signals] RAG service instance obtained")
+        except Exception as e:
+            logger.error(f"Error getting rag_service instance: {e}")
+            print(f"[Signals] Error: {e}")
+    return _rag_service
 
 @receiver(post_save, sender=Product)
 def sync_product_to_rag(sender, instance, created, **kwargs):
@@ -24,6 +31,7 @@ def sync_product_to_rag(sender, instance, created, **kwargs):
     Ensures database and RAG are always in sync
     """
     try:
+        rag_service = get_rag_service()
         if not rag_service:
             logger.warning(f"RAG service not initialized when syncing Product {instance.id}")
             return
@@ -48,6 +56,7 @@ def remove_product_from_rag(sender, instance, **kwargs):
     Ensures RAG doesn't contain deleted products
     """
     try:
+        rag_service = get_rag_service()
         if not rag_service:
             logger.warning(f"RAG service not initialized when deleting Product {instance.id}")
             return
@@ -93,3 +102,36 @@ def update_product_stock_on_order(sender, instance, created, **kwargs):
     except Exception as e:
         logger.error(f"Error updating product stock on order {instance.id}: {e}", exc_info=True)
         print(f"Error updating stock: {e}")
+
+@receiver(post_save, sender=AISettings)
+def reload_voice_commands_on_settings_change(sender, instance, created, **kwargs):
+    """
+    Signal handler: Reload voice commands when AISettings is saved
+    เพื่อให้ voice commands เปลี่ยนทันทีหลังจากที่ admin บันทึกการตั้งค่า
+    """
+    try:
+        rag_service = get_rag_service()
+        if not rag_service:
+            logger.warning("RAG service not initialized when AISettings changed")
+            print("⚠ RAG service not initialized")
+            return
+        
+        from .rag_service import VoiceCommandManager
+        
+        print(f"[Signal] AISettings updated - Reloading voice commands...")
+        
+        # Reload voice commands from database
+        rag_service.voice_commands = VoiceCommandManager.get_voice_commands()
+        
+        logger.info(f"Voice commands reloaded: "
+                   f"add={len(rag_service.voice_commands.get('add', []))}, "
+                   f"decrease={len(rag_service.voice_commands.get('decrease', []))}, "
+                   f"delete={len(rag_service.voice_commands.get('delete', []))}")
+        print(f"✓ Voice commands reloaded successfully!")
+        print(f"  ADD: {rag_service.voice_commands.get('add', [])}")
+        print(f"  DECREASE: {rag_service.voice_commands.get('decrease', [])}")
+        print(f"  DELETE: {rag_service.voice_commands.get('delete', [])}")
+        
+    except Exception as e:
+        logger.error(f"Error reloading voice commands on AISettings change: {e}", exc_info=True)
+        print(f" Error reloading voice commands: {e}")
