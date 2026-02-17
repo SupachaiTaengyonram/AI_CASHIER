@@ -10,8 +10,8 @@ from django.contrib.auth.views import (
 )
 from .views import (
     CustomLoginView, close_ai_view, chat_with_ai, get_product_recommendation, 
-    voice_order_api, cart_api, stripe_webhook, StripePaymentView, 
-    StripePaymentStatusView, set_payment_amount_view, voice_cart_api,
+    voice_order_api, cart_api, stripe_webhook, 
+    StripePaymentStatusView, set_payment_amount_view,
     CustomerListView, CustomerCreateView, CustomerUpdateView,
     CustomerDeleteView, CustomerDetailView, HomeView,
     ProductListView, ProductCreateView, ProductUpdateView, ProductDeleteView,
@@ -23,6 +23,11 @@ from .views import (
     check_payment_status, OrderManagementView, complete_order, get_pending_orders, order_stream,
     order_queue_display,
     PromotionListView, PromotionCreateView, PromotionUpdateView, PromotionDeleteView
+)
+from .api_views import (
+    call_staff_api, cancel_order_api, check_low_stock_api,
+    get_aov_api, get_cancellation_rate_api, get_top_queries_api,
+    get_staff_calls_api, acknowledge_staff_call_api, complete_staff_call_api
 )
 
 urlpatterns = [
@@ -110,7 +115,7 @@ urlpatterns = [
     path('api/orders/stream/', order_stream, name='api_order_stream'),
     
     # Stripe Payment Pages
-    path('stripe/payment/<int:payment_id>/', StripePaymentView.as_view(), name='stripe_payment'),
+    #path('stripe/payment/<int:payment_id>/', StripePaymentView.as_view(), name='stripe_payment'),
     path('api/stripe/status/<int:payment_id>/', StripePaymentStatusView.as_view(), name='stripe_payment_status'),
     path(
         'payment/check-status/<int:order_id>/',
@@ -122,5 +127,16 @@ urlpatterns = [
     path('api/recommendation/', get_product_recommendation, name='api_recommendation'),
     path('api/voice-order/', voice_order_api, name='api_voice_order'),
     path('api/cart/', cart_api, name='api_cart'),
-    path('api/voice-cart/', voice_cart_api, name='api_voice_cart'),
+    
+    
+    # New Feature APIs
+    path('api/staff/call/', call_staff_api, name='api_call_staff'),
+    path('api/staff/calls/', get_staff_calls_api, name='api_get_staff_calls'),
+    path('api/staff/call/acknowledge/', acknowledge_staff_call_api, name='api_acknowledge_staff_call'),
+    path('api/staff/call/complete/', complete_staff_call_api, name='api_complete_staff_call'),
+    path('api/orders/cancel/', cancel_order_api, name='api_cancel_order'),
+    path('api/inventory/check-low-stock/', check_low_stock_api, name='api_check_low_stock'),
+    path('api/analytics/aov/', get_aov_api, name='api_get_aov'),
+    path('api/analytics/cancellation-rate/', get_cancellation_rate_api, name='api_get_cancellation_rate'),
+    path('api/analytics/top-queries/', get_top_queries_api, name='api_get_top_queries'),
 ]

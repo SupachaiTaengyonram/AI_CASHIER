@@ -238,49 +238,9 @@ class RAGService:
             print(f"Error searching products: {e}")
             return []
     
-    def extract_product_and_quantity(self, user_message: str):
-
-        try:
-            # แปลงคำตัวเลขไทยเป็นตัวเลข
-            thai_numbers = {
-                'ศูนย์': '0', 'หนึ่ง': '1', 'สอง': '2', 'สาม': '3', 'สี่': '4',
-                'ห้า': '5', 'หก': '6', 'เจ็ด': '7', 'แปด': '8', 'เก้า': '9',
-                'สิบ': '10', 'สิบเอ็ด': '11', 'สิบสอง': '12', 'ยี่สิบ': '20', 'สามสิบ': '30'
-            }
-            
-            product_text = user_message
-            quantity = 1
-          
-            for thai_word, digit in thai_numbers.items():
-                if thai_word in product_text:
-                    quantity = int(digit)
-                    product_text = product_text.replace(thai_word, "").strip()
-                    break
-            
-            # หารูปแบบตัวเลข Arabic
-            numbers = re.findall(r'\d+', product_text)
-            if numbers:
-                quantity = int(numbers[0])
-            
-            # ลบตัวเลขจากข้อความ
-            product_text = re.sub(r'\d+', '', product_text).strip()
-            
-            # ลบคำศัพท์ทั่วไป
-            product_text = re.sub(r"(ให้|เพิ่ม|สั่ง|ซื้อ|แก้ว|ลูก|ชิ้น|ห่อ|ลง|ตะกร้า|ของ|ฉัน|เข้า)", "", product_text).strip()
-            
-            print(f"[RAG] Extracted: product='{product_text}', quantity={quantity}")
-            return product_text, quantity
-        except Exception as e:
-            print(f"[RAG] Error extracting product: {e}")
-            return None, 1
+    
     
     def _detect_action_from_voice_commands(self, user_message: str):
-        """
-        ตรวจสอบ action (add/decrease/delete/clear) จากคำสั่งเสียงที่ admin กำหนด
-        Return: 'add' | 'decrease' | 'delete' | 'clear' | None
-        
-        ลำดับความสำคัญ: clear > delete > decrease > add
-        """
         try:
             msg = user_message.lower().strip()
             
@@ -292,36 +252,36 @@ class RAGService:
             # Priority 1: Clear Cart (ลบทั้งหมด/ล้างตะกร้า)
             for cmd in self.voice_commands.get('delete', []):
                 if re.search(rf'{re.escape(cmd)}.*?(ทั้งหมด|ทั้งตะกร้า|ออเดอร์)', msg):
-                    print(f"[VoiceCommand] ✓ Detected CLEAR (delete cmd '{cmd}' + all/cart keyword)")
+                    print(f"[VoiceCommand] Detected CLEAR (delete cmd '{cmd}' + all/cart keyword)")
                     return 'clear'
             if re.search(r'(ล้างตะกร้า|ลบ.*(ทั้งหมด|ทั้งตะกร้า)|ยกเลิก.*(ทั้งหมด|ออเดอร์))', msg):
-                print(f"[VoiceCommand] ✓ Detected CLEAR (regex pattern)")
+                print(f"[VoiceCommand]  Detected CLEAR (regex pattern)")
                 return 'clear'
             
             # Priority 2: Delete/Remove (ลบสินค้า) - ห้ามไป check add/decrease ต่อ!
             for cmd in self.voice_commands.get('delete', []):
                 if cmd in msg:
-                    print(f"[VoiceCommand] ✓ Detected DELETE (delete cmd '{cmd}')")
+                    print(f"[VoiceCommand]  Detected DELETE (delete cmd '{cmd}')")
                     return 'delete'
             
             # Priority 3: Decrease (ลดจำนวน) - ห้ามไป check add ต่อ!
             for cmd in self.voice_commands.get('decrease', []):
                 if cmd in msg:
-                    print(f"[VoiceCommand] ✓ Detected DECREASE (decrease cmd '{cmd}')")
+                    print(f"[VoiceCommand]  Detected DECREASE (decrease cmd '{cmd}')")
                     return 'decrease'
             
             # Priority 4: Add (Default - เพิ่มสินค้า)
             for cmd in self.voice_commands.get('add', []):
                 if cmd in msg:
-                    print(f"[VoiceCommand] ✓ Detected ADD (add cmd '{cmd}')")
+                    print(f"[VoiceCommand]  Detected ADD (add cmd '{cmd}')")
                     return 'add'
             
             # Default to 'add' if no command matched
-            print(f"[VoiceCommand] ⚠ No command matched, defaulting to ADD")
+            print(f"[VoiceCommand]  No command matched, defaulting to ADD")
             return 'add'
         
         except Exception as e:
-            print(f"[VoiceCommand] ✗ Error detecting action: {e}")
+            print(f"[VoiceCommand]  Error detecting action: {e}")
             return 'add'
     
     def parse_cart_command_with_cart_context(self, user_message: str, cart: list = None):
@@ -329,113 +289,100 @@ class RAGService:
             print(f"[RAG-CART] Parsing V3: '{user_message}'")
             
             msg = user_message.lower().strip()
-
             
-            # ตรวจสอบ action จาก voice commands ของ admin
+            # ตรวจสอบ action
             action = self._detect_action_from_voice_commands(user_message)
-            
-            print(f"[RAG-CART]  Action detected from voice commands: {action}")
+            print(f"[RAG-CART] Action detected: {action}")
             
             if action == 'clear':
                 return {'action': 'clear', 'products': [], 'message': 'Clear cart'}
             
-            # IMPROVEMENT: ลบเฉพาะ command ของ action ที่ detect ไว้ แล้วลบคำศัพท์ทั่วไป
+            # Cleaning
             cleaned = msg
-            
-            # เอาคำสั่งเสียงของ action นั้นๆ ออกเท่านั้น (ไม่ใช่ทั้งหมด)
             for cmd in self.voice_commands.get(action, []):
-                # ใช้ regex ที่ไม่ต้อง word boundary เพราะ Thai ไม่ใช้ spaces
                 cleaned = re.sub(re.escape(cmd), ' ', cleaned, flags=re.IGNORECASE)
             
-            # ลบคำศัพท์ทั่วไปออก
             cleaned = re.sub(r'(ล้างตะกร้า|ลบออก|เอาออก|ไม่เอา|ลดลง|น้อยลง|ถอด)', ' ', cleaned)
-            # ลบคำกลุ่ม Add/General
             cleaned = re.sub(r'(เพิ่มเข้า|เพิ่ม|สั่ง|ซื้อ|ใส่|ให้|ทั้งตะกร้า|ทั้งหมด)', ' ', cleaned)
-            cleaned = re.sub(r'\bเอา\s', ' ', cleaned) 
-
+            cleaned = re.sub(r'\bเอา\s', ' ', cleaned)
             cleaned = cleaned.strip()
-            print(f"[RAG-CART] Cleaned for extraction: '{cleaned}'")
+            
+            print(f"[RAG-CART] Cleaned: '{cleaned}'")
             
             products = []
             
-            # ถ้า cleaned ว่างแล้ว และ action เป็น delete/decrease และมีตะกร้า
-            # ให้ใช้สินค้าแรกในตะกร้าเป็นเป้าหมาย
+            # Handle empty cleaned for delete/decrease
             if not cleaned and action in ['delete', 'decrease']:
                 if cart:
                     first_item = cart[0]
                     products.append((first_item['product_name'], 1))
-                    print(f"[RAG-CART] No product specified for {action}, using first item from cart: {first_item['product_name']}")
-                    return {
-                        'action': action,
-                        'products': products,
-                        'message': f'Parsed {action} command (using first cart item)'
-                    }
+                    print(f"[RAG-CART] Using first cart item: {first_item['product_name']}")
+                    return {'action': action, 'products': products, 
+                            'message': f'Parsed {action} command (using first cart item)'}
                 else:
-                    # ตะกร้าว่างเปล่า ส่งข้อความแจ้งเตือน
-                    print(f"[RAG-CART] No product specified and cart is empty for {action}")
                     action_text = 'ลด' if action == 'decrease' else 'ลบ'
-                    return {
-                        'action': action,
-                        'products': [],
-                        'message': f'ตะกร้าว่างเปล่า ไม่สามารถ{action_text}ได้'
-                    }
+                    return {'action': action, 'products': [], 
+                            'message': f'ตะกร้าว่างเปล่า ไม่สามารถ{action_text}ได้'}
             
-            # 1. ลองหาจากสินค้าในตะกร้าก่อน (แม่นยำที่สุดสำหรับคำสั่งลด/แก้ไข)
+            from django.apps import apps
+            Product = apps.get_model('aicashier', 'Product')
+            
+            # Pattern จับคู่ product-quantity
+            # รองรับ: "สินค้า 3", "3 สินค้า", "น้ำมะนาว 4" (ชื่อหลายคำ)
+            product_qty_pattern = r'([ก-๙a-z]+(?:\s+[ก-๙a-z]+)*)\s+(\d+)|(\d+)\s+([ก-๙a-z]+(?:\s+[ก-๙a-z]+)*)'
+            matches = re.finditer(product_qty_pattern, cleaned, re.IGNORECASE)
+            
+            # เก็บคู่ที่พบ
+            potential_pairs = []
+            for match in matches:
+                if match.group(1):  # "สินค้า จำนวน"
+                    product_text = match.group(1).strip()
+                    qty = int(match.group(2))
+                else:  # "จำนวน สินค้า"
+                    product_text = match.group(4).strip()
+                    qty = int(match.group(3))
+                
+                potential_pairs.append((product_text, qty, match.start(), match.end()))
+                print(f"[RAG-CART] Found potential pair: '{product_text}' qty={qty}")
+            
+            # Validate กับ database และ cart
+            all_products = Product.objects.all()
+            product_names_map = {p.name.lower(): p.name for p in all_products}
+            
+            # เพิ่ม cart items ถ้ามี
             if cart:
                 for item in cart:
-                    p_name = item['product_name']
-                    # เช็คว่าชื่อสินค้าอยู่ในข้อความที่ clean แล้วหรือไม่
-                    if p_name in cleaned or (p_name.replace(' ', '') in cleaned.replace(' ', '')):
-                        # หาจำนวน
-                        qty = 1
-                        
-                        # สำหรับทุก action ให้ดึงตัวเลข: "เพิ่ม 5" = +5, "ดาว 2" = -2, "ลบ" = remove all
-                        # Pattern: "Product 5" or "5 Product"
-                        pattern = f"{re.escape(p_name)}\\s*(\\d+)|\\d+\\s*{re.escape(p_name)}"
-                        matches = re.finditer(pattern, cleaned)
-                        found_num = False
-                        
-                        for match in matches:
-                            found_num = True
-                            qty_text = match.group()
-                            nums = re.findall(r'\d+', qty_text)
-                            if nums:
-                                qty = int(nums[0])
-                                products.append((p_name, qty))
-                                print(f"[RAG-CART] For {action} action, found qty={qty} for {p_name}")
-                        
-                        # ถ้าเจอชื่อแต่ไม่เจอตัวเลข
-                        if not found_num and p_name in cleaned:
-                             # default qty=1 สำหรับทุก action
-                             if not any(p[0] == p_name for p in products):
-                                 products.append((p_name, 1))
-                                 print(f"[RAG-CART] For {action} action, no number found, using default qty=1 for {p_name}")
-
-            # 2. ถ้าไม่เจอ ใช้ regex จับคู่ "ชื่อสินค้า" กับ "ตัวเลข"
-            if not products and cleaned:
-                # Pattern: "word number" หรือ "number word" (รองรับชื่อสินค้าหลายคำเช่น น้ำมะนาว)
-                # ตัวอย่าง: "มะม่วง 5" หรือ "5 มะม่วง" หรือ "น้ำมะนาว 3"
-                from django.apps import apps
-                Product = apps.get_model('aicashier', 'Product')
+                    product_names_map[item['product_name'].lower()] = item['product_name']
+            
+            # Match potential pairs กับ product names
+            used_positions = set()
+            for product_text, qty, start, end in potential_pairs:
+                # หา exact match หรือ partial match
+                matched_name = None
                 
-                # ค้นหาชื่อสินค้าในข้อความ
-                all_products = Product.objects.all()
-                for product in all_products:
-                    if product.name.lower() in cleaned or (product.name.replace(' ', '') in cleaned.replace(' ', '')):
-                        # เจอชื่อสินค้า ตอนนี้ดึงตัวเลข
-                        qty = 1
-                        pattern = f"{re.escape(product.name.lower())}\\s*(\\d+)|\\d+\\s*{re.escape(product.name.lower())}"
-                        matches = re.finditer(pattern, cleaned)
+                # Exact match
+                if product_text in product_names_map:
+                    matched_name = product_names_map[product_text]
+                else:
+                    # Partial match (สินค้าที่มีชื่อเป็น substring)
+                    for db_name_lower, db_name_original in product_names_map.items():
+                        if db_name_lower in product_text or product_text in db_name_lower:
+                            matched_name = db_name_original
+                            break
                         
-                        for match in matches:
-                            qty_text = match.group()
-                            nums = re.findall(r'\d+', qty_text)
-                            if nums:
-                                qty = int(nums[0])
-                        
-                        products.append((product.name, qty))
-                        print(f"[RAG-CART] Found product '{product.name}' from database with qty={qty}")
-
+                if matched_name and start not in used_positions:
+                    products.append((matched_name, qty))
+                    used_positions.add(start)
+                    print(f"[RAG-CART] Matched: '{matched_name}' qty={qty}")
+            
+            # ถ้ายังไม่เจอเลย ลองหาแบบไม่มีตัวเลข (default qty=1)
+            if not products and cleaned:
+                for db_name_lower, db_name_original in product_names_map.items():
+                    if db_name_lower in cleaned:
+                        products.append((db_name_original, 1))
+                        print(f"[RAG-CART] Found '{db_name_original}' without quantity, using qty=1")
+                        break
+                    
             return {
                 'action': action,
                 'products': products,
@@ -443,162 +390,10 @@ class RAGService:
             }
         
         except Exception as e:
-            print(f"[RAG-CART]  Error: {e}")
+            print(f"[RAG-CART] Error: {e}")
             return {'action': 'add', 'products': [], 'message': str(e)}
-    
-    def parse_cart_command(self, user_message: str):
-        """
-        วิเคราะห์คำสั่งการจัดการตะกร้า (เพิ่ม/ลด/ลบ) รองรับหลายสินค้า
-        Return: {
-            'action': 'add'|'remove'|'delete'|'clear',
-            'products': [('product_name', quantity), ...],
-            'message': 'error/info message'
-        }
         
-        ตัวอย่าง:
-        - "เพิ่มส้มโอ 3 ลูกนม 2 แก้วเค้ก 1 ชิ้น" 
-          → [("ส้มโอ", 3), ("นม", 2), ("เค้ก", 1)]
-        - "ลดส้มโอ 2 ลูกนม 1 แก้ว"
-          → [("ส้มโอ", 2), ("นม", 1)]
-        """
-        msg = user_message.lower().strip()
-        
-        # แปลงคำตัวเลขไทยเป็นตัวเลข (เพิ่ม compound numbers เช่น สิบสอง, เจ็ดสิบห้า)
-        thai_numbers = {
-            'ศูนย์': '0', 'หนึ่ง': '1', 'สอง': '2', 'สาม': '3', 'สี่': '4',
-            'ห้า': '5', 'หก': '6', 'เจ็ด': '7', 'แปด': '8', 'เก้า': '9',
-            'สิบเอ็ด': '11', 'สิบสอง': '12', 'สิบสาม': '13', 'สิบสี่': '14', 'สิบห้า': '15',
-            'สิบหก': '16', 'สิบเจ็ด': '17', 'สิบแปด': '18', 'สิบเก้า': '19',
-            'ยี่สิบ': '20', 'สามสิบ': '30', 'สี่สิบ': '40', 'ห้าสิบ': '50',
-            'หกสิบ': '60', 'เจ็ดสิบ': '70', 'แปดสิบ': '80', 'เก้าสิบ': '90',
-            'หนึ่งร้อย': '100', 'สองร้อย': '200',
-            'สิบ': '10' 
-        }
-        
-        # แปลงตัวเลขไทย (เรียงลำดับเพื่อหลีกเลี่ยง partial match)
-        normalized_msg = msg
-        for thai_word in sorted(thai_numbers.keys(), key=len, reverse=True):
-            normalized_msg = normalized_msg.replace(thai_word, f' {thai_numbers[thai_word]} ')
-        
-        print(f"[RAG] Normalized: {normalized_msg}")
-        
-        # ตรวจสอบ action
-        action = None
-        
-        # ลบ/ลบออก (delete)
-        if re.search(r'(ลบ(?!ลง)|เอา(?!ของ)|ถอด|ลบออก)', normalized_msg):
-            # ตรวจสอบว่าลบทั้งหมดหรือเฉพาะรายการ
-            if re.search(r'(ทั้งหมด|ทั้งตะกร้า|ตะกร้า\s*ทั้งหมด)', normalized_msg):
-                action = 'clear'
-            else:
-                action = 'delete'
-        
-        # ลด (decrease)
-        elif re.search(r'(^ลด|ลด(?!ลง)|หลุด|น้อยลง|ลดลง|รส|รถ|เอาออก)', normalized_msg):
-            action = 'decrease'
-        
-        # เพิ่ม (add)
-        elif re.search(r'(เพิ่ม|เพิ่มเข้า|ใส่|สั่ง|ซื้อ|เอา(?=\S+\s+\d)|add)', normalized_msg):
-            action = 'add'
-        
-        # ถ้าไม่เจอ action ให้ถือว่าเป็น add
-        else:
-            action = 'add'
-        
-        print(f"[RAG] Action detected: {action}")
-        
-        products = []
-        
-        # clear action: ลบทั้งตะกร้า ไม่ต้องตัดแยก product
-        if action == 'clear':
-            return {
-                'action': 'clear',
-                'products': [],
-                'message': 'Clear cart command'
-            }
-        
-        # ลบคำศัพท์ทั่วไปและ action verbs ออก
-        cleaned_msg = re.sub(
-            r'(ให้|เพิ่ม|เพิ่มเข้า|ลด(?!ลง)|ลบ|เอา|ถอด|สั่ง|ซื้อ|เข้า|ทั้งหมด|ทั้งตะกร้า|\s+)',
-            ' ', normalized_msg
-        ).strip()
-        
-        print(f"[RAG] Cleaned: {cleaned_msg}")
-        
-        # ตัดแยก product และ quantity
-        # Strategy: ค้นหา pattern "product_name quantity unit" หรือ "quantity product_name unit"
-        
-        # Pattern 1: ชื่อสินค้า ตัวเลข (อาจมี unit เช่น ลูก/แก้ว/ชิ้น)
-        # เช่น: "ส้มโอ 3" หรือ "ส้มโอ 3 ลูก" หรือ "ส้มโอสาม"
-        
-        # First, split by numbers to identify product-quantity pairs
-        # Split message by numbers to get segments
-        segments = re.split(r'(\d+)', cleaned_msg)  # ['ส้มโอ', '3', 'นม', '2', ...]
-        print(f"[RAG] Segments after split: {segments}")
-        
-        i = 0
-        while i < len(segments):
-            segment = segments[i].strip()
-            
-            # หา product name (text before number)
-            if segment and not segment.isdigit():
-                product_name = segment
-                quantity = 1
-                
-                # ลบ unit words เช่น ลูก, แก้ว, ชิ้น, ห่อ
-                # ระวัง: ห้าม substring ของชื่อสินค้า เช่น "ม" ในมะม่วง
-                original_name = product_name
-                product_name = re.sub(r'(ลูก|แก้ว|ชิ้น|ห่อ|อัน|หัว|ตัว)', '', product_name).strip()
-                
-                if original_name != product_name:
-                    print(f"[RAG] Unit removed: '{original_name}' → '{product_name}'")
-                
-                # หาตัวเลขถัดไป
-                if i + 1 < len(segments):
-                    next_segment = segments[i + 1].strip()
-                    if next_segment.isdigit():
-                        quantity = int(next_segment)
-                        i += 2  # skip both product and number
-                    else:
-                        i += 1
-                else:
-                    i += 1
-                
-                # เพิ่ม product ถ้าชื่อไม่ว่าง
-                if product_name:
-                    # ตรวจสอบว่ามี product นี้หรือไม่ (หลีกเลี่ยง duplicate)
-                    if not any(p[0].lower() == product_name.lower() for p in products):
-                        products.append((product_name, quantity))
-                        print(f"[RAG] Parsed: product='{product_name}', qty={quantity}")
-                    else:
-                        print(f"[RAG] Duplicate: '{product_name}'")
-                else:
-                    print(f"[RAG] Empty product name after unit removal from '{segment}'")
-            else:
-                i += 1
-        
-        # ถ้ายังไม่เจอ product ให้พยายามใช้ regex เพิ่มเติม
-        if not products:
-            # Pattern: "product qty unit" เช่น "ส้มโอ 3 ลูก"
-            pattern = r'([a-zA-Z\u0E00-\u0E7F]+?)\s*(\d+)\s*(?:ลูก|แก้ว|ชิ้น|ห่อ|อัน|หัว|ตัว)?'
-            matches = re.findall(pattern, cleaned_msg)
-            
-            for product_name, qty_str in matches:
-                product_name = product_name.strip()
-                if product_name and not any(p[0].lower() == product_name.lower() for p in products):
-                    products.append((product_name, int(qty_str)))
-                    print(f"[RAG] Regex found: product='{product_name}', qty={qty_str}")
-        
-        # Fallback: ถ้ายังไม่เจอ ให้ใช้ข้อความทั้งหมด
-        if not products and cleaned_msg.strip():
-            products.append((cleaned_msg.strip(), 1))
-            print(f"[RAG] Fallback: product='{cleaned_msg.strip()}', qty=1")
-        
-        return {
-            'action': action,
-            'products': products,
-            'message': f"Parsed {action} command with {len(products)} products"
-        }
+
     
     def _generate_cart_summary(self, cart):
         """สร้าง summary ของตะกร้า - แสดงรายการและราคารวม"""
@@ -616,7 +411,7 @@ class RAGService:
             item_total = quantity * price
             total_price += item_total
             
-            items_list.append(f"• {product_name} {quantity} ชิ้น @ ฿{price:.2f} = ฿{item_total:.2f}")
+            items_list.append(f"• {product_name} {quantity} ชิ้น ฿{price:.2f} = ฿{item_total:.2f}")
         
         # สร้าง summary message
         items_text = "\n".join(items_list)
@@ -625,10 +420,7 @@ class RAGService:
         return summary
     
     def voice_manage_cart(self, user_message: str, request=None):
-        """
-        ครอบคุมการจัดการตะกร้าจากคำพูด/แชท (เพิ่ม/ลด/ลบ)
-        Return: {"success": True/False, "message": "...", "action": "...", "cart": [...]}
-        """
+       
         try:
             print(f"[RAG] voice_manage_cart START: '{user_message}'")
             
@@ -650,9 +442,9 @@ class RAGService:
             # ใช้ parse_cart_command_with_cart_context เพื่อให้ดีขึ้น
             command = self.parse_cart_command_with_cart_context(user_message, cart)
             action = command['action']
-            products = command['products']
+            products_list = command['products']
             
-            print(f"[RAG] Command: action={action}, products={products}")
+            print(f"[RAG] Command: action={action}, products={products_list}")
             
             if action == 'clear':
                 # ลบตะกร้าทั้งหมด
@@ -679,9 +471,9 @@ class RAGService:
             modified = False
             
             from django.apps import apps
-            Product = apps.get_model('aicashier', 'Product')
+            products = apps.get_model('aicashier', 'Product')
             
-            for product_name, quantity in products:
+            for product_name, quantity in products_list:
                 try:
                     print(f"[RAG] Finding product: '{product_name}' qty={quantity}")
                     
@@ -865,6 +657,10 @@ class RAGService:
             search_results = self.search_products(product_name, k=1)
             if search_results:
                 doc, score = search_results[0]
+                SIMILARITY_THRESHOLD = 0.5
+                if score < SIMILARITY_THRESHOLD:
+                    print(f"[RAG] Score too low ({score:.2f}) for '{product_name}'")
+                    return None
                 metadata = doc.metadata
                 if 'product_id' in metadata:
                     product_id = int(metadata['product_id'])
@@ -875,122 +671,6 @@ class RAGService:
             print(f"Error finding product: {e}")
             return None
     
-    def add_to_cart_from_voice(self, user_message: str, request=None):
-        """
-        เพิ่มสินค้าลงตะกร้าจากข้อความเสียง/แชท (รองรับหลายสินค้า)
-        คืนค่า: {"success": True/False, "message": "..."}
-        """
-        try:
-            print(f"[RAG] add_to_cart_from_voice: user_message='{user_message}'")
-            
-            # ตัดแยก product list (รองรับหลายสินค้า) ใช้ parse_cart_command แทน
-            parsed = self.parse_cart_command(user_message)
-            products_list = parsed.get('products', [])
-            
-            if not products_list:
-                return {
-                    "success": False,
-                    "message": "ขออภัยครับ ไม่พบชื่อสินค้า"
-                }
-            
-            # เพิ่มลงตะกร้า
-            added_items = []
-            failed_items = []
-            
-            for product_name, quantity in products_list:
-                try:
-                    # ค้นหา product
-                    product = self.find_product_by_name(product_name)
-                    
-                    if not product:
-                        failed_items.append(f"ไม่มี '{product_name}'")
-                        continue
-                    
-                    print(f"[RAG]  Found product: {product.name} (stock: {product.quantity})")
-                    
-                    # ตรวจสอบ stock
-                    if product.quantity <= 0:
-                        print(f"[RAG] Stock is 0: {product.name}")
-                        failed_items.append(f"'{product.name}' ขายหมดแล้ว")
-                        continue
-                    
-                    # ตรวจสอบว่าจำนวนสั่งไม่เกิน stock
-                    if quantity > product.quantity:
-                        print(f"[RAG] Quantity {quantity} > Stock {product.quantity}: {product.name}")
-                        failed_items.append(f"'{product.name}' เหลือ {product.quantity} ชิ้น")
-                        continue
-                    
-                    # เพิ่มลงตะกร้า (session)
-                    if request and hasattr(request, 'session'):
-                        if 'cart' not in request.session:
-                            request.session['cart'] = []
-                        
-                        cart = request.session['cart']
-                        
-                        # ตรวจสอบว่ามีในตะกร้าแล้วหรือไม่
-                        item_exists = False
-                        for item in cart:
-                            if item['product_id'] == product.id:
-                                # ตรวจสอบว่าจำนวนใหม่ (เดิม + เพิ่ม) ไม่เกิน stock
-                                new_quantity = item['quantity'] + quantity
-                                print(f"[RAG]  Item exists: {product.name}, new_qty={new_quantity}, stock={product.quantity}")
-                                
-                                if new_quantity > product.quantity:
-                                    failed_items.append(f"'{product.name}' จำนวนเกิน (เหลือ {product.quantity})")
-                                    item_exists = True
-                                    break
-                                
-                                item['quantity'] = new_quantity
-                                item_exists = True
-                                added_items.append(f"{product.name} x{new_quantity}")
-                                print(f"[RAG] Updated: {product.name} x{new_quantity}")
-                                break
-                        
-                        # ถ้าไม่มี ให้เพิ่มใหม่
-                        if not item_exists:
-                            cart.append({
-                                "product_id": product.id,
-                                "product_name": product.name,
-                                "price": float(product.price),
-                                "quantity": quantity,
-                                "category": product.category.name if product.category else "ไม่มีหมวด"
-                            })
-                            added_items.append(f"{product.name} x{quantity}")
-                            print(f"[RAG] Added new: {product.name} x{quantity}")
-                        
-                        request.session.modified = True
-                
-                except Exception as item_error:
-                    print(f"[RAG]  Error adding item '{product_name}': {item_error}")
-                    failed_items.append(f"เรียงข้อผิดพลาด: {product_name}")
-            
-            print(f"[RAG] Session saved")
-            
-            # สรุปผล
-            if added_items and not failed_items:
-                return {
-                    "success": True,
-                    "message": f"เพิ่ม {', '.join(added_items)} เข้าตะกร้าแล้ว"
-                }
-            elif added_items and failed_items:
-                return {
-                    "success": True,
-                    "message": f"เพิ่ม {', '.join(added_items)} สำเร็จ แต่ {', '.join(failed_items)}"
-                }
-            else:
-                return {
-                    "success": False,
-                    "message": f"ขออภัยครับ {', '.join(failed_items)}"
-                }
-        
-        except Exception as e:
-            print(f"[RAG] Error adding to cart: {e}")
-            import traceback
-            traceback.print_exc()
-            return {
-                "success": False,
-                "message": f"เกิดข้อผิดพลาด: {str(e)[:50]}"
-            }
     
     def _format_product_with_stock(self, product):
         """จัดรูป Product ข้อมูลพร้อมสถานะสต็อก"""
@@ -1008,16 +688,6 @@ class RAGService:
             return f"Error formatting product: {e}"
     
     def rag_query(self, query: str, conversation_history: list = None) -> str:
-        """
-        ค้นหาและตอบคำถามเกี่ยวกับสินค้า พร้อมแสดงสถานะสต็อก
-        ไม่แนะนำสินค้าที่หมดสต็อก
-        ใช้ AISettings เพื่อปรับปรุง greeting, promotion, featured items
-        ใช้ conversation_history เพื่อให้ AI จำบทสนทนาก่อนหน้า
-        
-        Args:
-            query: คำถามจากผู้ใช้
-            conversation_history: รายการการสนทนาที่ผ่านมา [{"role": "user/assistant", "content": "..."}, ...]
-        """
         try:
             print(f"\n RAG Query: {query}")
             
@@ -1074,7 +744,7 @@ class RAGService:
                         if item.quantity > 0:
                             featured_products_text += f"• {item.name} - ฿{item.price} (เหลือ {item.quantity} ชิ้น)\n"
                         else:
-                            featured_products_text += f"• {item.name} - ขายหมดแล้ว (⏳ กำลังเตรียม)\n"
+                            featured_products_text += f"• {item.name} - ขายหมดแล้ว ( กำลังเตรียม)\n"
                     except:
                         pass
                 print(f"Added {len(featured_items)} featured items")

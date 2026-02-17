@@ -84,6 +84,52 @@
         </div>
     </div>
 
+    <!-- AOV and Cancellation Rate Cards (Admin Only) -->
+    {% if aov_data and cancellation_data %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <!-- AOV Card -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20 hover:border-[#b16cff]/50 transition">
+            <p class="text-[#b16cff] font-semibold text-sm mb-2">ค่าเฉลี่ยต่อบิล (AOV)</p>
+            <p class="text-white text-3xl font-bold">฿{{ aov_data.aov|floatformat:2 }}</p>
+            <p class="text-[#8b8ba8] text-xs mt-2">
+                {% if aov_data.order_count > 0 %}
+                    {{ aov_data.order_count }} ออเดอร์ใน {{ aov_data.period_days }} วัน
+                {% else %}
+                    ไม่มีข้อมูล
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Cancellation Rate Card -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20 hover:border-[#b16cff]/50 transition">
+            <p class="text-[#b16cff] font-semibold text-sm mb-2">อัตราการยกเลิก</p>
+            <p class="text-white text-3xl font-bold">{{ cancellation_data.percentage }}</p>
+            <p class="text-[#8b8ba8] text-xs mt-2">
+                {% if cancellation_data.total_count > 0 %}
+                    {{ cancellation_data.cancelled_count }} ยกเลิก จาก {{ cancellation_data.total_count }} ออเดอร์
+                {% else %}
+                    ไม่มีข้อมูล
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Total Revenue (30 days) Card -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20 hover:border-[#b16cff]/50 transition">
+            <p class="text-[#b16cff] font-semibold text-sm mb-2">ยอดขาย (30 วัน)</p>
+            <p class="text-white text-3xl font-bold">฿{{ aov_data.total_revenue|floatformat:2 }}</p>
+            <p class="text-[#8b8ba8] text-xs mt-2">รวมจากออเดอร์สำเร็จ</p>
+        </div>
+
+        <!-- Completed Orders (30 days) Card -->
+        <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20 hover:border-[#b16cff]/50 transition">
+            <p class="text-[#b16cff] font-semibold text-sm mb-2">ออเดอร์สำเร็จ (30 วัน)</p>
+            <p class="text-white text-3xl font-bold">{{ aov_data.order_count }}</p>
+            <p class="text-[#8b8ba8] text-xs mt-2">รวมทั้งสิ้น</p>
+        </div>
+    </div>
+
+    {% endif %}
+
     <!-- Quick Stats and Monthly Chart -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <!-- Quick Stats -->

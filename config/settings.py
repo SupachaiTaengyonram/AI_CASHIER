@@ -36,6 +36,7 @@ DEBUG = True
 CSRF_TRUSTED_ORIGINS = [
     'https://unviolable-euclid-lunier.ngrok-free.dev',
 ]
+
 ALLOWED_HOSTS = ['localhost',
     '127.0.0.1',
     'unviolable-euclid-lunier.ngrok-free.dev',]

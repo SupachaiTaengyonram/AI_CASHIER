@@ -41,14 +41,6 @@ except Exception as e:
     print(f"Warning: Could not initialize Stripe service: {e}")
     stripe_service = None
 
-# Initialize Gemini Service
-gemini_service = None
-try:
-    from .gemini_service import GeminiChatService
-    gemini_service = GeminiChatService()
-except Exception as e:
-    print(f"Warning: Could not initialize Gemini service: {e}")
-    gemini_service = None
 
 # Initialize RAG Service - โหลดข้อมูลสินค้าจากฐานข้อมูล
 rag_service = None
@@ -399,6 +391,20 @@ class OverviewsView(LoginRequiredMixin, ListView):
         monthly_data_json = json.dumps(monthly_data_list)
         monthly_labels_json = json.dumps(monthly_labels)
         
+        # === NEW ANALYTICS DATA ===
+        from .services import OrderAnalyticsService
+        
+        # ดึงข้อมูลวิเคราะห์เฉพาะ staff เท่านั้น
+        aov_data = {}
+        cancellation_data = {}
+        
+        if self.request.user.is_staff:
+            # Average Order Value (30 days)
+            aov_data = OrderAnalyticsService.get_average_order_value(days=30)
+            
+            # Cancellation Rate (30 days)
+            cancellation_data = OrderAnalyticsService.get_cancellation_rate(days=30)
+        
         context.update({
             'stats': stats,
             'top_products': top_products,
@@ -410,6 +416,9 @@ class OverviewsView(LoginRequiredMixin, ListView):
             'monthly_labels': monthly_labels_json,
             'total_customers': total_customers,
             'avg_price': f"฿{avg_price:.2f}" if avg_price else "฿0.00",
+            # New analytics
+            'aov_data': aov_data,
+            'cancellation_data': cancellation_data,
         })
         
         return context
@@ -1144,7 +1153,7 @@ class PaymentSuccessView(DetailView):
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>🎉 ขอบคุณที่ทำการสั่งซื้อ!</h1>
+                    <h1>ขอบคุณที่ทำการสั่งซื้อ!</h1>
                 </div>
                 
                 <div class="content">
@@ -1285,19 +1294,9 @@ class SetPaymentAmountView(LoginRequiredMixin, View):
 @csrf_exempt
 @require_http_methods(["POST"])
 def chat_with_ai(request):
-    """
-    API endpoint สำหรับแชทกับ AI โดยใช้ RAG (Retrieval Augmented Generation)
-    ตอบคำถามโดยใช้ข้อมูลสินค้าจากฐานข้อมูล ไม่ใช่ hallucination
-    
-    Expected POST data:
-    {
-        "message": "ข้อความจากผู้ใช้",
-        "conversation_history": [{"role": "user/assistant", "content": "..."}, ...]
-    }
-    """
+   
     try:
-        
-        
+
         if not rag_service:
             return JsonResponse({
                 'success': False,
@@ -1345,15 +1344,7 @@ def chat_with_ai(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def get_product_recommendation(request):
-    """
-    API endpoint สำหรับรับคำแนะนำสินค้า โดยใช้ RAG
-    ค้นหาและแนะนำสินค้าโดยใช้ข้อมูลจริงจากฐานข้อมูล
-    
-    Expected POST data:
-    {
-        "needs": "ความต้องการของลูกค้า"
-    }
-    """
+   
     try:
         
         if not rag_service:
@@ -1397,22 +1388,14 @@ def get_product_recommendation(request):
         }, status=500)
 
 
+
 @csrf_exempt
 @require_http_methods(["POST"])
 def voice_order_api(request):
-    """
-    API endpoint สำหรับการสั่งสินค้าด้วยเสียง
-    ใช้ RAG system เพื่อตอบคำถามจากข้อมูลสินค้า
-    สามารถเพิ่มสินค้าลงตะกร้าได้
-    
-    Expected POST data:
-    {
-        "user_message": "ข้อความจากผู้ใช้ที่บันทึกเสียง",
-        "conversation_history": [{"role": "user/assistant", "content": "..."}, ...]
-    }
-    """
+    ai_response = "ขอโทษค่ะ ฉันไม่สามารถประมวลผลคำสั่งของคุณได้ในขณะนี้"
+   
     try:
-        if not gemini_service:
+        if not rag_service:
             return JsonResponse({
                 'success': False,
                 'error': 'AI service is not available'
@@ -1481,18 +1464,29 @@ def voice_order_api(request):
                     ai_response = rag_service.rag_query(user_message, conversation_history=conversation_history)
                 else:
                     # ไม่มีข้อมูล ใช้ normal response
-                    ai_response = gemini_service.get_response(user_message)
+                    ai_response = "ขอโทษค่ะ ฉันไม่พบข้อมูลที่เกี่ยวข้องในระบบ แต่ฉันจะพยายามช่วยคุณเท่าที่ทำได้"
+                    print("[RAG] No documents in RAG collection")
             else:
-                # RAG ไม่พร้อม ใช้ normal response
-                ai_response = gemini_service.get_response(user_message)
+                ai_response = "ขอโทษค่ะ ฉันไม่สามารถเชื่อมต่อกับระบบ RAG ได้ในขณะนี้ แต่ฉันจะพยายามช่วยคุณเท่าที่ทำได้"
+                print("[RAG] RAG service not available")
         except Exception as rag_error:
             print(f"RAG Error (fallback to normal): {rag_error}")
-            # Fallback ไปใช้ normal response
-            ai_response = gemini_service.get_response(user_message)
+            ai_response = "ขอโทษค่ะ ฉันมีปัญหาในการประมวลผลข้อมูลในขณะนี้ แต่ฉันจะพยายามช่วยคุณเท่าที่ทำได้"
         
         # ถ้าสั่งซื้อสำเร็จ ให้ใช้ response จากการเพิ่มตะกร้า
         if cart_response and cart_response.get('success'):
             ai_response = cart_response.get('message', ai_response)
+        
+        # บันทึกการแชทไปยัง ChatLog
+        # try:
+        #     from .models import ChatLog
+        #     ChatLog.objects.create(
+        #         customer=request.user if request.user.is_authenticated else None,
+        #         user_query=user_message,
+        #         ai_response=ai_response
+        #     )
+        # except Exception as log_error:
+        #     print(f"Warning: Could not save chat log: {log_error}")
         
         # ส่ง actual session cart กลับไป
         session_cart = request.session.get('cart', [])
@@ -1519,62 +1513,10 @@ def voice_order_api(request):
         }, status=500)
 
 
-
-@csrf_exempt
-@require_http_methods(["POST"])
-def voice_cart_api(request):
-    """
-    API endpoint สำหรับจัดการตะกร้าโดยใช้เสียง/แชท
-    รองรับ: เพิ่ม/ลด/ลบ/ลบทั้งตะกร้า
-    
-    Expected POST data:
-    {
-        "action": "manage",  // ประเภทของการจัดการ
-        "command": "เพิ่มส้มโอสามลูก" | "ลดนม" | "ลบเค้ก" | "ลบทั้งตะกร้า"
-    }
-    """
-    try:
-        data = json.loads(request.body)
-        command = data.get('command', '').strip()
-        
-        if not command:
-            return JsonResponse({'success': False, 'message': 'command required'}, status=400)
-        
-        print(f"[Voice Cart] Command: {command}")
-        print(f"[Voice Cart] Request session: {request.session}")
-        print(f"[Voice Cart] Cart in session: {request.session.get('cart', [])}")
-        
-        # ใช้ RAG Service เพื่อจัดการตะกร้า
-        result = rag_service.voice_manage_cart(command, request)
-        
-        print(f"[Voice Cart] Result: {result}")
-        
-        return JsonResponse(result)
-    
-    except Exception as e:
-        print(f"[Voice Cart] Error: {e}")
-        import traceback
-        traceback.print_exc()
-        return JsonResponse({
-            'success': False,
-            'message': f'เกิดข้อผิดพลาด: {str(e)[:100]}'
-        }, status=500)
-
-
 @csrf_exempt
 @require_http_methods(["POST"])
 def cart_api(request):
-    """
-    API endpoint สำหรับจัดการตะกร้า
-    - POST: เพิ่ม/อัพเดท รายการในตะกร้า
-    
-    Expected POST data:
-    {
-        "action": "add" | "remove" | "get",
-        "product_id": 1,
-        "quantity": 3
-    }
-    """
+
     try:
         print(f"[CART API] Received request: {request.method}")
         print(f"[CART API] Content-Type: {request.content_type}")
@@ -1816,33 +1758,6 @@ class StripePaymentStatusView(LoginRequiredMixin, View):
             }, status=500)
 
 
-class StripePaymentView(LoginRequiredMixin, TemplateView):
-    """
-    View สำหรับแสดง Stripe Payment Status
-    """
-    template_name = 'aicashier/payment_final.html'
-    login_url = 'login'
-    
-    def get(self, request, payment_id):
-        try:
-            payment = Payment.objects.get(id=payment_id, customer=request.user)
-            
-            # ถ้าจ่ายแล้ว ให้ไปหน้า Success
-            if payment.payment_status == 'confirmed':
-                return redirect('payment_success', payment_id=payment.id)
-
-            context = {
-                'payment': payment,
-                'amount_text': "{:,.2f}".format(float(payment.amount)),
-                'reference': payment.reference_number,
-                'qr_code_url': payment.stripe_qr_code_url,  # QR Code URL from Stripe
-                'payment_url': payment.stripe_payment_url,  # Payment Link URL
-                'stripe_public_key': os.getenv('STRIPE_PUBLIC_KEY', ''),
-            }
-            
-            return self.render_to_response(context)
-        except Payment.DoesNotExist:
-            return redirect('home')
 
 
 @csrf_exempt

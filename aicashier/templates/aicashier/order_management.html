@@ -23,6 +23,12 @@
 
 {% block content %}
 <div class="min-h-screen bg-[#1a1b2e] font-kanit p-6 overflow-hidden">
+  
+  <!-- Staff Call Notifications Section -->
+  <div id="staff-calls-container" class="fixed top-20 right-6 z-40 flex flex-col gap-3 max-w-sm max-h-96 overflow-y-auto">
+    <!-- Staff call notifications จะแสดงที่นี่ -->
+  </div>
+  
   <div class="max-w-[1920px] mx-auto">
     
     <div class="flex justify-between items-end mb-6 px-2">
@@ -179,9 +185,16 @@ function organizeAndSplitOrders() {
 
             // Action Button / Continuation Badge
             const actionArea = isLastChunk ? `
-                <button onclick="completeOrder(${dataEl.dataset.orderId})" class="w-full py-3 rounded-lg bg-gradient-to-r ${btnColor} text-white font-bold hover:brightness-110 transition shadow-lg mt-auto active:scale-95 transform">
-                    ✓ เสร็จสิ้น
-                </button>
+                <div class="flex gap-2 mt-auto">
+                    <button onclick="completeOrder(${dataEl.dataset.orderId})" class="flex-1 py-3 rounded-lg bg-gradient-to-r ${btnColor} text-white font-bold hover:brightness-110 transition shadow-lg active:scale-95 transform">
+                        เสร็จสิ้น
+                    </button>
+                    ${type === 'online' ? `
+                    <button onclick="cancelOrder(${dataEl.dataset.orderId})" class="flex-1 py-3 rounded-lg bg-gradient-to-r from-red-600 to-red-700 text-white font-bold hover:brightness-110 transition shadow-lg active:scale-95 transform" title="ยกเลิกออเดอร์ออนไลน์">
+                        ยกเลิก
+                    </button>
+                    ` : ''}
+                </div>
             ` : `
                 <div class="w-full py-3 rounded-lg bg-white/5 text-gray-500 font-medium text-center mt-auto text-sm border border-white/10 cursor-help" title="ดูรายการสินค้าต่อในใบถัดไป">
                     ดูต่อใบถัดไป ➜
@@ -318,10 +331,139 @@ async function completeOrder(orderId) {
     }
 }
 
+async function cancelOrder(orderId) {
+    if (!confirm('ยืนยันการยกเลิกออเดอร์นี้?')) return;
+    try {
+        const response = await fetch('{% url "api_cancel_order" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ 
+                order_id: orderId,
+                reason: 'ยกเลิกจากหน้าจัดการออเดอร์'
+            })
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert('ยกเลิกออเดอร์เรียบร้อย');
+            location.reload();
+        } else {
+            alert('ไม่สามารถยกเลิกออเดอร์: ' + data.message);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     organizeAndSplitOrders();
     startOrderStream();
+    
+    // === STAFF CALLS MANAGEMENT ===
+    loadAndDisplayStaffCalls();
+    
+    // โหลด staff calls ทุก 2 วินาที
+    setInterval(loadAndDisplayStaffCalls, 2000);
 });
+
+// ฟังก์ชั่นโหลดและแสดง staff calls
+function loadAndDisplayStaffCalls() {
+    fetch('{% url "api_get_staff_calls" %}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.calls) {
+                updateStaffCallsDisplay(data.calls);
+            }
+        })
+        .catch(error => console.error('[STAFF CALLS] Error:', error));
+}
+
+// อัพเดทการแสดง staff calls
+function updateStaffCallsDisplay(calls) {
+    const container = document.getElementById('staff-calls-container');
+    
+    // ล้างการแสดงเก่า
+    container.innerHTML = '';
+    
+    if (calls.length === 0) {
+        return;
+    }
+    
+    calls.forEach(call => {
+        if (call.status === 'pending' || call.status === 'acknowledged') {
+            const callElement = document.createElement('div');
+            callElement.className = `bg-yellow-500/20 border-2 border-yellow-500/50 rounded-lg p-4 shadow-xl ${call.status === 'pending' ? 'animate-pulse' : 'border-green-500/50 bg-green-500/20'}`;
+            
+            const timeString = new Date(call.timestamp).toLocaleTimeString('th-TH');
+            const statusText = call.status === 'pending' ? 'รอการตอบกลับ' : 'ยอมรับแล้ว';
+            
+            callElement.innerHTML = `
+                <div class="text-yellow-300 font-bold mb-2 text-sm flex items-center gap-2">
+                    เรียกพนักงาน
+                    <span class="text-xs bg-yellow-600/20 px-2 py-0.5 rounded">${statusText}</span>
+                </div>
+                <div class="text-xs text-gray-200 mb-3 space-y-1">
+                    <p><strong>ผู้ใช้:</strong> ${call.username}</p>
+                    <p><strong>เหตุผล:</strong> ${call.reason}</p>
+                    <p class="text-gray-400">${timeString}</p>
+                </div>
+                <div class="flex gap-2">
+                    ${call.status === 'pending' ? `
+                    <button onclick="acknowledgeCall('${call.call_id}')" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs font-semibold transition active:scale-95">
+                        ยอมรับ 
+                    </button>
+                    ` : ''}
+                    <button onclick="completeCall('${call.call_id}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs font-semibold transition active:scale-95">
+                        เสร็จสิ้น
+                    </button>
+                </div>
+            `;
+            container.appendChild(callElement);
+        }
+    });
+}
+
+// ยอมรับการเรียก
+function acknowledgeCall(callId) {
+    fetch('{% url "api_acknowledge_staff_call" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ call_id: callId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            console.log('[STAFF CALLS] Call acknowledged');
+            loadAndDisplayStaffCalls();
+        }
+    })
+    .catch(err => console.error('[STAFF CALLS] Error:', err));
+}
+
+// เสร็จสิ้นการเรียก
+function completeCall(callId) {
+    fetch('{% url "api_complete_staff_call" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ call_id: callId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            console.log('[STAFF CALLS] Call completed');
+            loadAndDisplayStaffCalls();
+        }
+    })
+    .catch(err => console.error('[STAFF CALLS] Error:', err));
+}
 </script>
 
 <style>

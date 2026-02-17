@@ -208,14 +208,22 @@
         </div>
     </div>
 
-    <!-- ปุ่ม AI Order -->
+    <!-- ปุ่ม AI Order + Call Staff -->
     <div class="lg:row-span-5 flex flex-col items-center justify-center gap-2 h-full order-3 md:order-3 xl:order-4">
+        <!-- ปุ่มเรียกพนักงาน (สำหรับพนักงานแคชเชียร์หน้าร้านเท่านั้น) -->
+        {% if user.is_staff and user.staff_role == 'cashier' %}
+        <button id="call-staff-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-full w-32 h-32 sm:w-40 sm:h-40 text-lg sm:text-xl flex items-center justify-center text-center shadow-lg transform transition hover:scale-105 duration-300 mb-4">
+            <span>เรียกพนักงาน</span>
+        </button>
+        {% endif %}
+        
         <button id="ai-order-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold rounded-full w-48 h-48 sm:w-56 sm:h-56 lg:w-72 lg:h-72 xl:w-80 xl:h-80 text-lg sm:text-2xl flex items-center justify-center text-center shadow-lg transform transition hover:scale-105 duration-300">
             <span id="ai-btn-text">สั่งสินค้า<br>ด้วยเสียง</span>
         </button>
         <p class="text-white text-xs sm:text-sm font-semibold text-center">แตะปุ่ม เพื่อเริ่มสั่งสินค้าด้วยเสียง ใช้คำสั่งเสียงดังนี้</p>
-        <p class="text-green-300 text-xs sm:text-sm font-semibold text-center">เพิ่มสินค้าเข้าตะกร้าใช้คำว่า "เพิ่ม"</p>
-        <p class="text-red-300 text-xs sm:text-sm font-semibold text-center">ลด หรือ ลบ ในสินค้าเข้าตะกร้าใช้คำว่า "ลบ"</p>
+        <p class="text-green-300 text-xs sm:text-sm font-semibold text-center">เพิ่มสินค้าเข้าตะกร้าใช้คำว่า "เพิ่ม","ซื้อ"</p>
+        <p class="text-red-300 text-xs sm:text-sm font-semibold text-center">ลดจำนวนสินค้า ในตะกร้าใช้คำว่า "ลดจำนวน หรือ ดาว</p>
+        <p class="text-red-600 text-xs sm:text-sm font-semibold text-center">ลบ สินค้าออกจากตะกร้าใช้คำว่า "ลบ" หรือ "ลบทั้งหมด"เพื่อลบรายการทั้งหมด</p>
     </div>
 
     <!-- ตะกร้าสินค้า -->
@@ -533,6 +541,56 @@
             }
         }
     });
+    
+    // === CALL STAFF BUTTON ===
+    const callStaffBtn = document.getElementById('call-staff-btn');
+    if (callStaffBtn) {
+        callStaffBtn.addEventListener('click', async function() {
+            try {
+                console.log('[STAFF] Calling staff...');
+                callStaffBtn.disabled = true;
+                const originalHTML = callStaffBtn.innerHTML;
+                callStaffBtn.innerHTML = '<span>⏳<br>กำลังเรียก...</span>';
+                
+                const response = await fetch('{% url "api_call_staff" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        reason: 'ลูกค้าขอความช่วยเหลือ'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('[STAFF] ✓ Staff called');
+                    callStaffBtn.innerHTML = '<span>✓<br>ส่งสัญญาณแล้ว!</span>';
+                    callStaffBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                    callStaffBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+                    
+                    // รีเซ็ตหลังจาก 3 วินาที
+                    setTimeout(() => {
+                        callStaffBtn.disabled = false;
+                        callStaffBtn.innerHTML = originalHTML;
+                        callStaffBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                        callStaffBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+                    }, 3000);
+                } else {
+                    alert('ไม่สามารถเรียกพนักงานได้: ' + data.message);
+                    callStaffBtn.disabled = false;
+                    callStaffBtn.innerHTML = originalHTML;
+                }
+            } catch (error) {
+                console.error('[STAFF] Error:', error);
+                alert('เกิดข้อผิดพลาด: ' + error.message);
+                callStaffBtn.disabled = false;
+                callStaffBtn.innerHTML = '<span>🔔<br>เรียก<br>พนักงาน</span>';
+            }
+        });
+    }
     
     // ส่งข้อความเสียงไป API
     function sendVoiceMessage(userMessage) {
