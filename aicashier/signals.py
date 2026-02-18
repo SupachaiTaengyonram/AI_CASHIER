@@ -26,10 +26,6 @@ def get_rag_service():
 
 @receiver(post_save, sender=Product)
 def sync_product_to_rag(sender, instance, created, **kwargs):
-    """
-    Signal handler: Sync product to RAG when saved (create or update)
-    Ensures database and RAG are always in sync
-    """
     try:
         rag_service = get_rag_service()
         if not rag_service:
@@ -51,10 +47,6 @@ def sync_product_to_rag(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=Product)
 def remove_product_from_rag(sender, instance, **kwargs):
-    """
-    Signal handler: Remove product from RAG when deleted
-    Ensures RAG doesn't contain deleted products
-    """
     try:
         rag_service = get_rag_service()
         if not rag_service:
@@ -75,10 +67,6 @@ def remove_product_from_rag(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Order)
 def update_product_stock_on_order(sender, instance, created, **kwargs):
-    """
-    Signal handler: Update product stock when order is completed
-    ลดจำนวนสินค้าในคลังเมื่อ Order สำเร็จ
-    """
     try:
         # Only process when order status is completed
         if instance.status != 'completed':
@@ -105,10 +93,6 @@ def update_product_stock_on_order(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=AISettings)
 def reload_voice_commands_on_settings_change(sender, instance, created, **kwargs):
-    """
-    Signal handler: Reload voice commands when AISettings is saved
-    เพื่อให้ voice commands เปลี่ยนทันทีหลังจากที่ admin บันทึกการตั้งค่า
-    """
     try:
         rag_service = get_rag_service()
         if not rag_service:

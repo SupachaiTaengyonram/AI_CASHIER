@@ -22,13 +22,12 @@ from .views import (
     PaymentView, PaymentSuccessView, CheckPaymentStatusView, SetPaymentAmountView,
     check_payment_status, OrderManagementView, complete_order, get_pending_orders, order_stream,
     order_queue_display,
-    PromotionListView, PromotionCreateView, PromotionUpdateView, PromotionDeleteView
-)
-from .api_views import (
-    call_staff_api, cancel_order_api, check_low_stock_api,
-    get_aov_api, get_cancellation_rate_api, get_top_queries_api,
+    PromotionListView, PromotionCreateView, PromotionUpdateView, PromotionDeleteView,call_staff_api, cancel_order_api, check_low_stock_api,
+    get_aov_api, get_cancellation_rate_api,
     get_staff_calls_api, acknowledge_staff_call_api, complete_staff_call_api
 )
+
+
 
 urlpatterns = [
     # หน้าแรกเด้งไปหน้า sign in (กัน 404 ที่ '/')
@@ -138,5 +137,4 @@ urlpatterns = [
     path('api/inventory/check-low-stock/', check_low_stock_api, name='api_check_low_stock'),
     path('api/analytics/aov/', get_aov_api, name='api_get_aov'),
     path('api/analytics/cancellation-rate/', get_cancellation_rate_api, name='api_get_cancellation_rate'),
-    path('api/analytics/top-queries/', get_top_queries_api, name='api_get_top_queries'),
 ]
