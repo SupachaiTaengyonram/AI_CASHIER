@@ -120,7 +120,7 @@ class HomeView(LoginRequiredMixin, ListView):
         
         # ตรวจสอบว่า AI ถูกปิดหรือไม่
         ai_settings = AISettings.get_settings()
-        if not ai_settings.is_active:
+        if not ai_settings.is_active and not request.user.is_staff:
             return redirect('ai_disabled')
         
         response = super().get(request, *args, **kwargs)
