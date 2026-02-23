@@ -45,7 +45,7 @@
 ```
 "เอมะม่วง 5"       → Add 5 mangoes to cart
 "ดาวมะม่วง 2"      → Decrease mangoes by 2
-"ถอดส้มโอ"         → Remove pomelos from cart
+"ลบส้มโอ"         → Remove pomelos from cart
 ```
 
 ### 🔍 Intelligent Product Search
@@ -267,7 +267,7 @@ ai-cashier/
 │   ├── views.py                  # API views & endpoints
 │   ├── urls.py                   # URL routing
 │   ├── rag_service.py           # RAG & voice command logic
-│   ├── gemini_service.py        # Google Gemini integration
+│   ├── service.py               # StaffCall, OrderAnalytics, Inventory services
 │   ├── stripe_service.py        # Stripe payment integration
 │   ├── signals.py               # Signal handlers (auto-reload)
 │   ├── forms.py                 # Django forms

@@ -1483,18 +1483,7 @@ def voice_order_api(request):
         if cart_response and cart_response.get('success'):
             ai_response = cart_response.get('message', ai_response)
         
-        # บันทึกการแชทไปยัง ChatLog
-        # try:
-        #     from .models import ChatLog
-        #     ChatLog.objects.create(
-        #         customer=request.user if request.user.is_authenticated else None,
-        #         user_query=user_message,
-        #         ai_response=ai_response
-        #     )
-        # except Exception as log_error:
-        #     print(f"Warning: Could not save chat log: {log_error}")
-        
-        # ส่ง actual session cart กลับไป
+       
         session_cart = request.session.get('cart', [])
         
         return JsonResponse({
@@ -2114,9 +2103,7 @@ def complete_staff_call_api(request):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
-# ============================================
-# ORDER CANCELLATION API
-# ============================================
+
 @method_decorator(user_passes_test(admin_required, login_url='login'), name='dispatch')
 @require_http_methods(["POST"])
 def cancel_order_api(request):
@@ -2153,9 +2140,7 @@ def cancel_order_api(request):
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 
-# ============================================
-# INVENTORY CHECK API
-# ============================================
+
 @method_decorator(user_passes_test(admin_required, login_url='login'), name='dispatch')
 @require_http_methods(["GET"])
 def check_low_stock_api(request):
@@ -2174,9 +2159,7 @@ def check_low_stock_api(request):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
-# ============================================
-# ANALYTICS APIS
-# ============================================
+
 @method_decorator(user_passes_test(admin_required, login_url='login'), name='dispatch')
 @require_http_methods(["GET"])
 def get_aov_api(request):

@@ -3,7 +3,7 @@
 from django.core.management.base import BaseCommand
 from aicashier.models import Product
 import sys
-import time  # <--- 1. เพิ่มบรรทัดนี้
+import time  
 
 class Command(BaseCommand):
     help = 'Sync product data to RAG Vector Database'

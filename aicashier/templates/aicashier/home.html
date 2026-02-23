@@ -469,7 +469,6 @@
             const voices = window.speechSynthesis.getVoices();
             if (voices.length > 0) {
                 console.log('[TTS] Voices loaded:', voices.length);
-                // เลือกเสียง Thai ถ้ามี
                 const thaiVoices = voices.filter(v => v.lang.includes('th'));
                 if (thaiVoices.length > 0) {
                     console.log('[TTS] Found Thai voice:', thaiVoices[0].name);
@@ -678,7 +677,7 @@
             return;
         }
     
-        // --- 🧹 ล้างข้อความก่อนพูด ---
+        // ---  ล้างข้อความก่อนพูด ---
         if (text === null || text === undefined) {
             text = '';
         }
@@ -957,7 +956,7 @@
         })
         .then(data => {
             if (!data) {
-                console.error('[CART] ❌ Response was not valid JSON');
+                console.error('[CART]  Response was not valid JSON');
                 alert('เกิดข้อผิดพลาด: ได้รับข้อมูลที่ไม่ถูกต้อง');
                 return;
             }

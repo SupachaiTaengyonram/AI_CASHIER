@@ -11,7 +11,7 @@ class Command(BaseCommand):
     help = 'ตรวจสอบสินค้าที่ใกล้หมด และส่อง email แจ้งเตือน'
 
     def handle(self, *args, **options):
-        self.stdout.write('🔍 กำลังตรวจสอบสินค้าคงเหลือ...')
+        self.stdout.write(' กำลังตรวจสอบสินค้าคงเหลือ...')
         
         result = InventoryService.check_and_notify_low_stock()
         
@@ -19,7 +19,7 @@ class Command(BaseCommand):
             if result['products_count'] > 0:
                 self.stdout.write(
                     self.style.WARNING(
-                        f'⚠️  พบสินค้าที่ใกล้หมด: {result["products_count"]} รายการ'
+                        f'  พบสินค้าที่ใกล้หมด: {result["products_count"]} รายการ'
                     )
                 )
                 for product in result['products']:
