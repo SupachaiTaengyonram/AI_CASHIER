@@ -1,48 +1,132 @@
 {% extends 'aicashier/base.html' %}
 {% load static %}
 {% block navbar %}
-<nav class="bg-[#23243a] py-4 px-8 flex items-center">
-  <span class="text-2xl font-bold text-[#b16cff] tracking-wide">AI CASHIER</span>
+<nav class="bg-[#1a2332]/80 backdrop-blur-xl border-b border-white/10 py-4 px-8 flex items-center">
+  <span class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#ff6b9d] to-[#c084fc] tracking-wide">AI CASHIER</span>
 </nav>
 {% endblock %}
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-[#23243a] font-kanit">
-  <div class="flex flex-col md:flex-row bg-[#23243a] rounded-3xl shadow-lg overflow-hidden w-full max-w-5xl">
-    <!-- Left: Image -->
-    <div class="md:w-1/2 flex items-center justify-center p-8">
-      <img src="{% static 'images/leaf-8144517_1920.jpg' %}" alt="plant"
-           class="rounded-2xl object-cover w-[600px] h-[700px] shadow-lg" />
-    </div>
+<style>
+  /* Sakura petal particles */
+  .sakura-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .sakura-petal {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(ellipse at center, #ff6b9d 0%, #ff6b9d80 40%, transparent 70%);
+    border-radius: 50% 0 50% 0;
+    opacity: 0;
+    animation: sakura-fall linear infinite;
+  }
+  .sakura-petal:nth-child(1) { left: 10%; animation-duration: 8s; animation-delay: 0s; width: 10px; height: 10px; }
+  .sakura-petal:nth-child(2) { left: 25%; animation-duration: 10s; animation-delay: 2s; width: 14px; height: 14px; }
+  .sakura-petal:nth-child(3) { left: 40%; animation-duration: 7s; animation-delay: 4s; width: 8px; height: 8px; }
+  .sakura-petal:nth-child(4) { left: 55%; animation-duration: 9s; animation-delay: 1s; width: 12px; height: 12px; }
+  .sakura-petal:nth-child(5) { left: 70%; animation-duration: 11s; animation-delay: 3s; width: 10px; height: 10px; }
+  .sakura-petal:nth-child(6) { left: 85%; animation-duration: 8s; animation-delay: 5s; width: 14px; height: 14px; }
+  .sakura-petal:nth-child(7) { left: 15%; animation-duration: 12s; animation-delay: 6s; width: 9px; height: 9px; }
+  .sakura-petal:nth-child(8) { left: 60%; animation-duration: 9s; animation-delay: 7s; width: 11px; height: 11px; }
 
-    <!-- Right: Form -->
-    <div class="md:w-1/2 flex flex-col justify-center p-10">
-      <div class="mb-8">
-        <h2 class="text-white text-2xl font-normal">ยินดีต้อนรับสู่ <span class="text-[#b16cff] font-medium">AI CASHIER</span></h2>
-        <h1 class="text-white text-6xl font-bold mt-2 mb-2">เข้าสู่ระบบ</h1>
+  @keyframes sakura-fall {
+    0% { transform: translateY(-10%) rotate(0deg) scale(1); opacity: 0.8; }
+    25% { transform: translateY(25vh) rotate(180deg) scale(0.9); opacity: 0.6; }
+    50% { transform: translateY(50vh) rotate(360deg) scale(1.1); opacity: 0.4; }
+    75% { transform: translateY(75vh) rotate(540deg) scale(0.8); opacity: 0.2; }
+    100% { transform: translateY(110vh) rotate(720deg) scale(0.6); opacity: 0; }
+  }
+
+  .glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+    animation: float 6s ease-in-out infinite;
+  }
+</style>
+
+<div class="min-h-screen flex items-center justify-center bg-[#0f1923] font-kanit p-4">
+  <div class="flex flex-col md:flex-row rounded-3xl overflow-hidden w-full max-w-5xl shadow-2xl shadow-black/50">
+
+    <!-- Left: Anime Decorative Panel -->
+    <div class="md:w-1/2 relative flex flex-col items-center justify-center p-12 bg-gradient-to-br from-[#1a2332] via-[#0f1923] to-[#1a2332] overflow-hidden">
+      <!-- Floating glow orbs -->
+      <div class="glow-orb w-64 h-64 bg-[#ff6b9d] top-[-20%] left-[-10%]"></div>
+      <div class="glow-orb w-48 h-48 bg-[#c084fc] bottom-[-15%] right-[-10%]" style="animation-delay: 3s;"></div>
+      <div class="glow-orb w-32 h-32 bg-[#67e8f9] top-[50%] left-[60%]" style="animation-delay: 1.5s;"></div>
+
+      <!-- Sakura petals -->
+      <div class="sakura-container">
+        <div class="sakura-petal"></div>
+        <div class="sakura-petal"></div>
+        <div class="sakura-petal"></div>
+        <div class="sakura-petal"></div>
+        <div class="sakura-petal"></div>
+        <div class="sakura-petal"></div>
+        <div class="sakura-petal"></div>
+        <div class="sakura-petal"></div>
       </div>
 
-      <form method="post" action="{% url 'login' %}" class="space-y-4">
+      <!-- Brand content -->
+      <div class="relative z-10 text-center space-y-6">
+        <div class="inline-flex items-center gap-2 bg-[#ff6b9d]/10 border border-[#ff6b9d]/20 rounded-full px-4 py-1.5 text-[#ff6b9d] text-xs font-medium tracking-wider uppercase">
+          ✦ AI-Powered ✦
+        </div>
+        <h1 class="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#ff6b9d] via-[#c084fc] to-[#67e8f9] leading-tight">
+          AI<br>CASHIER
+        </h1>
+        <p class="text-[#94a3b8] text-lg max-w-xs mx-auto leading-relaxed">
+          ระบบจัดการร้านค้าอัจฉริยะ<br>
+          <span class="text-[#67e8f9]">ขับเคลื่อนด้วย AI</span>
+        </p>
+
+        <!-- Decorative line -->
+        <div class="flex items-center justify-center gap-3 pt-4">
+          <div class="w-12 h-px bg-gradient-to-r from-transparent to-[#ff6b9d]"></div>
+          <div class="w-2 h-2 rounded-full bg-[#ff6b9d] animate-pulse"></div>
+          <div class="w-12 h-px bg-gradient-to-l from-transparent to-[#c084fc]"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Glassmorphism Login Form -->
+    <div class="md:w-1/2 flex flex-col justify-center p-10 md:p-12 bg-[#1e2d3d]/60 backdrop-blur-xl border-l border-white/5">
+      <div class="mb-8" style="animation: slide-up 0.6s ease-out forwards;">
+        <h2 class="text-[#94a3b8] text-lg font-light">ยินดีต้อนรับสู่ <span class="text-[#ff6b9d] font-medium">AI CASHIER</span></h2>
+        <h1 class="text-[#e2e8f0] text-4xl md:text-5xl font-bold mt-2 mb-2">เข้าสู่ระบบ</h1>
+      </div>
+
+      <form method="post" action="{% url 'login' %}" class="space-y-5">
         {% csrf_token %}
         {% if form.errors %}
-          <p class="text-red-400 text-sm">ชื่อผู้ใช้ หรือ รหัสผ่าน ไม่ถูกต้อง</p>
+          <div class="flex items-center gap-2 bg-[#f87171]/10 border border-[#f87171]/30 rounded-xl px-4 py-3">
+            <svg class="w-5 h-5 text-[#f87171] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="text-[#f87171] text-sm">ชื่อผู้ใช้ หรือ รหัสผ่าน ไม่ถูกต้อง</p>
+          </div>
         {% endif %}
 
         <div>
-          <label class="block text-gray-300 text-sm mb-1">ชื่อผู้ใช้</label>
+          <label class="block text-[#94a3b8] text-sm mb-2 font-medium">ชื่อผู้ใช้</label>
           <input name="username" type="text" required
                  value="{{ form.username.value|default:'' }}"
-                 class="w-full rounded-md px-4 py-2 bg-[#393a5a] text-white focus:outline-none focus:ring-2 focus:ring-[#b16cff]"
+                 class="w-full rounded-xl px-4 py-3 bg-[#0f1923] border border-[#2a3a4a] text-[#e2e8f0] placeholder-[#64748b] focus:outline-none focus:border-[#ff6b9d] focus:ring-2 focus:ring-[#ff6b9d]/20 transition-all duration-300"
                  placeholder="Username" />
         </div>
 
         <div>
-          <label class="block text-gray-300 text-sm mb-1">รหัสผ่าน</label>
+          <label class="block text-[#94a3b8] text-sm mb-2 font-medium">รหัสผ่าน</label>
           <input name="password" type="password" required
-                 class="w-full rounded-md px-4 py-2 bg-[#393a5a] text-white focus:outline-none focus:ring-2 focus:ring-[#b16cff]"
+                 class="w-full rounded-xl px-4 py-3 bg-[#0f1923] border border-[#2a3a4a] text-[#e2e8f0] placeholder-[#64748b] focus:outline-none focus:border-[#ff6b9d] focus:ring-2 focus:ring-[#ff6b9d]/20 transition-all duration-300"
                  placeholder="Password" />
-          <div class="flex justify-end mt-1">
+          <div class="flex justify-end mt-2">
             <!-- ใส่ URL reset password ได้ภายหลัง -->
-            <a href="{% url 'password_reset' %}" class="text-xs text-gray-400 hover:underline">ลืมรหัสผ่าน</a>
+            <a href="{% url 'password_reset' %}" class="text-xs text-[#94a3b8] hover:text-[#ff6b9d] transition-colors duration-200">ลืมรหัสผ่าน</a>
           </div>
         </div>
 
@@ -50,15 +134,17 @@
         <input type="hidden" name="next" value="{{ next|default:'' }}">
 
         <button type="submit"
-                class="w-full mt-4 py-3 rounded-md bg-gradient-to-r from-[#b16cff] to-[#6f6cff] text-white text-lg font-medium hover:from-[#a259e6] hover:to-[#5a5ae6] transition">
+                class="w-full mt-2 py-3.5 rounded-xl bg-gradient-to-r from-[#ff6b9d] to-[#c084fc] text-white text-lg font-semibold hover:from-[#ff5588] hover:to-[#a855f7] transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,107,157,0.4)] hover:scale-[1.02] cursor-pointer">
           เข้าสู่ระบบ
         </button>
-        <div class="flex items-center justify-between mt-4">
-          <p class="text-gray-300 text-xs">ยังไม่มีบัญชี?</p>
-          <a href="{% url 'sign_up' %}" class="text-[#b16cff] text-xs hover:underline">สมัครสมาชิก</a>
+
+        <div class="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-[#2a3a4a]">
+          <p class="text-[#94a3b8] text-sm">ยังไม่มีบัญชี?</p>
+          <a href="{% url 'sign_up' %}" class="text-[#ff6b9d] text-sm font-medium hover:text-[#c084fc] transition-colors duration-200">สมัครสมาชิก</a>
         </div>
       </form>
     </div>
+
   </div>
 </div>
 {% endblock %}

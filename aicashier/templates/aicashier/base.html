@@ -1,21 +1,61 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI CASHIER</title>
+    <meta name="theme-color" content="#0b111b">
+    <title>{% block title %}AI CASHIER{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://unpkg.com/htmx.org"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'aicashier/css/anime-ui.css' %}">
+    {% block extra_head %}{% endblock %}
 </head>
 
-<body class="font-kanit bg-[#23243a]">
+<body class="anime-app {% block body_class %}{% endblock %}">
+  <div class="anime-atmosphere" aria-hidden="true">
+    <span class="anime-orb anime-orb--sakura"></span>
+    <span class="anime-orb anime-orb--cyan"></span>
+    <span class="anime-star anime-star--one">✦</span>
+    <span class="anime-star anime-star--two">✧</span>
+  </div>
+
   {% block navbar %}
-      {% endblock navbar %}
+  <header class="anime-navbar">
+    <a href="{% url 'home' %}" class="anime-brand" aria-label="AI Cashier — หน้าหลัก">
+      <span class="anime-brand__mark">愛</span>
+      <span><b>AI</b> CASHIER<small>SMART CAFÉ SYSTEM</small></span>
+    </a>
+    {% if user.is_authenticated %}
+    <nav class="anime-navlinks" aria-label="เมนูหลัก">
+      <a href="{% url 'home' %}">หน้าหลัก</a>
+      {% if user.is_superuser %}
+      <a href="{% url 'overviews' %}">ภาพรวม</a>
+      <a href="{% url 'product_manage' %}">สินค้า</a>
+      <a href="{% url 'ai_settings' %}">ตั้งค่า AI</a>
+      {% endif %}
+    </nav>
+    <div class="anime-navbar__actions">
+      {% if not user.is_staff %}<a href="{% url 'profile' %}" class="anime-icon-button" title="โปรไฟล์">♡</a>{% endif %}
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="anime-button anime-button--ghost anime-button--small">ออกจากระบบ</button>
+      </form>
+    </div>
+    {% else %}
+    <span class="anime-status"><i></i> ONLINE SERVICE</span>
+    {% endif %}
+  </header>
+  {% endblock navbar %}
 
-    {% block content %}
-    {% endblock %}
-
+  <main class="anime-main">
+    {% block content %}{% endblock %}
+  </main>
+  {% block extra_script %}{% endblock %}
 </body>
 </html>

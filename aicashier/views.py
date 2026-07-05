@@ -1,4 +1,3 @@
-from chromadb import logger
 from django.conf import settings
 from django.contrib.auth.views import LoginView
 import os
@@ -23,7 +22,6 @@ from .forms import CustomerForm
 from django.contrib.auth import authenticate, logout
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-from .rag_service import rag_service
 from django.db.models import Sum, Count, Avg, F
 from datetime import timedelta
 from django.contrib.auth.mixins import UserPassesTestMixin
