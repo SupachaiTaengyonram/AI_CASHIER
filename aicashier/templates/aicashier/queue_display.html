@@ -1,85 +1,277 @@
-{% extends 'aicashier/base.html' %}
+<!DOCTYPE html>
+<html lang="th" class="h-full bg-[#FFFFFF]">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORDER QUEUE | AI CASHIER</title>
+    
+    <!-- Google Fonts: Inter & Noto Sans Thai -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Thai:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Prevent FOUC: Load theme immediately -->
+    <script>
+        (function() {
+            try {
+                var savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'swiss-black': '#000000',
+                        'swiss-white': '#FFFFFF',
+                        'swiss-muted': '#F2F2F2',
+                        'swiss-accent': '#FF3000',
+                        'swiss-border': '#000000',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans Thai', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Courier New', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        *, *::before, *::after {
+            border-radius: 0px !important;
+        }
+        body {
+            font-family: 'Inter', 'Noto Sans Thai', sans-serif;
+            background-color: #F2F2F2;
+            color: #000000;
+        }
+        .swiss-grid-pattern {
+            background-image: 
+                linear-gradient(to right, rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .order-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 5rem;
+            font-weight: 900;
+            line-height: 1;
+        }
 
-{% block title %}คิวรับสินค้า · AI CASHIER{% endblock %}
-{% block navbar %}{% endblock %}
-{% block body_class %}queue-screen{% endblock %}
+        /* Night Mode Overrides */
+        html.dark {
+            color-scheme: dark;
+            background-color: #0A0A0A !important;
+        }
+        html.dark body {
+            background-color: #0A0A0A !important;
+            color: #EDEDED !important;
+        }
+        html.dark .bg-white,
+        html.dark .bg-\[\#FFFFFF\] {
+            background-color: #141414 !important;
+        }
+        html.dark .bg-\[\#F2F2F2\],
+        html.dark .bg-swiss-muted {
+            background-color: #000000 !important;
+        }
+        html.dark .border-black,
+        html.dark [class*="border-black"] {
+            border-color: #E5E5E5 !important;
+        }
+        html.dark .text-black,
+        html.dark [class*="text-black"] {
+            color: #FFFFFF !important;
+        }
+        html.dark .text-neutral-700,
+        html.dark .text-neutral-600 {
+            color: #D4D4D4 !important;
+        }
+        html.dark .text-neutral-500,
+        html.dark .text-neutral-400 {
+            color: #A3A3A3 !important;
+        }
+        html.dark .swiss-grid-pattern {
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px) !important;
+        }
+        html.dark .theme-toggle-btn {
+            background-color: #1A1A1A !important;
+            color: #FFFFFF !important;
+            border-color: #FFFFFF !important;
+        }
+        html.dark .theme-toggle-btn:hover {
+            background-color: #FF3000 !important;
+            border-color: #FF3000 !important;
+            color: #FFFFFF !important;
+        }
+    </style>
 
-{% block content %}
-<section class="queue-stage">
-    <header class="queue-hero">
-        <div class="queue-kicker"><span></span> LIVE ORDER STATUS</div>
-        <h1>คิวรับสินค้า <em>✦</em></h1>
-        <p>ดูหมายเลขของคุณให้พร้อม แล้วมารับความอร่อยที่เคาน์เตอร์ได้เลย</p>
-        <div class="queue-clock" id="queue-clock">--:--</div>
-    </header>
+    <!-- Theme Switch Script -->
+    <script>
+        function updateThemeUI(isDark) {
+            var icons = document.querySelectorAll('.theme-toggle-icon');
+            var texts = document.querySelectorAll('.theme-toggle-text');
+            var btns = document.querySelectorAll('.theme-toggle-btn');
+            for (var i = 0; i < icons.length; i++) {
+                icons[i].textContent = isDark ? '☀️' : '🌙';
+            }
+            for (var j = 0; j < texts.length; j++) {
+                texts[j].textContent = isDark ? 'DAY' : 'NIGHT';
+            }
+            for (var k = 0; k < btns.length; k++) {
+                btns[k].setAttribute('title', isDark ? 'Switch to Day Mode (โหมดกลางวัน)' : 'Switch to Night Mode (โหมดกลางคืน)');
+                btns[k].setAttribute('aria-label', isDark ? 'Switch to Day Mode' : 'Switch to Night Mode');
+            }
+        }
 
-    <div class="queue-layout">
-        <section class="queue-ready">
-            <div class="queue-section-title">
-                <div>
-                    <span class="queue-label queue-label--ready">READY NOW</span>
-                    <h2>พร้อมรับแล้ว</h2>
+        function toggleTheme() {
+            var isDark = document.documentElement.classList.toggle('dark');
+            try {
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            } catch(e) {}
+            updateThemeUI(isDark);
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            var isDark = document.documentElement.classList.contains('dark');
+            updateThemeUI(isDark);
+        });
+    </script>
+</head>
+<body class="min-h-screen bg-[#F2F2F2] swiss-grid-pattern p-4 sm:p-8">
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- Header -->
+        <header class="bg-white border-4 border-black p-6 sm:p-8 mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-black text-white text-xs font-mono font-black uppercase tracking-widest mb-3">
+                    <span class="w-2 h-2 bg-[#FF3000]"></span>
+                    QUEUE BOARD // DISPLAY TERMINAL
                 </div>
-                <b>{{ completed_orders|length }} คิว</b>
+                <h1 class="text-4xl sm:text-6xl font-black text-black tracking-tighter uppercase leading-none">
+                    คิวออเดอร์<br><span class="text-neutral-400">ORDER DISPATCH</span>
+                </h1>
             </div>
+            <div class="flex items-center gap-4 text-xs font-mono font-bold">
+                <!-- Day / Night Mode Switch Button -->
+                <button type="button" onclick="toggleTheme()" class="theme-toggle-btn px-2.5 sm:px-3 py-1.5 border-2 border-black bg-white hover:bg-black hover:text-white text-black font-mono font-bold text-xs uppercase tracking-wider transition duration-150 flex items-center gap-1.5" title="Switch Day/Night Mode">
+                    <span class="theme-toggle-icon">🌙</span>
+                    <span class="theme-toggle-text hidden sm:inline">NIGHT</span>
+                </button>
+                <div class="px-3 py-1.5 border-2 border-black bg-[#F2F2F2] uppercase">
+                    AUTO-REFRESH: <span class="text-[#FF3000]">5s</span>
+                </div>
+                <div class="px-3 py-1.5 border-2 border-black bg-black text-white uppercase flex items-center gap-2">
+                    <span class="w-2 h-2 bg-emerald-400 animate-pulse"></span> SYSTEM LIVE
+                </div>
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'logout' %}" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="px-2.5 sm:px-3 py-1.5 bg-black hover:bg-[#FF3000] text-white font-mono font-bold uppercase text-xs tracking-wider border-2 border-black transition duration-150">
+                        ออกจากระบบ
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </header>
 
-            <div class="queue-ready-grid">
-                {% for order in completed_orders %}
-                <article class="queue-ticket queue-ticket--ready order-card" data-order-id="{{ order.id }}">
-                    <span class="queue-ticket__spark">✦</span>
-                    <small>ORDER NUMBER</small>
-                    <strong>{{ order.order_number }}</strong>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Ready / Completed Orders Section (Col 7) -->
+            <section class="lg:col-span-7 bg-white border-4 border-black p-6 sm:p-8 flex flex-col">
+                <div class="flex justify-between items-end pb-4 mb-6 border-b-4 border-black">
                     <div>
-                        <span>{{ order.customer.username }}</span>
-                        <time>{{ order.created_at|date:"H:i" }}</time>
+                        <span class="text-xs font-mono font-bold tracking-widest text-[#FF3000] uppercase block mb-1">01 // CALLOUT</span>
+                        <h2 class="text-2xl sm:text-3xl font-black text-black uppercase tracking-tight">พร้อมรับสินค้า / READY</h2>
                     </div>
-                </article>
-                {% empty %}
-                <div class="queue-empty">
-                    <span>☾</span>
-                    <p>ยังไม่มีออเดอร์ที่พร้อม<br><small>กำลังปรุงอย่างตั้งใจ รอสักครู่นะ</small></p>
+                    <span class="px-3 py-1 bg-[#FF3000] text-white font-mono font-black text-sm uppercase">
+                        {{ completed_orders|length }} READY
+                    </span>
                 </div>
-                {% endfor %}
-            </div>
-        </section>
 
-        <section class="queue-preparing">
-            <div class="queue-section-title">
-                <div>
-                    <span class="queue-label queue-label--preparing">IN THE KITCHEN</span>
-                    <h2>กำลังเตรียม</h2>
-                </div>
-                <b>{{ pending_orders|length }} คิว</b>
-            </div>
-
-            <div class="queue-pending-list">
-                {% for order in pending_orders %}
-                <article class="queue-ticket queue-ticket--pending">
-                    <strong>#{{ order.order_number }}</strong>
-                    <div class="queue-ticket__info">
-                        <span>{{ order.customer.username }}</span>
-                        <small>{{ order.created_at|date:"H:i" }}</small>
+                <!-- Orders Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 content-start">
+                    {% for order in completed_orders %}
+                    <div class="bg-black text-white border-4 border-black p-6 text-center order-card hover:bg-[#FF3000] transition duration-150" data-order-id="{{ order.id }}">
+                        <div class="text-xs font-mono font-bold uppercase tracking-widest text-neutral-400 mb-2">ORDER NUMBER</div>
+                        <div class="order-number text-white my-2">
+                            {{ order.order_number }}
+                        </div>
+                        <div class="mt-4 pt-3 border-t-2 border-white/30 flex justify-between items-center text-xs font-mono">
+                            <span class="font-bold truncate max-w-[140px] uppercase">{{ order.customer.username }}</span>
+                            <span class="text-neutral-400">{{ order.created_at|date:"H:i:s" }}</span>
+                        </div>
                     </div>
-                    <div class="queue-ticket__items"><b>{{ order.items.count }}</b><small>รายการ</small></div>
-                    <i aria-label="กำลังดำเนินการ"></i>
-                </article>
-                {% empty %}
-                <div class="queue-empty queue-empty--compact"><span>♡</span><p>ไม่มีออเดอร์รอในขณะนี้</p></div>
-                {% endfor %}
-            </div>
-        </section>
+                    {% empty %}
+                    <div class="col-span-full border-2 border-dashed border-neutral-300 py-16 text-center">
+                        <span class="text-3xl font-black text-neutral-300 block mb-2 font-mono">000</span>
+                        <p class="text-neutral-500 font-mono text-xs uppercase">ไม่มีออเดอร์ที่พร้อมรับในขณะนี้</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Pending Orders Section (Col 5) -->
+            <section class="lg:col-span-5 bg-white border-4 border-black p-6 sm:p-8 flex flex-col">
+                <div class="flex justify-between items-end pb-4 mb-6 border-b-4 border-black">
+                    <div>
+                        <span class="text-xs font-mono font-bold tracking-widest text-[#FF3000] uppercase block mb-1">02 // IN KITCHEN</span>
+                        <h2 class="text-2xl sm:text-3xl font-black text-black uppercase tracking-tight">กำลังเตรียม / PREP</h2>
+                    </div>
+                    <span class="px-3 py-1 bg-black text-white font-mono font-black text-sm uppercase">
+                        {{ pending_orders|length }} QUEUED
+                    </span>
+                </div>
+
+                <!-- Pending Orders List -->
+                <div class="space-y-3 flex-1 overflow-y-auto max-h-[700px] pr-1">
+                    {% for order in pending_orders %}
+                    <div class="bg-[#F2F2F2] border-2 border-black p-4 flex justify-between items-center hover:border-[#FF3000] transition">
+                        <div class="flex items-center gap-4">
+                            <div class="text-3xl sm:text-4xl font-black font-mono text-black">
+                                #{{ order.order_number }}
+                            </div>
+                            <div>
+                                <p class="text-xs font-black uppercase text-black">{{ order.customer.username }}</p>
+                                <p class="text-[11px] font-mono text-neutral-500">{{ order.created_at|date:"H:i:s" }}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-mono uppercase text-neutral-500 block">ITEMS</span>
+                            <span class="text-sm font-mono font-black text-black">{{ order.items.count }} ชิ้น</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="border-2 border-dashed border-neutral-300 py-16 text-center">
+                        <p class="text-neutral-500 font-mono text-xs uppercase">ไม่มีออเดอร์ที่กำลังจัดเตรียม</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+        </div>
     </div>
 
-    <footer class="queue-footer"><span>AI CASHIER</span><i></i> หน้านี้อัปเดตอัตโนมัติ</footer>
-</section>
+    <!-- Auto-refresh Script -->
+    <script>
+        // Refresh every 5 seconds to check for updates
+        setInterval(() => {
+            console.log('Refreshing queue display...');
+            location.reload();
+        }, 5000);
 
-<script>
-    function updateQueueClock() {
-        const clock = document.getElementById('queue-clock');
-        if (clock) clock.textContent = new Intl.DateTimeFormat('th-TH', {hour: '2-digit', minute: '2-digit'}).format(new Date());
-    }
-    updateQueueClock();
-    setInterval(updateQueueClock, 1000);
-    setInterval(() => location.reload(), 5000);
-</script>
-{% endblock %}
+        console.log('Queue display page loaded');
+    </script>
+</body>
+</html>

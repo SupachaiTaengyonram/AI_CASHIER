@@ -2,184 +2,245 @@
 {% load static %}
 
 {% block navbar %}
-<nav class="bg-[#2d2d4a] py-3 px-4 sm:px-6 lg:px-8 flex flex-wrap md:flex-nowrap items-center justify-between border-b border-[#393a5a] min-h-[70px] flex-shrink-0 gap-2">
-    <div class="flex items-center gap-4 sm:gap-8 flex-shrink-0">
-        <a href="{% url 'home' %}" class="text-xl sm:text-2xl font-bold text-[#b16cff]">AI CASHIER</a>
-        <!-- แสดง role ของผู้ใช้ -->
-        {% if user.is_staff and user.staff_role == 'cashier' %}
-        <span class="text-xs sm:text-sm px-2 sm:px-3 py-1 bg-[#b16cff]/20 text-[#b16cff] rounded-full border border-[#b16cff]/30">หน้าร้าน</span>
+<nav class="bg-white border-b-4 border-black py-2.5 px-4 sm:px-8 flex flex-wrap lg:flex-nowrap items-center justify-between min-h-[60px] flex-shrink-0 gap-3 z-30 sticky top-0 shadow-[0_4px_0_0_rgba(0,0,0,1)]">
+    <!-- Brand & Role -->
+    <div class="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+        <div class="flex items-center gap-2">
+            <div class="w-4 h-4 bg-[#FF3000]"></div>
+            <a href="{% url 'home' %}" class="text-xl sm:text-2xl font-black text-black tracking-tighter uppercase hover:text-[#FF3000] transition-colors">
+                AI CASHIER
+            </a>
+        </div>
+        
+        <!-- User role badge -->
+        {% if user.is_superuser %}
+        <span class="text-xs px-2.5 py-1 bg-black text-white font-mono font-black uppercase tracking-widest border border-black">ADMIN</span>
+        {% elif user.is_staff and user.staff_role == 'cashier' %}
+        <span class="text-xs px-2.5 py-1 bg-black text-white font-mono font-black uppercase tracking-widest border border-black">CASHIER</span>
         {% elif user.is_staff and user.staff_role == 'order_manager' %}
-        <span class="text-xs sm:text-sm px-2 sm:px-3 py-1 bg-[#b16cff]/20 text-[#b16cff] rounded-full border border-[#b16cff]/30">พนักงาน</span>
+        <span class="text-xs px-2.5 py-1 bg-white text-black font-mono font-black uppercase tracking-widest border-2 border-black">KITCHEN</span>
         {% else %}
-        <span class="text-xs sm:text-sm px-2 sm:px-3 py-1 bg-[#4a9d6f]/20 text-[#4a9d6f] rounded-full border border-[#4a9d6f]/30">ลูกค้า</span>
+        <span class="text-xs px-2.5 py-1 bg-[#F2F2F2] text-black font-mono font-bold uppercase tracking-widest border border-black">CUSTOMER</span>
         {% endif %}
     </div>
 
-    <!-- เมนูขวา: ให้บีบลงแล้วขึ้นบรรทัดใหม่ได้บนจอเล็ก -->
-    <div class="flex items-center gap-2 sm:gap-4 order-2 md:order-3 w-full md:w-auto justify-end">
+    <!-- Center Navigation Links -->
+    {% if user.is_staff %}
+    <div class="flex items-center gap-1 sm:gap-1.5 text-xs font-mono font-bold uppercase tracking-wider py-1 overflow-x-auto order-3 md:order-2 w-full md:w-auto">
+        <a href="{% url 'home' %}" class="px-2.5 sm:px-3 py-1.5 border border-black bg-black text-white whitespace-nowrap transition-colors">
+            <span class="text-[#FF3000] mr-1">01.</span> หน้าหลัก
+        </a>
+        <a href="{% url 'overviews' %}" class="px-2.5 sm:px-3 py-1.5 border border-black bg-white text-black hover:bg-[#FF3000] hover:text-white hover:border-[#FF3000] whitespace-nowrap transition-colors">
+            <span class="text-[#FF3000] mr-1">02.</span> ข้อมูลการขาย
+        </a>
+        <a href="{% url 'product_manage' %}" class="px-2.5 sm:px-3 py-1.5 border border-black bg-white text-black hover:bg-[#FF3000] hover:text-white hover:border-[#FF3000] whitespace-nowrap transition-colors">
+            <span class="text-[#FF3000] mr-1">03.</span> จัดการสินค้า
+        </a>
+        <a href="{% url 'order_management' %}" class="px-2.5 sm:px-3 py-1.5 border border-black bg-white text-black hover:bg-[#FF3000] hover:text-white hover:border-[#FF3000] whitespace-nowrap transition-colors">
+            <span class="text-[#FF3000] mr-1">04.</span> คิวออเดอร์
+        </a>
+        <a href="{% url 'customer_list' %}" class="px-2.5 sm:px-3 py-1.5 border border-black bg-white text-black hover:bg-[#FF3000] hover:text-white hover:border-[#FF3000] whitespace-nowrap transition-colors">
+            <span class="text-[#FF3000] mr-1">05.</span> ลูกค้า
+        </a>
+        <a href="{% url 'ai_settings' %}" class="px-2.5 sm:px-3 py-1.5 border border-black bg-white text-black hover:bg-[#FF3000] hover:text-white hover:border-[#FF3000] whitespace-nowrap transition-colors">
+            <span class="text-[#FF3000] mr-1">06.</span> ตั้งค่า AI
+        </a>
+    </div>
+    {% elif user.is_authenticated %}
+    <div class="flex items-center gap-1 sm:gap-1.5 text-xs font-mono font-bold uppercase tracking-wider py-1 overflow-x-auto order-3 md:order-2 w-full md:w-auto">
+        <a href="{% url 'home' %}" class="px-2.5 sm:px-3 py-1.5 border border-black bg-black text-white whitespace-nowrap transition-colors">
+            <span class="text-[#FF3000] mr-1">01.</span> สั่งอาหาร / เมนู
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Right Controls -->
+    <div class="flex items-center gap-2 sm:gap-3 order-2 md:order-3 shrink-0">
+        <!-- Day / Night Mode Switch Button -->
+        <button type="button" onclick="toggleTheme()" class="theme-toggle-btn px-2.5 sm:px-3 py-1.5 border-2 border-black bg-white hover:bg-black hover:text-white text-black font-mono font-bold text-xs uppercase tracking-wider transition duration-150 flex items-center gap-1.5" title="Switch Day/Night Mode">
+            <span class="theme-toggle-icon">🌙</span>
+            <span class="theme-toggle-text hidden sm:inline">NIGHT</span>
+        </button>
+
+        <a href="{% url 'order_queue_display' %}" target="_blank" class="px-2.5 sm:px-3 py-1.5 bg-[#F2F2F2] hover:bg-black hover:text-white text-black border-2 border-black font-mono font-bold text-xs uppercase tracking-wider transition duration-150" title="เปิดหน้าจอคิวลูกค้า">
+            จอคิว ↗
+        </a>
+
         {% if not user.is_staff %}
-        <a href="{% url 'profile' %}" class="text-white p-2 rounded-lg hover:bg-[#3a3d5c] transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <a href="{% url 'profile' %}" class="p-2 bg-white text-black border-2 border-black hover:bg-[#FF3000] hover:text-white transition duration-150" title="โปรไฟล์">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
             </svg>
         </a>
         {% endif %}
+
         {% if user.is_staff and user.staff_role == 'cashier' %}
-        <a href="{% url 'ai_disable_action' %}" class="px-4 sm:px-6 py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-lg transition text-xs sm:text-sm">
-            ปิดการใช้งาน
+        <a href="{% url 'ai_disable_action' %}" class="px-3 sm:px-4 py-1.5 bg-white text-black border-2 border-black hover:bg-[#FF3000] hover:text-white font-mono font-black uppercase text-xs tracking-wider transition duration-150">
+            ปิดใช้งาน AI
         </a>
         {% elif user.is_staff and user.staff_role == 'order_manager' %}
-        <a href="{% url 'order_management' %}" class="px-3 sm:px-4 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold rounded-lg transition text-xs sm:text-sm">
+        <a href="{% url 'order_management' %}" class="px-3 sm:px-4 py-1.5 bg-white text-black border-2 border-black hover:bg-black hover:text-white font-mono font-black uppercase text-xs tracking-wider transition duration-150">
             คิวออเดอร์
         </a>
         {% endif %}
-        <form method="post" action="{% url 'logout' %}">
+
+        <form method="post" action="{% url 'logout' %}" class="m-0">
             {% csrf_token %}
-            <button type="submit" class="px-4 sm:px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition text-xs sm:text-sm">
+            <button type="submit" class="px-3 sm:px-4 py-1.5 bg-black text-white border-2 border-black hover:bg-[#FF3000] hover:text-white font-mono font-bold uppercase text-xs tracking-wider transition duration-150">
                 ออกจากระบบ
             </button>
         </form>
     </div>
 </nav>
-
-<!-- เมนู admin สำหรับจัดการระบบ (เฉพาะ admin ที่มี is_superuser) -->
-{% if user.is_superuser %}
-<div class="bg-[#23243a] px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-4 text-xs sm:text-sm border-b border-[#393a5a] overflow-x-auto custom-scrollbar">
-    <a href="{% url 'home' %}" class="text-gray-300 hover:text-white font-medium transition whitespace-nowrap">หน้าหลัก</a>
-    <a href="{% url 'overviews' %}" class="text-gray-300 hover:text-white font-medium transition whitespace-nowrap">ข้อมูลการขาย</a>
-    <a href="{% url 'product_manage' %}" class="text-gray-300 hover:text-white font-medium transition whitespace-nowrap">จัดการสินค้า</a>
-    <a href="{% url 'ai_settings' %}" class="text-gray-300 hover:text-white font-medium transition whitespace-nowrap">ตั้งค่าการทำงานระบบเอไอ</a>
-</div>
-{% endif %}
 {% endblock navbar %}
 
-
 {% block content %}
-<div class="min-h-[calc(100vh-70px)] lg:h-[calc(100vh-70px)] overflow-y-auto lg:overflow-hidden grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 lg:grid-rows-5 gap-4 lg:gap-6 p-3 sm:p-4 lg:p-6 font-kanit text-white">
+<div class="min-h-[calc(100vh-70px)] lg:h-[calc(100vh-70px)] overflow-y-auto lg:overflow-hidden grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 lg:grid-rows-5 gap-3 sm:gap-4 p-3 sm:p-4 bg-[#F2F2F2] swiss-grid-pattern text-black">
 
-    <!-- แนะนำสินค้า -->
-    <div class="lg:row-span-2 bg-[#2d2d4a] rounded-lg border border-[#393a5a] p-3 flex flex-col gap-2 overflow-hidden h-full order-2 md:order-2 xl:order-1">
-        <h2 class="text-base font-bold text-[#b16cff] mb-1 flex-shrink-0">รายการสินค้าแนะนำ</h2>
-        <div class="flex-1 overflow-y-auto min-h-0 space-y-2 pr-1 custom-scrollbar">
+    <!-- 01. แนะนำสินค้า / FEATURED SELECTIONS -->
+    <div class="lg:row-span-2 bg-white border-4 border-black p-3.5 flex flex-col gap-2 overflow-hidden h-full order-2 md:order-2 xl:order-1 shadow-none">
+        <div class="flex items-center justify-between pb-2 border-b-2 border-black flex-shrink-0">
+            <div>
+                <span class="text-[10px] font-mono font-bold tracking-widest text-[#FF3000] uppercase block">01 // HIGHLIGHTS</span>
+                <h2 class="text-xs sm:text-sm font-black text-black tracking-wider uppercase">รายการสินค้าแนะนำ</h2>
+            </div>
+            <span class="text-xs font-mono font-bold text-neutral-400">[{{ featured_items|length|default:0 }}]</span>
+        </div>
+
+        <div class="flex-1 overflow-y-auto min-h-0 space-y-2 pr-1">
             {% if featured_items %}
                 {% for item in featured_items %}
-                <div class="w-full bg-[#3a3d5c] text-white py-2 px-3 rounded-lg transition border border-[#b16cff]/20 hover:border-[#b16cff]/40 flex gap-2 items-start group flex-shrink-0">
-                    <div class="w-12 h-12 bg-gradient-to-br from-[#b16cff]/30 to-[#7c3aed]/30 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div class="w-full bg-white border-2 border-black p-2 hover:border-[#FF3000] transition flex gap-2.5 items-center group flex-shrink-0">
+                    <div class="w-12 h-12 border-2 border-black bg-[#F2F2F2] flex items-center justify-center flex-shrink-0 overflow-hidden">
                         {% if item.image %}
                         <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-full h-full object-cover">
                         {% elif item.image_url %}
                         <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-full h-full object-cover">
                         {% else %}
-                        <span class="text-lg">⭐</span>
+                        <span class="text-sm font-mono font-black text-black">ITEM</span>
                         {% endif %}
                     </div>
                     <div class="flex-1 min-w-0 flex flex-col justify-center">
-                        <p class="font-semibold text-white truncate text-xs">{{ item.name }}</p>
-                        <p class="text-[#b16cff] font-bold text-xs">฿{{ item.price }}</p>
+                        <p class="font-bold text-black truncate text-xs uppercase">{{ item.name }}</p>
+                        <p class="text-black font-black font-mono text-xs mt-0.5">฿{{ item.price }}</p>
                     </div>
-                    <button class="add-to-cart-btn bg-[#b16cff] hover:bg-[#7c3aed] text-white font-semibold py-1 px-2 rounded transition text-xs flex-shrink-0 whitespace-nowrap" 
+                    <button class="add-to-cart-btn bg-black hover:bg-[#FF3000] text-white font-black py-1.5 px-3 uppercase text-[11px] tracking-wider transition flex-shrink-0 whitespace-nowrap border border-black" 
                             data-product-id="{{ item.id }}" 
                             data-product-name="{{ item.name }}" 
                             data-product-price="{{ item.price }}">
-                        เพิ่ม
+                        + เพิ่ม
                     </button>
                 </div>
                 {% endfor %}
             {% else %}
-                <p class="text-[#8b8ba8] text-xs text-center py-4">ไม่มีรายการแนะนำ</p>
+                <div class="border-2 border-dashed border-neutral-300 p-4 text-center">
+                    <p class="text-neutral-500 font-mono text-xs uppercase">ไม่มีรายการแนะนำ</p>
+                </div>
             {% endif %}
         </div>
     </div>
 
-    <!-- สินค้าทั้งหมด -->
-    <div class="md:col-span-2 xl:col-span-2 lg:row-span-2 bg-[#2d2d4a] rounded-lg border border-[#393a5a] flex flex-col overflow-hidden p-3 h-full order-1 md:order-1 xl:order-2">
-        <div class="grid grid-cols-2 gap-3 h-full">
-            <!-- ฝั่งซ้าย: สินค้า -->
-            <div class="flex flex-col overflow-hidden border border-[#393a5a] rounded-lg p-2 bg-[#23243a]">
-                <h2 class="text-sm font-bold text-[#b16cff] mb-2 flex-shrink-0">สินค้าทั้งหมด</h2>
+    <!-- 02 & 03. สินค้าทั้งหมด และ โปรโมชั่น / CATALOG & PROMOTIONS -->
+    <div class="md:col-span-2 xl:col-span-2 lg:row-span-2 bg-white border-4 border-black flex flex-col overflow-hidden p-3.5 h-full order-1 md:order-1 xl:order-2 shadow-none">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 h-full">
+            
+            <!-- ฝั่งซ้าย: รายการสินค้า -->
+            <div class="flex flex-col overflow-hidden border-2 border-black p-3 bg-white">
+                <div class="flex items-center justify-between pb-1.5 mb-2 border-b-2 border-black flex-shrink-0">
+                    <div>
+                        <span class="text-[10px] font-mono font-bold tracking-widest text-[#FF3000] uppercase block">02 // CATALOG</span>
+                        <h2 class="text-xs sm:text-sm font-black text-black tracking-wider uppercase">สินค้าทั้งหมด</h2>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-neutral-400">[{{ products|length|default:0 }}]</span>
+                </div>
                 
                 <!-- Search input -->
                 <input 
                     type="text" 
                     id="product-search" 
-                    placeholder="🔍 ค้นหา..." 
-                    class="w-full bg-[#3a3d5c] text-white border border-[#b16cff]/20 rounded-lg px-2 py-1 mb-2 focus:outline-none focus:border-[#b16cff] transition text-xs flex-shrink-0"
+                    placeholder="SEARCH CATALOG / ค้นหา..." 
+                    class="w-full bg-white text-black border-2 border-black px-2.5 py-1.5 mb-2 focus:outline-none focus:border-[#FF3000] transition text-xs font-bold uppercase tracking-wider placeholder:text-neutral-400 flex-shrink-0"
                 >
                 
-                <div class="flex gap-2 mb-2 pb-2 border-b border-[#393a5a] overflow-x-auto flex-shrink-0 custom-scrollbar">
-                    <button class="category-btn category-all px-2 py-1 bg-[#b16cff] text-white rounded-lg text-xs font-semibold flex-shrink-0 transition" data-category="all">
+                <!-- Category tabs -->
+                <div class="flex gap-1.5 mb-2 pb-2 border-b border-black overflow-x-auto flex-shrink-0">
+                    <button class="category-btn category-all px-2.5 py-1 bg-black text-white text-[11px] font-black uppercase tracking-wider flex-shrink-0 transition border border-black hover:bg-[#FF3000]" data-category="all">
                         ทั้งหมด
                     </button>
                     {% for category in categories %}
-                    <button class="category-btn px-2 py-1 bg-[#3a3d5c] text-[#8b8ba8] rounded-lg text-xs font-semibold hover:bg-[#4a4d6c] flex-shrink-0 transition" data-category="{{ category.id }}">
+                    <button class="category-btn px-2.5 py-1 bg-[#F2F2F2] text-black text-[11px] font-black uppercase tracking-wider hover:bg-black hover:text-white flex-shrink-0 transition border border-black" data-category="{{ category.id }}">
                         {{ category.name }}
                     </button>
                     {% endfor %}
                 </div>
                 
-                <div class="flex-1 overflow-y-auto min-h-0 pr-1 space-y-1 custom-scrollbar">
+                <!-- Product items scroll list -->
+                <div class="flex-1 overflow-y-auto min-h-0 pr-1 space-y-1.5">
                     {% for product in products %}
-                    <div class="product-card bg-[#3a3d5c] rounded-lg p-1.5 border border-[#b16cff]/30 hover:border-[#b16cff] transition flex gap-2 items-center" data-product-name="{{ product.name }}" data-category-id="{% if product.category %}{{ product.category.id }}{% else %}none{% endif %}">
+                    <div class="product-card bg-white p-2 border-2 border-black hover:border-[#FF3000] transition flex gap-2.5 items-center" data-product-name="{{ product.name }}" data-category-id="{% if product.category %}{{ product.category.id }}{% else %}none{% endif %}">
                         
-                        <div class="w-14 h-14 bg-gradient-to-br from-[#b16cff]/30 to-[#7c3aed]/30 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <div class="w-12 h-12 border-2 border-black bg-[#F2F2F2] flex items-center justify-center overflow-hidden flex-shrink-0">
                             {% if product.image %}
                             <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
                             {% elif product.image_url %}
                             <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
                             {% else %}
-                            <span class="text-xl"></span> 
+                            <span class="text-xs font-mono font-bold text-neutral-400">PRD</span> 
                             {% endif %}
                         </div>
                         
                         <div class="flex-1 flex flex-col justify-between min-w-0">
-                            <div>
-                                <p class="font-semibold text-white text-xs truncate">{{ product.name }}</p>
-                                <p class="text-[#b16cff] font-bold text-xs">฿{{ product.price }}</p>
-                            </div>
-                            <button class="add-to-cart-btn w-full bg-[#b16cff] hover:bg-[#7c3aed] text-white font-semibold py-0.5 rounded transition text-xs" 
-                                    data-product-id="{{ product.id }}" 
-                                    data-product-name="{{ product.name }}" 
-                                    data-product-price="{{ product.price }}">
-                                เพิ่ม
-                            </button>
+                            <p class="font-bold text-black text-xs truncate uppercase">{{ product.name }}</p>
+                            <p class="text-black font-black font-mono text-xs mt-0.5">฿{{ product.price }}</p>
                         </div>
+
+                        <button class="add-to-cart-btn bg-black hover:bg-[#FF3000] text-white font-black py-1 px-3 uppercase text-[11px] tracking-wider transition border border-black flex-shrink-0" 
+                                data-product-id="{{ product.id }}" 
+                                data-product-name="{{ product.name }}" 
+                                data-product-price="{{ product.price }}">
+                            + เพิ่ม
+                        </button>
                     </div>
                     {% empty %}
-                    <p class="text-[#8b8ba8] text-center text-xs py-2">ไม่มีสินค้า</p>
+                    <p class="text-neutral-500 text-center font-mono text-xs py-4 uppercase">ไม่มีสินค้าในระบบ</p>
                     {% endfor %}
                 </div>
             </div>
 
             <!-- ฝั่งขวา: โปรโมชั่น -->
-            <div class="flex flex-col overflow-hidden border border-[#393a5a] rounded-lg p-2 bg-[#23243a]">
-                <h2 class="text-sm font-bold text-[#b16cff] mb-2 flex-shrink-0">โปรโมชั่น</h2>
+            <div class="flex flex-col overflow-hidden border-2 border-black p-3 bg-white">
+                <div class="flex items-center justify-between pb-1.5 mb-2 border-b-2 border-black flex-shrink-0">
+                    <div>
+                        <span class="text-[10px] font-mono font-bold tracking-widest text-[#FF3000] uppercase block">03 // PROMOTIONS</span>
+                        <h2 class="text-xs sm:text-sm font-black text-black tracking-wider uppercase">โปรโมชั่นร้านค้า</h2>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-neutral-400">[{{ promotions|length|default:0 }}]</span>
+                </div>
                 
-                <div class="flex-1 overflow-y-auto min-h-0 pr-1 space-y-2 custom-scrollbar">
+                <div class="flex-1 overflow-y-auto min-h-0 pr-1 space-y-2">
                     {% if promotions %}
                         {% for promo in promotions %}
-                        <div class="bg-[#3a3d5c] rounded-lg overflow-hidden border border-[#b16cff]/20 flex flex-col flex-shrink-0">
-                            <div class="w-full aspect-video bg-gradient-to-br from-[#b16cff]/30 to-[#7c3aed]/30 flex items-center justify-center overflow-hidden">
+                        <div class="bg-[#F2F2F2] border-2 border-black overflow-hidden flex flex-col flex-shrink-0">
+                            <div class="w-full aspect-[21/9] bg-white border-b-2 border-black flex items-center justify-center overflow-hidden">
                                 {% if promo.image %}
                                 <img src="{{ promo.image.url }}" alt="{{ promo.title }}" class="w-full h-full object-cover">
                                 {% elif promo.image_url %}
                                 <img src="{{ promo.image_url }}" alt="{{ promo.title }}" class="w-full h-full object-cover">
                                 {% else %}
-                                <span class="text-3xl">📢</span>
+                                <span class="text-xs font-mono font-black text-black uppercase">CAMPAIGN BULLETIN</span>
                                 {% endif %}
                             </div>
-                            <div class="p-2 flex flex-col justify-between flex-1">
-                                <div>
-                                    <p class="font-semibold text-white text-xs line-clamp-1">{{ promo.title }}</p>
-                                    {% if promo.description %}
-                                    <p class="text-[#8b8ba8] text-xs line-clamp-1 mt-1">{{ promo.description }}</p>
-                                    {% endif %}
-                                </div>
+                            <div class="p-2.5">
+                                <p class="font-black text-black text-xs line-clamp-1 uppercase">{{ promo.title }}</p>
+                                {% if promo.description %}
+                                <p class="text-neutral-600 text-[11px] line-clamp-2 mt-0.5 leading-snug font-medium">{{ promo.description }}</p>
+                                {% endif %}
                             </div>
                         </div>
                         {% endfor %}
                     {% else %}
-                    <div class="flex items-center justify-center h-full">
-                        <p class="text-[#8b8ba8] text-center text-xs">ไม่มีโปรโมชั่น</p>
+                    <div class="flex items-center justify-center h-full border-2 border-dashed border-neutral-300">
+                        <p class="text-neutral-400 font-mono text-xs uppercase">ไม่มีโปรโมชั่นขณะนี้</p>
                     </div>
                     {% endif %}
                 </div>
@@ -187,125 +248,130 @@
         </div>
     </div>
     
-    <!-- แชท -->
-    <div class="lg:row-span-3 bg-[#2d2d4a] rounded-lg border border-[#393a5a] flex flex-col overflow-hidden p-3 h-full order-5 xl:order-3">
-        <div class="flex items-center justify-between mb-2 flex-shrink-0">
-            <h2 class="text-base font-bold text-[#b16cff]">สอบถามพนักงานขาย</h2>
-            <button id="clear-chat-btn" class="text-xs bg-[#393a5a] hover:bg-red-600/30 text-[#8b8ba8] hover:text-red-400 px-2 py-1 rounded transition" title="ล้างประวัติการสนทนา">
-                ลบประวัติการสนทนา
+    <!-- 04. แชทสอบถามพนักงาน / INQUIRY TERMINAL -->
+    <div class="lg:row-span-3 bg-white border-4 border-black flex flex-col overflow-hidden p-3.5 h-full order-5 xl:order-3 shadow-none">
+        <div class="flex items-center justify-between pb-2 mb-2 border-b-2 border-black flex-shrink-0">
+            <div>
+                <span class="text-[10px] font-mono font-bold tracking-widest text-[#FF3000] uppercase block">04 // ASSISTANT</span>
+                <h2 class="text-xs sm:text-sm font-black text-black tracking-wider uppercase">สอบถามพนักงานขาย</h2>
+            </div>
+            <button id="clear-chat-btn" class="text-[10px] font-mono font-bold bg-white hover:bg-[#FF3000] hover:text-white text-black border border-black px-2 py-1 uppercase tracking-wider transition" title="ล้างประวัติการสนทนา">
+                CLEAR
             </button>
         </div>
-        <div class="flex-1 overflow-y-auto min-h-0 mb-2 bg-[#1a1a2e] rounded p-2 custom-scrollbar">
+        <div class="flex-1 overflow-y-auto min-h-0 mb-2 bg-[#F2F2F2] border-2 border-black p-3">
             <div id="chat-messages" class="space-y-2 flex flex-col">
-                <div class="text-[#8b8ba8] text-center text-xs py-2">เริ่มต้นการสนทนา...</div>
+                <div class="text-neutral-500 text-center font-mono text-xs py-2 uppercase">SYSTEM READY // เริ่มต้นการสนทนา...</div>
             </div>
         </div>
-        <div class="flex gap-1 flex-shrink-0">
-            <input type="text" id="chat-input" placeholder="พิมพ์ข้อความ..." class="flex-1 bg-[#3a3d5c] text-white border border-[#b16cff]/20 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-[#b16cff]">
-            <button id="chat-send-btn" class="bg-[#b16cff] hover:bg-[#7c3aed] text-white font-semibold px-3 py-1.5 rounded transition text-xs">
-                ส่ง
+        <div class="flex gap-1.5 flex-shrink-0">
+            <input type="text" id="chat-input" placeholder="TYPE MESSAGE / พิมพ์ข้อความ..." class="flex-1 bg-white text-black border-2 border-black px-2.5 py-2 text-xs font-medium focus:outline-none focus:border-[#FF3000] uppercase placeholder:text-neutral-400">
+            <button id="chat-send-btn" class="bg-black hover:bg-[#FF3000] text-white font-black px-4 py-2 uppercase text-xs tracking-wider transition border-2 border-black">
+                SEND →
             </button>
         </div>
     </div>
 
-    <!-- ปุ่ม AI Order + Call Staff -->
-    <div class="lg:row-span-5 flex flex-col items-center justify-center gap-2 h-full order-3 md:order-3 xl:order-4">
-        <!-- ปุ่มเรียกพนักงาน (สำหรับพนักงานแคชเชียร์หน้าร้านเท่านั้น) -->
-        {% if user.is_staff and user.staff_role == 'cashier' %}
-        <button id="call-staff-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-full w-32 h-32 sm:w-40 sm:h-40 text-lg sm:text-xl flex items-center justify-center text-center shadow-lg transform transition hover:scale-105 duration-300 mb-4">
-            <span>เรียกพนักงาน</span>
-        </button>
-        {% endif %}
-        
-        <button id="ai-order-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold rounded-full w-48 h-48 sm:w-56 sm:h-56 lg:w-72 lg:h-72 xl:w-80 xl:h-80 text-lg sm:text-2xl flex items-center justify-center text-center shadow-lg transform transition hover:scale-105 duration-300">
-            <span id="ai-btn-text">สั่งสินค้า<br>ด้วยเสียง</span>
-        </button>
-        <p class="text-white text-xs sm:text-sm font-semibold text-center">แตะปุ่มแล้วพูดคำสั่งได้เลย</p>
-        <p class="text-green-300 text-xs sm:text-sm font-semibold text-center">เพิ่มสินค้า — พูดว่า “เพิ่ม” หรือ “ซื้อ”</p>
-        <p class="text-red-300 text-xs sm:text-sm font-semibold text-center">ลดจำนวน — พูดว่า “ลดจำนวน”</p>
-        <p class="text-red-400 text-xs sm:text-sm font-semibold text-center">นำออก — พูดว่า “ลบ” หรือ “ลบทั้งหมด”</p>
+    <!-- 05. ระบบสั่งการด้วยเสียง AI / VOICE ORDER TERMINAL -->
+    <div class="lg:row-span-5 bg-white border-4 border-black p-4 sm:p-6 flex flex-col items-center justify-between h-full order-3 md:order-3 xl:order-4 swiss-dots shadow-none">
+        <div class="w-full text-center pb-2 border-b-2 border-black">
+            <span class="text-xs font-mono font-bold tracking-widest text-[#FF3000] uppercase block">05 // VOICE TERMINAL</span>
+            <h2 class="text-base sm:text-lg font-black text-black uppercase tracking-tight">สั่งซื้อสินค้าด้วยเสียง</h2>
+        </div>
+
+        <div class="flex flex-col items-center justify-center gap-4 my-auto w-full py-4">
+            <!-- ปุ่มเรียกพนักงาน (สำหรับพนักงานแคชเชียร์หน้าร้าน) -->
+            {% if user.is_staff and user.staff_role == 'cashier' %}
+            <button id="call-staff-btn" class="bg-white hover:bg-black hover:text-white text-black font-black uppercase text-xs sm:text-sm tracking-widest border-4 border-black px-6 py-3 transition duration-150 w-full max-w-xs text-center mb-2">
+                <span>🔔 เรียกพนักงาน / CALL STAFF</span>
+            </button>
+            {% endif %}
+            
+            <!-- ปุ่มหลักสั่งสินค้าด้วยเสียง -->
+            <button id="ai-order-btn" class="w-44 h-44 sm:w-52 sm:h-52 lg:w-64 lg:h-64 rounded-full border-4 border-black bg-[#FF3000] hover:bg-black text-white font-black uppercase text-lg sm:text-2xl flex items-center justify-center text-center transition duration-150 active:scale-95">
+                <span id="ai-btn-text" class="tracking-tight leading-tight">สั่งสินค้า<br>ด้วยเสียง</span>
+            </button>
+        </div>
+
+        <!-- Voice Instructions Box -->
+        <div class="w-full border-2 border-black bg-[#FFFFFF] p-3 font-mono text-left space-y-1.5 text-xs">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-500 border-b border-black pb-1 mb-1">
+                SYNTAX // ไวยากรณ์คำสั่งเสียง:
+            </div>
+            <p class="text-neutral-800 font-semibold"><span class="bg-black text-white px-1.5 py-0.5 font-bold mr-1 text-[10px]">ADD</span> "เพิ่ม", "ซื้อ" ตามด้วยชื่อสินค้า</p>
+            <p class="text-neutral-800 font-semibold"><span class="bg-[#F2F2F2] border border-black text-black px-1.5 py-0.5 font-bold mr-1 text-[10px]">DEC</span> "ลดจำนวน" หรือ "ลด"</p>
+            <p class="text-neutral-800 font-semibold"><span class="bg-[#FF3000] text-white px-1.5 py-0.5 font-bold mr-1 text-[10px]">DEL</span> "ลบ" หรือ "ลบทั้งหมด"</p>
+        </div>
     </div>
 
-    <!-- ตะกร้าสินค้า -->
-    <div class="lg:row-span-3 bg-[#2d2d4a] border border-[#393a5a] p-2 flex flex-col rounded-lg overflow-hidden h-full order-4 xl:order-5">
-        <div class="mb-2 flex-shrink-0">
-            <h2 class="text-[#b16cff] font-bold text-base mb-1">รายการสินค้าที่เลือก</h2>
-            <div class="bg-[#3a3d5c] rounded-lg p-2 border border-[#b16cff]/20">
-                <p class="text-[#8b8ba8] text-xs">จำนวนรายการ</p>
-                <p class="text-white text-lg font-bold"><span id="cart-count">0</span> รายการ</p>
+    <!-- 06. ตะกร้าสินค้า / ORDER SUMMARY & CHECKOUT -->
+    <div class="lg:row-span-3 bg-white border-4 border-black p-3.5 flex flex-col h-full order-4 xl:order-5 shadow-none">
+        <div class="flex items-center justify-between pb-2 mb-2 border-b-2 border-black flex-shrink-0">
+            <div>
+                <span class="text-[10px] font-mono font-bold tracking-widest text-[#FF3000] uppercase block">06 // REGISTER</span>
+                <h2 class="text-xs sm:text-sm font-black text-black tracking-wider uppercase">รายการในตะกร้า</h2>
+            </div>
+            <div class="text-xs font-mono font-bold bg-[#F2F2F2] px-2 py-0.5 border border-black">
+                <span id="cart-count">0</span> ITEMS
             </div>
         </div>
-        <div class="flex-1 overflow-y-auto mb-2 min-h-0 custom-scrollbar">
-            <div id="cart-items" class="space-y-1">
-                <p class="text-[#8b8ba8] text-center text-xs py-2">ยังไม่มีรายการ</p>
+
+        <div class="flex-1 overflow-y-auto mb-2 min-h-0 pr-1">
+            <div id="cart-items" class="space-y-1.5">
+                <p class="text-neutral-400 text-center font-mono text-xs py-4 uppercase">EMPTY // ยังไม่มีรายการ</p>
             </div>
         </div>
-        <div class="border-t border-[#393a5a] mb-2 flex-shrink-0"></div>
-        <div class="mb-2 flex-shrink-0">
-            <div class="flex justify-between">
-                <span class="text-[#8b8ba8] text-xs">รวมทั้งสิ้น:</span>
-                <span class="text-white font-bold text-sm">฿<span id="total-price">0.00</span></span>
+
+        <div class="border-t-2 border-black pt-2 mb-3 flex-shrink-0">
+            <div class="flex justify-between items-baseline">
+                <span class="text-xs font-mono font-bold uppercase tracking-widest text-neutral-500">TOTAL DUE / รวมทั้งสิ้น:</span>
+                <span class="text-xl sm:text-2xl font-black font-mono text-black">฿<span id="total-price">0.00</span></span>
             </div>
         </div>
-        <div class="space-y-1 flex-shrink-0">
-            <button id="test-add-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 rounded-lg transition border border-[#b16cff]/20 text-xs" style="display: none;">
-                ทดสอบเพิ่มสินค้า
+
+        <div class="space-y-1.5 flex-shrink-0">
+            <button id="test-add-btn" class="w-full bg-white text-black border-2 border-black font-black py-1 uppercase text-xs" style="display: none;">
+                TEST ADD
             </button>
-            <button id="clear-cart-btn" class="w-full bg-[#3a3d5c] hover:bg-[#4a4d6c] text-white font-semibold py-1 rounded-lg transition border border-[#b16cff]/20 text-xs">
-                ลบรายการทั้งหมด
+            <button id="clear-cart-btn" class="w-full bg-[#F2F2F2] hover:bg-neutral-300 text-black font-black py-2 uppercase text-xs tracking-wider transition border-2 border-black">
+                ลบรายการทั้งหมด / CLEAR ALL
             </button>
-            <button id="payment-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg transition text-sm" onclick="handlePaymentClick(event)">
-                ชำระเงิน
+            <button id="payment-btn" class="w-full bg-[#FF3000] hover:bg-black text-white font-black py-3 uppercase text-sm tracking-widest transition duration-150 border-2 border-black" onclick="handlePaymentClick(event)">
+                ชำระเงิน / PROCEED TO PAY →
             </button>
         </div>
     </div>
 
 </div>
 
-<div id="closeAiModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
-    <div class="bg-[#3a3d5c] rounded-lg p-4 max-w-md w-full border border-[#b16cff]/20">
-        <h3 class="text-[#b16cff] font-bold text-base mb-3">ปิด AI Cashier</h3>
-        <p class="text-[#8b8ba8] mb-3 text-sm">กรุณาใส่ชื่อผู้ใช้และรหัสผ่าน เพื่อยืนยัน</p>
+<!-- Modal ยืนยันปิด AI -->
+<div id="closeAiModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white border-4 border-black p-6 sm:p-8 max-w-md w-full shadow-none">
+        <span class="text-xs font-mono font-bold tracking-widest text-[#FF3000] uppercase block mb-1">AUTH VERIFICATION</span>
+        <h3 class="text-2xl font-black text-black uppercase tracking-tight mb-2">ปิด AI Cashier</h3>
+        <p class="text-xs text-neutral-600 mb-6 uppercase tracking-wider font-semibold">กรุณากรอกชื่อผู้ใช้และรหัสผ่านของผู้ดูแล เพื่อยืนยันคำสั่ง</p>
         
-        <form method="post" action="{% url 'close_ai' %}" class="space-y-3">
+        <form method="post" action="{% url 'close_ai' %}" class="space-y-4">
             {% csrf_token %}
             <div>
-                <label class="text-[#b16cff] text-xs font-semibold">ชื่อผู้ใช้</label>
-                <input type="text" name="username" class="w-full bg-[#23243a] text-white border border-[#b16cff]/20 rounded px-3 py-2 mt-1 focus:outline-none focus:border-[#b16cff] text-sm" required>
+                <label class="block text-xs font-black uppercase tracking-wider text-black mb-1.5">ชื่อผู้ใช้ / USERNAME</label>
+                <input type="text" name="username" class="w-full bg-white text-black border-2 border-black px-3 py-2 text-sm font-medium focus:outline-none focus:border-[#FF3000] uppercase" required>
             </div>
             <div>
-                <label class="text-[#b16cff] text-xs font-semibold">รหัสผ่าน</label>
-                <input type="password" name="password" class="w-full bg-[#23243a] text-white border border-[#b16cff]/20 rounded px-3 py-2 mt-1 focus:outline-none focus:border-[#b16cff] text-sm" required>
+                <label class="block text-xs font-black uppercase tracking-wider text-black mb-1.5">รหัสผ่าน / PASSWORD</label>
+                <input type="password" name="password" class="w-full bg-white text-black border-2 border-black px-3 py-2 text-sm font-medium focus:outline-none focus:border-[#FF3000]" required>
             </div>
-            <div class="flex gap-2">
-                <button type="button" id="cancel-close-ai" class="flex-1 bg-[#3a3d5c] hover:bg-[#4a4d6c] text-white font-semibold py-1.5 rounded transition text-xs">
-                    ยกเลิก
+            <div class="flex gap-2 pt-2">
+                <button type="button" id="cancel-close-ai" class="flex-1 bg-white hover:bg-neutral-200 text-black border-2 border-black font-black uppercase py-2.5 text-xs tracking-wider transition">
+                    ยกเลิก / CANCEL
                 </button>
-                <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-1.5 rounded transition text-xs">
-                    ปิด AI
+                <button type="submit" class="flex-1 bg-[#FF3000] hover:bg-black text-white border-2 border-black font-black uppercase py-2.5 text-xs tracking-wider transition">
+                    ยืนยันปิด AI
                 </button>
             </div>
         </form>
     </div>
 </div>
-
-<style>
-    /* ปรับแต่ง Scrollbar ให้สวยงามและไม่รก */
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 4px;
-        height: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: #2d2d4a; 
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #5b5d7e; 
-        border-radius: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #b16cff; 
-    }
-</style>
 
 <script>
     // ### ส่วนที่เพิ่มใหม่: จัดการปุ่ม AI Voice Order ###

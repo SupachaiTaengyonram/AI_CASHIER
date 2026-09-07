@@ -1,61 +1,507 @@
-{% load static %}
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="h-full bg-[#FFFFFF]">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0b111b">
-    <title>{% block title %}AI CASHIER{% endblock %}</title>
+    <title>AI CASHIER | INTERNATIONAL TYPOGRAPHIC POS</title>
+
+    <!-- Google Fonts: Inter & Noto Sans Thai -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Thai:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <!-- Prevent FOUC: Load theme immediately -->
+    <script>
+        (function() {
+            try {
+                var savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
+
+    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'swiss-black': '#000000',
+                        'swiss-white': '#FFFFFF',
+                        'swiss-muted': '#F2F2F2',
+                        'swiss-gray': '#E5E5E5',
+                        'swiss-dark': '#111111',
+                        'swiss-accent': '#FF3000',
+                        'swiss-border': '#000000',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans Thai', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Courier New', 'monospace'],
+                    },
+                    borderWidth: {
+                        '3': '3px',
+                        '5': '5px',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Alpine, HTMX, Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://unpkg.com/htmx.org"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'aicashier/css/anime-ui.css' %}">
-    {% block extra_head %}{% endblock %}
+
+    <style>
+        :root {
+            --swiss-black: #000000;
+            --swiss-white: #FFFFFF;
+            --swiss-muted: #F2F2F2;
+            --swiss-accent: #FF3000;
+        }
+
+        /* Strict Swiss Geometry: zero rounded corners by law */
+        *, *::before, *::after {
+            border-radius: 0px !important;
+        }
+
+        /* Base Typography */
+        body {
+            font-family: 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #FFFFFF;
+            color: #000000;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Swiss Pattern Overlays */
+        .swiss-grid-pattern {
+            background-image: 
+                linear-gradient(to right, rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .swiss-dots {
+            background-image: radial-gradient(rgba(0, 0, 0, 0.12) 1.5px, transparent 1.5px);
+            background-size: 16px 16px;
+        }
+
+        .swiss-diagonal {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(0, 0, 0, 0.04),
+                rgba(0, 0, 0, 0.04) 1px,
+                transparent 1px,
+                transparent 10px
+            );
+        }
+
+        /* Custom Scrollbar - Precision Swiss Architecture */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F2F2F2;
+            border-left: 1px solid #000000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #000000;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF3000;
+        }
+
+        /* Form Controls - Brutal Flatness */
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="number"],
+        input[type="tel"],
+        input[type="url"],
+        select,
+        textarea {
+            background-color: #FFFFFF !important;
+            color: #000000 !important;
+            border: 2px solid #000000 !important;
+            padding: 0.625rem 0.875rem !important;
+            font-size: 0.875rem !important;
+            font-weight: 500 !important;
+            border-radius: 0px !important;
+            box-shadow: none !important;
+            outline: none !important;
+            transition: border-color 0.15s ease-in-out;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #FF3000 !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+        /* Styling for dynamically inserted cart items by JS */
+        #cart-items > div {
+            background-color: #FFFFFF !important;
+            border: 2px solid #000000 !important;
+            color: #000000 !important;
+            margin-bottom: 0.375rem !important;
+            padding: 0.5rem 0.625rem !important;
+            box-shadow: none !important;
+        }
+        #cart-items > div p {
+            color: #000000 !important;
+        }
+        #cart-items > div span {
+            color: #000000 !important;
+        }
+        #cart-items button.decrease-btn,
+        #cart-items button.increase-btn {
+            background-color: #000000 !important;
+            color: #FFFFFF !important;
+            border: 1px solid #000000 !important;
+            font-weight: 800 !important;
+            transition: all 0.15s ease !important;
+        }
+        #cart-items button.decrease-btn:hover,
+        #cart-items button.increase-btn:hover {
+            background-color: #FF3000 !important;
+            border-color: #FF3000 !important;
+            color: #FFFFFF !important;
+        }
+        #cart-items button.remove-btn {
+            background-color: #FFFFFF !important;
+            color: #000000 !important;
+            border: 1px solid #000000 !important;
+            font-weight: 800 !important;
+            transition: all 0.15s ease !important;
+        }
+        #cart-items button.remove-btn:hover {
+            background-color: #FF3000 !important;
+            color: #FFFFFF !important;
+            border-color: #FF3000 !important;
+        }
+
+        /* Styling for dynamically inserted chat messages */
+        #chat-messages .chat-bubble,
+        #chat-messages > div {
+            border-radius: 0px !important;
+        }
+
+        /* Styling for dynamically created order cards in order_management */
+        #master-grid > div {
+            background-color: #FFFFFF !important;
+            border: 2px solid #000000 !important;
+            box-shadow: none !important;
+            color: #000000 !important;
+        }
+        #master-grid > div h3,
+        #master-grid > div p,
+        #master-grid > div span {
+            color: #000000 !important;
+        }
+        #master-grid > div button {
+            border-radius: 0px !important;
+            border: 2px solid #000000 !important;
+            font-weight: 800 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+        }
+        /* Theme Toggle Button */
+        .theme-toggle-btn {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s ease-in-out;
+        }
+
+        /* ==========================================================================
+           NIGHT / DARK MODE - INVERTED SWISS BRUTALIST ARCHITECTURE
+           ========================================================================== */
+        html.dark {
+            color-scheme: dark;
+            background-color: #0A0A0A !important;
+        }
+
+        html.dark body {
+            background-color: #0A0A0A !important;
+            color: #EDEDED !important;
+        }
+
+        /* Surfaces & Backgrounds */
+        html.dark .bg-white,
+        html.dark .bg-\[\#FFFFFF\] {
+            background-color: #141414 !important;
+        }
+
+        html.dark .bg-\[\#F2F2F2\],
+        html.dark .bg-swiss-muted {
+            background-color: #000000 !important;
+        }
+
+        html.dark .bg-neutral-50,
+        html.dark .bg-neutral-100 {
+            background-color: #1A1A1A !important;
+        }
+
+        /* Stark White Architectural Borders */
+        html.dark .border-black,
+        html.dark .border-2.border-black,
+        html.dark .border-4.border-black,
+        html.dark [class*="border-black"] {
+            border-color: #E5E5E5 !important;
+        }
+
+        html.dark .border-neutral-200,
+        html.dark .border-neutral-300 {
+            border-color: #2E2E2E !important;
+        }
+
+        html.dark .divide-black > * + * {
+            border-color: #E5E5E5 !important;
+        }
+
+        /* Typography */
+        html.dark .text-black,
+        html.dark [class*="text-black"] {
+            color: #FFFFFF !important;
+        }
+
+        html.dark .text-neutral-700,
+        html.dark .text-neutral-600 {
+            color: #D4D4D4 !important;
+        }
+
+        html.dark .text-neutral-500,
+        html.dark .text-neutral-400 {
+            color: #A3A3A3 !important;
+        }
+
+        /* Buttons & Badges: Stark Inverted Contrast */
+        html.dark button.bg-black,
+        html.dark a.bg-black:not(.category-all) {
+            background-color: #FFFFFF !important;
+            color: #000000 !important;
+            border-color: #FFFFFF !important;
+        }
+
+        html.dark button.bg-black:hover,
+        html.dark a.bg-black:hover {
+            background-color: #FF3000 !important;
+            color: #FFFFFF !important;
+            border-color: #FF3000 !important;
+        }
+
+        /* Keep category-all button clear */
+        html.dark .category-all {
+            background-color: #FFFFFF !important;
+            color: #000000 !important;
+            border-color: #FFFFFF !important;
+        }
+
+        /* Table Headers in Dark Mode */
+        html.dark tr.bg-black {
+            background-color: #1F1F1F !important;
+            color: #FFFFFF !important;
+            border-color: #E5E5E5 !important;
+        }
+
+        /* Status Badges in Dark Mode */
+        html.dark span.bg-black {
+            background-color: #262626 !important;
+            color: #FFFFFF !important;
+            border: 1px solid #555555 !important;
+        }
+
+        /* Swiss Accent stays pure glowing red */
+        html.dark .bg-\[\#FF3000\],
+        html.dark .bg-swiss-accent {
+            background-color: #FF3000 !important;
+            color: #FFFFFF !important;
+        }
+
+        html.dark .hover\:bg-\[\#FF3000\]:hover,
+        html.dark .hover\:bg-swiss-accent:hover {
+            background-color: #FF3000 !important;
+            color: #FFFFFF !important;
+            border-color: #FF3000 !important;
+        }
+
+        html.dark .text-\[\#FF3000\],
+        html.dark .text-swiss-accent {
+            color: #FF3000 !important;
+        }
+
+        /* Inputs & Form Controls in Dark Mode */
+        html.dark input[type="text"],
+        html.dark input[type="password"],
+        html.dark input[type="email"],
+        html.dark input[type="number"],
+        html.dark input[type="tel"],
+        html.dark input[type="url"],
+        html.dark select,
+        html.dark textarea {
+            background-color: #1A1A1A !important;
+            color: #FFFFFF !important;
+            border: 2px solid #555555 !important;
+        }
+
+        html.dark input::placeholder,
+        html.dark textarea::placeholder {
+            color: #737373 !important;
+        }
+
+        html.dark input:focus,
+        html.dark select:focus,
+        html.dark textarea:focus {
+            border-color: #FF3000 !important;
+        }
+
+        /* Dark Mode Scrollbars */
+        html.dark ::-webkit-scrollbar-track {
+            background: #0A0A0A !important;
+            border-left: 1px solid #E5E5E5 !important;
+        }
+        html.dark ::-webkit-scrollbar-thumb {
+            background: #E5E5E5 !important;
+        }
+        html.dark ::-webkit-scrollbar-thumb:hover {
+            background: #FF3000 !important;
+        }
+
+        /* Dark Mode Swiss Grid & Patterns */
+        html.dark .swiss-grid-pattern {
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px) !important;
+            background-size: 24px 24px !important;
+        }
+
+        html.dark .swiss-dots {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1.5px, transparent 1.5px) !important;
+            background-size: 16px 16px !important;
+        }
+
+        /* Dark Mode Shadows */
+        html.dark [class*="shadow-"] {
+            box-shadow: none !important;
+        }
+        html.dark .shadow-\[0_4px_0_0_rgba\(0\,0\,0\,1\)\] {
+            box-shadow: 0 4px 0 0 rgba(255, 255, 255, 0.25) !important;
+        }
+
+        /* Dark Mode Theme Switch Button */
+        html.dark .theme-toggle-btn {
+            background-color: #1A1A1A !important;
+            color: #FFFFFF !important;
+            border-color: #FFFFFF !important;
+        }
+        html.dark .theme-toggle-btn:hover {
+            background-color: #FF3000 !important;
+            border-color: #FF3000 !important;
+            color: #FFFFFF !important;
+        }
+
+        /* Dynamic Cart Items in Dark Mode */
+        html.dark #cart-items > div {
+            background-color: #1A1A1A !important;
+            border: 2px solid #555555 !important;
+            color: #FFFFFF !important;
+        }
+        html.dark #cart-items > div p,
+        html.dark #cart-items > div span {
+            color: #FFFFFF !important;
+        }
+        html.dark #cart-items button.decrease-btn,
+        html.dark #cart-items button.increase-btn {
+            background-color: #FFFFFF !important;
+            color: #000000 !important;
+            border: 1px solid #FFFFFF !important;
+        }
+        html.dark #cart-items button.decrease-btn:hover,
+        html.dark #cart-items button.increase-btn:hover {
+            background-color: #FF3000 !important;
+            border-color: #FF3000 !important;
+            color: #FFFFFF !important;
+        }
+        html.dark #cart-items button.remove-btn {
+            background-color: #1A1A1A !important;
+            color: #FFFFFF !important;
+            border: 1px solid #555555 !important;
+        }
+        html.dark #cart-items button.remove-btn:hover {
+            background-color: #FF3000 !important;
+            color: #FFFFFF !important;
+            border-color: #FF3000 !important;
+        }
+
+        /* Dynamic Kitchen Queue Cards in Dark Mode */
+        html.dark #master-grid > div {
+            background-color: #141414 !important;
+            border: 2px solid #E5E5E5 !important;
+            color: #FFFFFF !important;
+        }
+        html.dark #master-grid > div h3,
+        html.dark #master-grid > div p,
+        html.dark #master-grid > div span {
+            color: #FFFFFF !important;
+        }
+        html.dark #master-grid > div button {
+            border: 2px solid #E5E5E5 !important;
+        }
+
+        /* Chat in Dark Mode */
+        html.dark #chat-messages > div {
+            color: #D4D4D4 !important;
+        }
+    </style>
+
+    <!-- Theme Switch Script -->
+    <script>
+        function updateThemeUI(isDark) {
+            var icons = document.querySelectorAll('.theme-toggle-icon');
+            var texts = document.querySelectorAll('.theme-toggle-text');
+            var btns = document.querySelectorAll('.theme-toggle-btn');
+            for (var i = 0; i < icons.length; i++) {
+                icons[i].textContent = isDark ? '☀️' : '🌙';
+            }
+            for (var j = 0; j < texts.length; j++) {
+                texts[j].textContent = isDark ? 'DAY' : 'NIGHT';
+            }
+            for (var k = 0; k < btns.length; k++) {
+                btns[k].setAttribute('title', isDark ? 'Switch to Day Mode (โหมดกลางวัน)' : 'Switch to Night Mode (โหมดกลางคืน)');
+                btns[k].setAttribute('aria-label', isDark ? 'Switch to Day Mode' : 'Switch to Night Mode');
+            }
+        }
+
+        function toggleTheme() {
+            var isDark = document.documentElement.classList.toggle('dark');
+            try {
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            } catch(e) {}
+            updateThemeUI(isDark);
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            var isDark = document.documentElement.classList.contains('dark');
+            updateThemeUI(isDark);
+        });
+    </script>
 </head>
 
-<body class="anime-app {% block body_class %}{% endblock %}">
-  <div class="anime-atmosphere" aria-hidden="true">
-    <span class="anime-orb anime-orb--sakura"></span>
-    <span class="anime-orb anime-orb--cyan"></span>
-    <span class="anime-star anime-star--one">✦</span>
-    <span class="anime-star anime-star--two">✧</span>
-  </div>
+<body class="min-h-screen flex flex-col bg-[#FFFFFF] text-[#000000] font-sans selection:bg-[#FF3000] selection:text-white">
+    {% block navbar %}
+        {% include 'aicashier/product/navbar.html' %}
+    {% endblock navbar %}
 
-  {% block navbar %}
-  <header class="anime-navbar">
-    <a href="{% url 'home' %}" class="anime-brand" aria-label="AI Cashier — หน้าหลัก">
-      <span class="anime-brand__mark">愛</span>
-      <span><b>AI</b> CASHIER<small>SMART CAFÉ SYSTEM</small></span>
-    </a>
-    {% if user.is_authenticated %}
-    <nav class="anime-navlinks" aria-label="เมนูหลัก">
-      <a href="{% url 'home' %}">หน้าหลัก</a>
-      {% if user.is_superuser %}
-      <a href="{% url 'overviews' %}">ภาพรวม</a>
-      <a href="{% url 'product_manage' %}">สินค้า</a>
-      <a href="{% url 'ai_settings' %}">ตั้งค่า AI</a>
-      {% endif %}
-    </nav>
-    <div class="anime-navbar__actions">
-      {% if not user.is_staff %}<a href="{% url 'profile' %}" class="anime-icon-button" title="โปรไฟล์">♡</a>{% endif %}
-      <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="anime-button anime-button--ghost anime-button--small">ออกจากระบบ</button>
-      </form>
-    </div>
-    {% else %}
-    <span class="anime-status"><i></i> ONLINE SERVICE</span>
-    {% endif %}
-  </header>
-  {% endblock navbar %}
-
-  <main class="anime-main">
-    {% block content %}{% endblock %}
-  </main>
-  {% block extra_script %}{% endblock %}
+    <main class="flex-1 w-full">
+        {% block content %}
+        {% endblock %}
+    </main>
 </body>
 </html>

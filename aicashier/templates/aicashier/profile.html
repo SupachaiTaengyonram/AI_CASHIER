@@ -2,85 +2,101 @@
 {% load static %}
 
 {% block content %}
-<div class="min-h-screen bg-[#23243a] font-kanit py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-2xl mx-auto">
+<div class="min-h-[calc(100vh-68px)] bg-[#F2F2F2] swiss-grid-pattern py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto bg-white border-4 border-black p-6 sm:p-10 shadow-none">
         <!-- Header -->
-        <div class="mb-8 flex items-center justify-between">
+        <div class="mb-8 pb-6 border-b-4 border-black flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-                <h1 class="text-4xl font-bold text-[#b16cff] mb-2">ข้อมูลส่วนตัว</h1>
-                <p class="text-[#8b8ba8]">โปรไฟล์ของคุณ</p>
+                <span class="text-xs font-mono font-bold tracking-widest text-[#FF3000] uppercase block mb-1">03. // DOSSIER</span>
+                <h1 class="text-3xl sm:text-4xl font-black text-black tracking-tighter uppercase leading-none">
+                    ข้อมูลส่วนตัว<br><span class="text-neutral-400">USER PROFILE</span>
+                </h1>
             </div>
-            <a href="{% url 'home' %}" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition">
-                กลับสู่หน้าหลัก
+            <a href="{% url 'home' %}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-black border-2 border-black font-black uppercase text-xs tracking-wider hover:bg-black hover:text-white transition duration-150">
+                <span>←</span> กลับหน้าหลัก
             </a>
         </div>
 
-        <!-- Profile Card -->
-        <div class="bg-[#3a3d5c] rounded-lg p-8 border border-[#b16cff]/20">
-            <div class="space-y-6">
-                <!-- Username -->
-                <div>
-                    <label class="text-[#b16cff] font-semibold block mb-2">ชื่อผู้ใช้</label>
-                    <div class="bg-[#2d2d4a] text-white rounded-lg px-4 py-3 border border-[#b16cff]/20">
-                        {{ customer.username }}
-                    </div>
-                </div>
+        <!-- Profile Data Table -->
+        <div class="border-2 border-black divide-y-2 divide-black bg-white mb-8">
+            <!-- Username -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 p-4 sm:p-5">
+                <span class="sm:col-span-4 text-xs font-mono font-bold uppercase tracking-widest text-neutral-500 flex items-center">
+                    ชื่อผู้ใช้ / USERNAME
+                </span>
+                <span class="sm:col-span-8 text-base font-black text-black uppercase mt-1 sm:mt-0 font-mono">
+                    {{ customer.username }}
+                </span>
+            </div>
 
-                <!-- Email -->
-                <div>
-                    <label class="text-[#b16cff] font-semibold block mb-2">อีเมล</label>
-                    <div class="bg-[#2d2d4a] text-white rounded-lg px-4 py-3 border border-[#b16cff]/20">
-                        {{ customer.email }}
-                    </div>
-                </div>
+            <!-- Email -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 p-4 sm:p-5 bg-[#F2F2F2]">
+                <span class="sm:col-span-4 text-xs font-mono font-bold uppercase tracking-widest text-neutral-500 flex items-center">
+                    อีเมล / EMAIL
+                </span>
+                <span class="sm:col-span-8 text-base font-bold text-black mt-1 sm:mt-0">
+                    {{ customer.email }}
+                </span>
+            </div>
 
-                <!-- Contact Number -->
-                <div>
-                    <label class="text-[#b16cff] font-semibold block mb-2">เบอร์ติดต่อ</label>
-                    <div class="bg-[#2d2d4a] text-white rounded-lg px-4 py-3 border border-[#b16cff]/20">
-                        {% if customer.contact_number %}
-                            {{ customer.contact_number }}
-                        {% else %}
-                            <span class="text-[#8b8ba8]">ยังไม่มีข้อมูล</span>
-                        {% endif %}
-                    </div>
-                </div>
+            <!-- Contact Number -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 p-4 sm:p-5">
+                <span class="sm:col-span-4 text-xs font-mono font-bold uppercase tracking-widest text-neutral-500 flex items-center">
+                    เบอร์ติดต่อ / CONTACT
+                </span>
+                <span class="sm:col-span-8 text-base font-bold text-black mt-1 sm:mt-0 font-mono">
+                    {% if customer.contact_number %}
+                        {{ customer.contact_number }}
+                    {% else %}
+                        <span class="text-neutral-400 italic">NOT REGISTERED</span>
+                    {% endif %}
+                </span>
+            </div>
 
-                <!-- Join Date -->
-                <div>
-                    <label class="text-[#b16cff] font-semibold block mb-2">วันที่สมัคร</label>
-                    <div class="bg-[#2d2d4a] text-white rounded-lg px-4 py-3 border border-[#b16cff]/20">
-                        {{ customer.date_joined|date:"d/m/Y" }}
-                    </div>
-                </div>
+            <!-- Join Date -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 p-4 sm:p-5 bg-[#F2F2F2]">
+                <span class="sm:col-span-4 text-xs font-mono font-bold uppercase tracking-widest text-neutral-500 flex items-center">
+                    วันที่สมัคร / ENROLLED
+                </span>
+                <span class="sm:col-span-8 text-base font-mono font-bold text-black mt-1 sm:mt-0">
+                    {{ customer.date_joined|date:"d/m/Y H:i" }}
+                </span>
+            </div>
 
-                <!-- Account Status -->
-                <div>
-                    <label class="text-[#b16cff] font-semibold block mb-2">สถานะบัญชี</label>
-                    <div class="bg-[#2d2d4a] text-white rounded-lg px-4 py-3 border border-[#b16cff]/20">
-                        {% if customer.is_active %}
-                            <span class="text-green-400">✅ ใช้งาน</span>
-                        {% else %}
-                            <span class="text-red-400">❌ ปิดใช้งาน</span>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex gap-4 pt-4">
-                    <a href="{% url 'profile_edit' %}" class="flex-1 px-6 py-3 bg-[#b16cff] hover:bg-[#7c3aed] text-white font-bold rounded-lg transition text-center">
-                        แก้ไขโปรไฟล์
-                    </a>
+            <!-- Account Status -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 p-4 sm:p-5">
+                <span class="sm:col-span-4 text-xs font-mono font-bold uppercase tracking-widest text-neutral-500 flex items-center">
+                    สถานะบัญชี / STATUS
+                </span>
+                <div class="sm:col-span-8 mt-1 sm:mt-0">
+                    {% if customer.is_active %}
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-black text-white text-xs font-mono font-bold uppercase tracking-widest">
+                            <span class="w-2 h-2 bg-emerald-400"></span> ACTIVE
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FF3000] text-white text-xs font-mono font-bold uppercase tracking-widest">
+                            DISABLED
+                        </span>
+                    {% endif %}
                 </div>
             </div>
+        </div>
+
+        <!-- Action Button -->
+        <div>
+            <a href="{% url 'profile_edit' %}" class="w-full py-4 bg-black text-white text-xs sm:text-sm font-black uppercase tracking-widest border-2 border-black hover:bg-[#FF3000] hover:text-white transition duration-150 flex items-center justify-center gap-2">
+                <span>แก้ไขข้อมูลส่วนตัว / EDIT PROFILE</span>
+                <span>→</span>
+            </a>
         </div>
 
         <!-- Messages -->
         {% if messages %}
-        <div class="mt-8 space-y-4">
+        <div class="mt-8 space-y-2">
             {% for message in messages %}
-            <div class="p-4 rounded-lg bg-{% if message.tags %}{{ message.tags }}-500/20{% else %}blue-500/20{% endif %} border border-{% if message.tags %}{{ message.tags }}-500{% else %}blue-500{% endif %}">
-                <p class="text-white">{{ message }}</p>
+            <div class="p-3 border-2 border-black bg-white text-xs font-bold uppercase tracking-wide flex items-center gap-2">
+                <span class="w-2 h-2 bg-[#FF3000]"></span>
+                {{ message }}
             </div>
             {% endfor %}
         </div>
