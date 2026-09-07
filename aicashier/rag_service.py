@@ -284,6 +284,28 @@ class RAGService:
             print(f"[VoiceCommand]  Error detecting action: {e}")
             return 'add'
     
+    THAI_NUMBER_WORDS = {
+        'หนึ่ง': 1, 'สอง': 2, 'สาม': 3, 'สี่': 4, 'ห้า': 5,
+        'หก': 6, 'เจ็ด': 7, 'แปด': 8, 'เก้า': 9, 'สิบ': 10,
+        '๑': 1, '๒': 2, '๓': 3, '๔': 4, '๕': 5,
+        '๖': 6, '๗': 7, '๘': 8, '๙': 9, '๐': 0,
+    }
+
+    def _convert_thai_numbers(self, text: str) -> str:
+        """แปลงคำบอกจำนวนภาษาไทยและตัวเลขไทยเป็นเลขอารบิก"""
+        result = text
+        protected = {'สามารถ': '__samart__', 'เก้าอี้': '__เก้าอี้__', 'ห้าม': '__haam__'}
+        for word, placeholder in protected.items():
+            result = result.replace(word, placeholder)
+            
+        for thai_word, digit in sorted(self.THAI_NUMBER_WORDS.items(), key=lambda x: len(x[0]), reverse=True):
+            result = result.replace(thai_word, f" {digit} ")
+            
+        for word, placeholder in protected.items():
+            result = result.replace(placeholder, word)
+            
+        return result
+
     def parse_cart_command_with_cart_context(self, user_message: str, cart: list = None):
         try:
             print(f"[RAG-CART] Parsing V3: '{user_message}'")
@@ -305,6 +327,9 @@ class RAGService:
             cleaned = re.sub(r'(ล้างตะกร้า|ลบออก|เอาออก|ไม่เอา|ลดลง|น้อยลง|ถอด)', ' ', cleaned)
             cleaned = re.sub(r'(เพิ่มเข้า|เพิ่ม|สั่ง|ซื้อ|ใส่|ให้|ทั้งตะกร้า|ทั้งหมด)', ' ', cleaned)
             cleaned = re.sub(r'\bเอา\s', ' ', cleaned)
+            
+            # แปลงคำบอกจำนวนภาษาไทยและตัวเลขไทยเป็นตัวเลขอารบิก
+            cleaned = self._convert_thai_numbers(cleaned)
             cleaned = cleaned.strip()
             
             print(f"[RAG-CART] Cleaned: '{cleaned}'")
@@ -328,8 +353,8 @@ class RAGService:
             Product = apps.get_model('aicashier', 'Product')
             
             # Pattern จับคู่ product-quantity
-            # รองรับ: "สินค้า 3", "3 สินค้า", "น้ำมะนาว 4" (ชื่อหลายคำ)
-            product_qty_pattern = r'([ก-๙a-z]+(?:\s+[ก-๙a-z]+)*)\s+(\d+)|(\d+)\s+([ก-๙a-z]+(?:\s+[ก-๙a-z]+)*)'
+            # รองรับ: "สินค้า 3", "3 สินค้า", "น้ำส้ม2แก้ว", "น้ำส้ม 2" (ใช้ \s* แทน \s+)
+            product_qty_pattern = r'([ก-๙a-z]+(?:\s+[ก-๙a-z]+)*)\s*(\d+)|(\d+)\s*([ก-๙a-z]+(?:\s+[ก-๙a-z]+)*)'
             matches = re.finditer(product_qty_pattern, cleaned, re.IGNORECASE)
             
             # เก็บคู่ที่พบ
@@ -357,16 +382,22 @@ class RAGService:
             # Match potential pairs กับ product names
             used_positions = set()
             for product_text, qty, start, end in potential_pairs:
-                # หา exact match หรือ partial match
+                # ทำความสะอาดลักษณนามหรือคำเชื่อมด้านหน้า เช่น "แก้ว ชาเย็น", "และ ลาเต้"
+                cleaned_product_text = re.sub(r'^(แก้ว|ขวด|ชิ้น|อัน|กระป๋อง|ถ้วย|กล่อง|จาน|ชุด|ที่|บาท|และ|กับ|ขอ|เอา)\s*', '', product_text).strip()
                 matched_name = None
                 
                 # Exact match
-                if product_text in product_names_map:
+                if cleaned_product_text in product_names_map:
+                    matched_name = product_names_map[cleaned_product_text]
+                elif product_text in product_names_map:
                     matched_name = product_names_map[product_text]
                 else:
                     # Partial match (สินค้าที่มีชื่อเป็น substring)
                     for db_name_lower, db_name_original in product_names_map.items():
-                        if db_name_lower in product_text or product_text in db_name_lower:
+                        if db_name_lower in cleaned_product_text or cleaned_product_text in db_name_lower:
+                            matched_name = db_name_original
+                            break
+                        elif db_name_lower in product_text or product_text in db_name_lower:
                             matched_name = db_name_original
                             break
                         
@@ -377,11 +408,12 @@ class RAGService:
             
             # ถ้ายังไม่เจอเลย ลองหาแบบไม่มีตัวเลข (default qty=1)
             if not products and cleaned:
-                for db_name_lower, db_name_original in product_names_map.items():
-                    if db_name_lower in cleaned:
+                temp_cleaned = cleaned
+                for db_name_lower, db_name_original in sorted(product_names_map.items(), key=lambda x: len(x[0]), reverse=True):
+                    if db_name_lower in temp_cleaned:
                         products.append((db_name_original, 1))
+                        temp_cleaned = temp_cleaned.replace(db_name_lower, ' ')
                         print(f"[RAG-CART] Found '{db_name_original}' without quantity, using qty=1")
-                        break
                     
             return {
                 'action': action,
