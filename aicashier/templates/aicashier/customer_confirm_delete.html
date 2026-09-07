@@ -1,11 +1,43 @@
 {% extends 'aicashier/base.html' %}
 {% block content %}
-<div class="container mx-auto mt-8 max-w-lg">
-    <h1 class="text-3xl font-bold mb-4">Delete Customer</h1>
-    <p>Are you sure you want to delete customer <strong>{{ object.username }}</strong>?</p>
-    <form method="post">{% csrf_token %}
-        <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded">Confirm Delete</button>
-        <a href="{% url 'customer_list' %}" class="ml-4 text-blue-600">Cancel</a>
-    </form>
+<div class="min-h-[85vh] swiss-grid-pattern py-8 px-4 flex items-center justify-center">
+    <div class="max-w-md w-full bg-white border-4 border-black p-6 sm:p-8 rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+        <!-- Header Badge -->
+        <div class="flex items-center justify-between border-b-2 border-black pb-4 mb-6">
+            <div class="flex items-center gap-2">
+                <span class="inline-block w-3 h-3 bg-swiss-accent"></span>
+                <span class="text-xs font-mono font-bold tracking-widest uppercase">CRM // DELETE RECORD</span>
+            </div>
+            <span class="text-xs font-mono font-bold uppercase bg-swiss-accent text-white px-2 py-0.5">IRREVERSIBLE</span>
+        </div>
+
+        <h1 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-black mb-2">
+            ลบข้อมูล<span class="text-swiss-accent">ลูกค้า</span>
+        </h1>
+        <p class="text-xs font-mono text-neutral-600 uppercase mb-6">
+            CONFIRM PERMANENT ACCOUNT REMOVAL
+        </p>
+
+        <!-- Target Info Box -->
+        <div class="border-2 border-black bg-swiss-muted p-4 mb-6">
+            <p class="text-xs font-mono text-neutral-600 uppercase mb-1">TARGET ACCOUNT:</p>
+            <p class="text-xl font-black uppercase tracking-tight text-black font-mono">{{ object.username }}</p>
+            {% if object.email %}
+            <p class="text-xs font-mono text-neutral-600 mt-1">{{ object.email }}</p>
+            {% endif %}
+        </div>
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <div class="grid grid-cols-2 gap-3">
+                <button type="submit" class="w-full py-3 bg-swiss-accent hover:bg-black text-white font-mono font-bold text-xs uppercase tracking-widest border-2 border-black rounded-none transition-colors">
+                    ยืนยันการลบ
+                </button>
+                <a href="{% url 'customer_list' %}" class="w-full py-3 bg-white hover:bg-black hover:text-white text-black font-mono font-bold text-xs uppercase tracking-widest border-2 border-black rounded-none text-center transition-colors flex items-center justify-center">
+                    ยกเลิก
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

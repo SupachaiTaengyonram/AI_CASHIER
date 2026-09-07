@@ -1,15 +1,55 @@
 {% extends 'aicashier/base.html' %}
 {% block content %}
-<div class="container mx-auto mt-8 max-w-lg">
-    <h1 class="text-3xl font-bold mb-4">Customer Detail</h1>
-    <ul class="mb-4">
-        <li><strong>Username:</strong> {{ customer.username }}</li>
-        <li><strong>Email:</strong> {{ customer.email }}</li>
-        <li><strong>Contact Number:</strong> {{ customer.contact_number }}</li>
-        <li><strong>Date Joined:</strong> {{ customer.date_joined }}</li>
-    </ul>
-    <a href="{% url 'customer_edit' customer.pk %}" class="text-yellow-600">Edit</a> |
-    <a href="{% url 'customer_delete' customer.pk %}" class="text-red-600">Delete</a> |
-    <a href="{% url 'customer_list' %}" class="text-blue-600">Back to List</a>
+<div class="min-h-[85vh] swiss-grid-pattern py-8 px-4 flex items-center justify-center">
+    <div class="max-w-xl w-full bg-white border-4 border-black p-6 sm:p-10 rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b-2 border-black pb-4 mb-6">
+            <div class="flex items-center gap-2">
+                <span class="inline-block w-3 h-3 bg-swiss-accent"></span>
+                <span class="text-xs font-mono font-bold tracking-widest uppercase">CRM // DOSSIER FILE</span>
+            </div>
+            <span class="text-xs font-mono font-bold uppercase bg-black text-white px-2 py-0.5">UID: #{{ customer.pk }}</span>
+        </div>
+
+        <h1 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-black mb-2">
+            ข้อมูล<span class="text-swiss-accent">ลูกค้า</span>
+        </h1>
+        <p class="text-xs font-mono text-neutral-600 uppercase mb-6">
+            INDIVIDUAL CUSTOMER RECORD CARD
+        </p>
+
+        <!-- Structured Dossier Table -->
+        <div class="border-2 border-black bg-white mb-6 divide-y-2 divide-black text-sm">
+            <div class="grid grid-cols-3 p-3 bg-swiss-muted">
+                <span class="text-xs font-mono uppercase font-bold text-neutral-600">ชื่อผู้ใช้ (USERNAME)</span>
+                <span class="col-span-2 font-mono font-bold text-black uppercase">{{ customer.username }}</span>
+            </div>
+            <div class="grid grid-cols-3 p-3">
+                <span class="text-xs font-mono uppercase font-bold text-neutral-600">อีเมล (EMAIL)</span>
+                <span class="col-span-2 font-mono text-black">{{ customer.email|default:"-" }}</span>
+            </div>
+            <div class="grid grid-cols-3 p-3 bg-swiss-muted">
+                <span class="text-xs font-mono uppercase font-bold text-neutral-600">เบอร์โทร (CONTACT)</span>
+                <span class="col-span-2 font-mono font-bold text-black">{{ customer.contact_number|default:"-" }}</span>
+            </div>
+            <div class="grid grid-cols-3 p-3">
+                <span class="text-xs font-mono uppercase font-bold text-neutral-600">วันที่สมัคร (JOINED)</span>
+                <span class="col-span-2 font-mono text-neutral-700 text-xs">{{ customer.date_joined }}</span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="grid grid-cols-3 gap-2 sm:gap-3">
+            <a href="{% url 'customer_edit' customer.pk %}" class="py-2.5 bg-black hover:bg-swiss-accent text-white font-mono font-bold text-xs uppercase tracking-wider border-2 border-black rounded-none text-center transition-colors">
+                แก้ไขข้อมูล
+            </a>
+            <a href="{% url 'customer_delete' customer.pk %}" class="py-2.5 bg-white hover:bg-swiss-accent hover:text-white text-swiss-accent font-mono font-bold text-xs uppercase tracking-wider border-2 border-black rounded-none text-center transition-colors">
+                ลบข้อมูล
+            </a>
+            <a href="{% url 'customer_list' %}" class="py-2.5 bg-white hover:bg-black hover:text-white text-black font-mono font-bold text-xs uppercase tracking-wider border-2 border-black rounded-none text-center transition-colors">
+                ← รายชื่อลูกค้า
+            </a>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -1,61 +1,95 @@
 {% extends 'aicashier/base.html' %}
 {% load static %}
 {% block content %}
-<div class="flex items-center gap-4 text-sm">
-    <a href="{% url 'home' %}" class="text-gray-300 hover:text-white font-medium transition">หน้าหลัก</a>
-    <a href="{% url 'overviews' %}" class="text-gray-300 hover:text-white font-medium transition">ข้อมูลการขาย</a>
-    <a href="{% url 'product_manage' %}" class="text-gray-300 hover:text-white font-medium transition">จัดการสินค้า</a>
-    <a href="{% url 'ai_settings' %}" class="text-gray-300 hover:text-white font-medium transition">ตั้งค่าการทำงานระบบเอไอ</a>
-</div>
+<div class="min-h-[90vh] swiss-grid-pattern p-4 sm:p-6 lg:p-8">
+    <!-- Header / Context Bar -->
+    <div class="bg-white border-4 border-black p-4 sm:p-6 rounded-none mb-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="inline-block w-3 h-3 bg-swiss-accent"></span>
+                    <span class="text-xs font-mono font-bold tracking-widest uppercase">CATALOG // CATEGORY TAXONOMY</span>
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-black uppercase tracking-tight text-black">
+                    จัดการ<span class="text-swiss-accent">หมวดหมู่</span>
+                </h1>
+            </div>
 
-<div class="min-h-screen bg-[#23243a] font-kanit py-8 px-4">
-    <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold text-[#b16cff]">จัดการหมวดหมู่</h1>
-        <div class="flex gap-3">
-            <a href="{% url 'create_category' %}" class="px-6 py-2 rounded-md bg-green-600 hover:bg-green-700 text-white font-medium transition">สร้างหมวดหมู่ใหม่</a>
+            <!-- Action Navigation Buttons -->
+            <div class="flex flex-wrap gap-2 sm:gap-3">
+                <a href="{% url 'product_manage' %}" class="px-4 py-2.5 bg-white hover:bg-black hover:text-white text-black font-mono font-bold text-xs uppercase tracking-wider border-2 border-black rounded-none transition-colors">
+                    ← รายการสินค้า
+                </a>
+                <a href="{% url 'create_category' %}" class="px-4 py-2.5 bg-swiss-accent hover:bg-black text-white font-mono font-bold text-xs uppercase tracking-widest border-2 border-black rounded-none transition-colors">
+                    + สร้างหมวดหมู่ใหม่
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- Messages -->
     {% if messages %}
-    <div class="mb-8">
+    <div class="mb-6 space-y-2">
         {% for message in messages %}
-        <div class="p-4 rounded-lg bg-{% if message.tags %}{{ message.tags }}{% else %}green{% endif %}-500/20 border border-{% if message.tags %}{{ message.tags }}{% else %}green{% endif %}-500 text-{% if message.tags %}{{ message.tags }}{% else %}green{% endif %}-400 mb-4">
-            {{ message }}
+        <div class="border-2 border-black bg-white p-3 font-mono text-xs font-bold uppercase tracking-wider text-black flex items-center justify-between">
+            <span>{{ message }}</span>
+            <span class="w-2.5 h-2.5 bg-black"></span>
         </div>
         {% endfor %}
     </div>
     {% endif %}
 
     <!-- Categories Table -->
-    <div class="overflow-x-auto rounded-2xl shadow-lg mb-12">
-        <table class="min-w-full bg-[#393a5a] text-white rounded-2xl">
+    <div class="border-4 border-black bg-white rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-x-auto mb-8">
+        <table class="min-w-full text-black border-collapse">
             <thead>
-                <tr class="bg-[#393a5a] text-[#b16cff] text-lg">
-                    <th class="py-4 px-4 text-left">หมวดหมู่</th>
-                    <th class="py-4 px-4 text-left">รายละเอียด</th>
-                    <th class="py-4 px-4 text-left">จำนวนสินค้า</th>
-                    <th class="py-4 px-4 text-left">จัดการ</th>
+                <tr class="bg-black text-white text-xs font-mono uppercase tracking-widest border-b-2 border-black">
+                    <th class="py-3.5 px-4 text-left">หมวดหมู่ (CATEGORY)</th>
+                    <th class="py-3.5 px-4 text-left">รายละเอียด (DESCRIPTION)</th>
+                    <th class="py-3.5 px-4 text-center">จำนวนสินค้า (ITEMS)</th>
+                    <th class="py-3.5 px-4 text-center">จัดการ (ACTIONS)</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y-2 divide-black font-sans text-sm">
                 {% for category in categories %}
-                <tr class="border-b border-[#23243a] hover:bg-[#2a2b45] transition">
-                    <td class="py-3 px-4 font-semibold text-white">{{ category.name }}</td>
-                    <td class="py-3 px-4 text-[#8b8ba8] text-sm">{{ category.description|truncatewords:10 }}</td>
-                    <td class="py-3 px-4">
-                        <span class="px-3 py-1 bg-[#b16cff]/20 text-[#b16cff] rounded-full text-sm font-semibold">
-                            {{ category.product_count }} สินค้า
+                <tr class="hover:bg-swiss-muted transition-colors">
+                    <td class="py-3 px-4 font-bold text-black uppercase tracking-tight">
+                        {{ category.name }}
+                    </td>
+                    <td class="py-3 px-4 text-neutral-600 text-xs font-mono">
+                        {{ category.description|default:"-"|truncatewords:10 }}
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="inline-block px-2.5 py-0.5 border border-black bg-swiss-muted font-mono text-xs font-bold text-black">
+                            {{ category.product_count }} ITEMS
                         </span>
                     </td>
-                    <td class="py-3 px-4 flex gap-2">
-                        <button type="button" class="text-blue-400 hover:underline text-sm" onclick="openEditModal(this)" data-id="{{ category.id }}" data-name="{{ category.name }}" data-description="{{ category.description }}">แก้ไข</button>
-                        <a href="{% url 'delete_category' category.id %}" class="text-red-400 hover:underline text-sm">ลบ</a>
+                    <td class="py-3 px-4 text-center">
+                        <div class="inline-flex items-center gap-2">
+                            <button 
+                                type="button" 
+                                class="px-2.5 py-1 text-xs font-mono font-bold uppercase border border-black bg-white hover:bg-black hover:text-white transition-colors" 
+                                onclick="openEditModal(this)" 
+                                data-id="{{ category.id }}" 
+                                data-name="{{ category.name }}" 
+                                data-description="{{ category.description }}"
+                            >
+                                แก้ไข
+                            </button>
+                            <a 
+                                href="{% url 'delete_category' category.id %}" 
+                                class="px-2.5 py-1 text-xs font-mono font-bold uppercase border border-black bg-white text-swiss-accent hover:bg-swiss-accent hover:text-white transition-colors"
+                            >
+                                ลบ
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="py-6 text-center text-gray-400">ยังไม่มีหมวดหมู่ กรุณาสร้างหมวดหมู่ใหม่</td>
+                    <td colspan="4" class="py-12 text-center text-neutral-400 font-mono text-xs uppercase tracking-widest">
+                        NO CATEGORIES RECORDED. PLEASE CREATE A CATEGORY.
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -64,11 +98,23 @@
 </div>
 
 <!-- Edit Category Modal -->
-<div id="editModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto">
-    <div class="bg-[#3a3d5c] rounded-lg p-6 border border-[#b16cff]/20 w-full max-w-2xl my-8">
-        <h3 class="text-2xl font-bold text-[#b16cff] mb-4">แก้ไขหมวดหมู่</h3>
+<div id="editModal" class="hidden fixed inset-0 bg-black/75 flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div class="bg-white border-4 border-black p-6 sm:p-8 w-full max-w-2xl rounded-none shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] my-8">
+        <div class="flex items-center justify-between border-b-2 border-black pb-3 mb-6">
+            <div class="flex items-center gap-2">
+                <span class="inline-block w-3 h-3 bg-swiss-accent"></span>
+                <span class="text-xs font-mono font-bold tracking-widest uppercase">MODAL // TAXONOMY EDITOR</span>
+            </div>
+            <button type="button" onclick="closeEditModal()" class="w-6 h-6 border-2 border-black bg-white hover:bg-swiss-accent hover:text-white flex items-center justify-center font-mono font-black text-xs">
+                ✕
+            </button>
+        </div>
+
+        <h3 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-black mb-6">
+            แก้ไข<span class="text-swiss-accent">หมวดหมู่</span>
+        </h3>
         
-        <form id="editForm" method="post" class="space-y-6">
+        <form id="editForm" method="post" class="space-y-5">
             {% csrf_token %}
             
             <!-- Hidden field for product IDs -->
@@ -77,53 +123,109 @@
             <!-- Category Info -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="text-[#b16cff] font-semibold block mb-2">ชื่อหมวดหมู่</label>
-                    <input type="text" name="name" id="categoryName" required class="w-full bg-[#393a5a] text-white border border-[#b16cff]/30 rounded-lg px-4 py-3 focus:outline-none focus:border-[#b16cff] transition">
+                    <label class="block text-xs font-mono uppercase font-bold tracking-wider text-black mb-1">
+                        ชื่อหมวดหมู่ (Category Name) *
+                    </label>
+                    <input 
+                        type="text" 
+                        name="name" 
+                        id="categoryName" 
+                        required 
+                        class="w-full bg-white text-black border-2 border-black px-3.5 py-2.5 rounded-none font-sans text-sm focus:outline-none focus:bg-swiss-muted"
+                    >
                 </div>
                 
                 <div>
-                    <label class="text-[#b16cff] font-semibold block mb-2">รายละเอียด</label>
-                    <input type="text" name="description" id="categoryDescription" class="w-full bg-[#393a5a] text-white border border-[#b16cff]/30 rounded-lg px-4 py-3 focus:outline-none focus:border-[#b16cff] transition">
+                    <label class="block text-xs font-mono uppercase font-bold tracking-wider text-black mb-1">
+                        รายละเอียด (Description)
+                    </label>
+                    <input 
+                        type="text" 
+                        name="description" 
+                        id="categoryDescription" 
+                        class="w-full bg-white text-black border-2 border-black px-3.5 py-2.5 rounded-none font-sans text-sm focus:outline-none focus:bg-swiss-muted"
+                    >
                 </div>
             </div>
 
             <!-- Products in Category -->
-            <div>
-                <label class="text-[#b16cff] font-semibold block mb-3">สินค้าในหมวดนี้</label>
-                <div class="bg-[#393a5a] rounded-lg p-4 max-h-64 overflow-y-auto">
+            <div class="border-2 border-black p-4 bg-swiss-muted">
+                <label class="block text-xs font-mono uppercase font-bold tracking-wider text-black mb-2">
+                    สินค้าในหมวดนี้ (Assigned Products)
+                </label>
+                <div class="bg-white border-2 border-black p-3 max-h-56 overflow-y-auto">
                     <div id="productsList" class="space-y-2">
                         <!-- ส่วนที่จะเติมด้วย JavaScript -->
                     </div>
                 </div>
                 
-                <div class="mt-4">
-                    <label class="text-[#b16cff] font-semibold block mb-2">เพิ่มสินค้าเข้าหมวดนี้</label>
+                <div class="mt-4 pt-3 border-t-2 border-black">
+                    <label class="block text-xs font-mono uppercase font-bold tracking-wider text-black mb-1.5">
+                        เพิ่มสินค้าเข้าหมวดนี้ (Assign Product)
+                    </label>
                     <div class="flex gap-2">
-                        <select id="productToAdd" class="flex-1 bg-[#393a5a] text-white border border-[#b16cff]/30 rounded-lg px-4 py-2 focus:outline-none focus:border-[#b16cff] transition">
-                            <option value="">-- เลือกสินค้า --</option>
+                        <select id="productToAdd" class="flex-1 bg-white text-black border-2 border-black px-3 py-2 rounded-none font-mono text-xs focus:outline-none">
+                            <option value="">-- เลือกสินค้า (SELECT PRODUCT) --</option>
                             {% for product in products %}
                             <option value="{{ product.id }}">{{ product.name }} (฿{{ product.price }})</option>
                             {% endfor %}
                         </select>
-                        <button type="button" onclick="addProductToCategory()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition">
-                            เพิ่ม
+                        <button type="button" onclick="addProductToCategory()" class="px-5 py-2 bg-black hover:bg-swiss-accent text-white font-mono font-bold text-xs uppercase tracking-wider border-2 border-black rounded-none transition-colors">
+                            เพิ่ม +
                         </button>
                     </div>
                 </div>
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex gap-3">
-                <button type="submit" class="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition">
-                    บันทึก
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button type="submit" class="w-full py-3 bg-black hover:bg-swiss-accent text-white font-mono font-bold text-xs uppercase tracking-widest border-2 border-black rounded-none transition-colors">
+                    บันทึกหมวดหมู่
                 </button>
-                <button type="button" onclick="closeEditModal()" class="flex-1 px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition">
+                <button type="button" onclick="closeEditModal()" class="w-full py-3 bg-white hover:bg-black hover:text-white text-black font-mono font-bold text-xs uppercase tracking-widest border-2 border-black rounded-none transition-colors">
                     ยกเลิก
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+/* Swiss styling overrides for dynamic JS items inside productsList */
+#productsList > div {
+    background-color: #FFFFFF !important;
+    border: 1px solid #000000 !important;
+    border-radius: 0px !important;
+    padding: 8px 12px !important;
+}
+#productsList > div p.text-white {
+    color: #000000 !important;
+    font-family: inherit !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+}
+#productsList > div p.text-\[\#8b8ba8\] {
+    color: #555555 !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 12px !important;
+}
+#productsList > div button {
+    border: 1px solid #000000 !important;
+    border-radius: 0px !important;
+    background-color: #FFFFFF !important;
+    color: #FF3000 !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-weight: 700 !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    padding: 2px 8px !important;
+    transition: all 0.15s ease !important;
+}
+#productsList > div button:hover {
+    background-color: #FF3000 !important;
+    color: #FFFFFF !important;
+}
+</style>
 
 <script>
 let currentCategoryId = null;

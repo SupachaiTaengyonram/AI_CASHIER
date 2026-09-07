@@ -1,35 +1,51 @@
 {% extends 'aicashier/base.html' %}
 {% load static %}
 {% block content %}
-<div class="min-h-screen bg-[#23243a] font-kanit py-8 px-4">
-	<div class="max-w-2xl mx-auto">
-		<div class="bg-[#2d2d4a] rounded-lg border border-[#393a5a] p-8">
-			<h1 class="text-3xl font-bold text-red-500 mb-4">ยืนยันการลบโปรโมชั่น</h1>
-			
-			<div class="bg-red-600/10 border border-red-600/30 rounded-lg p-4 mb-6">
-				<p class="text-red-300 mb-4">คุณแน่ใจหรือว่าต้องการลบโปรโมชั่น:</p>
-				<p class="text-white text-2xl font-bold mb-2">{{ promotion.title }}</p>
-				{% if promotion.description %}
-				<p class="text-gray-300">{{ promotion.description }}</p>
-				{% endif %}
+<div class="min-h-[85vh] swiss-grid-pattern py-8 px-4 flex items-center justify-center">
+	<div class="max-w-md w-full bg-white border-4 border-black p-6 sm:p-8 rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+		<!-- Header Badge -->
+		<div class="flex items-center justify-between border-b-2 border-black pb-4 mb-6">
+			<div class="flex items-center gap-2">
+				<span class="inline-block w-3 h-3 bg-swiss-accent"></span>
+				<span class="text-xs font-mono font-bold tracking-widest uppercase">MARKETING // DELETE PROMOTION</span>
 			</div>
+			<span class="text-xs font-mono font-bold uppercase bg-swiss-accent text-white px-2 py-0.5">IRREVERSIBLE</span>
+		</div>
 
-			<p class="text-yellow-400 mb-6">⚠️ การกระทำนี้ไม่สามารถย้อนกลับได้</p>
+		<h1 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-black mb-2">
+			ยืนยันการลบ<span class="text-swiss-accent">โปรโมชั่น</span>
+		</h1>
+		<p class="text-xs font-mono text-neutral-600 uppercase mb-6">
+			CONFIRM CAMPAIGN ASSET DELETION
+		</p>
+		
+		<!-- Details Box -->
+		<div class="border-2 border-black bg-swiss-muted p-4 mb-6">
+			<p class="text-xs font-mono text-neutral-600 uppercase mb-1">TARGET CAMPAIGN:</p>
+			<p class="text-xl font-black uppercase tracking-tight text-black">{{ promotion.title }}</p>
+			{% if promotion.description %}
+			<p class="text-xs text-neutral-700 mt-2 font-mono">{{ promotion.description }}</p>
+			{% endif %}
+		</div>
 
-			<div class="flex gap-4">
-				<form method="post" class="flex-1">
-					{% csrf_token %}
-					<button type="submit" class="w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition">
-						ยืนยันการลบ
-					</button>
-				</form>
-				<a href="{% url 'manage_promotion' %}" class="flex-1 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition text-center">
+		<div class="border-2 border-black p-3 bg-white mb-6 flex items-center gap-2">
+			<span class="w-2.5 h-2.5 bg-swiss-accent"></span>
+			<p class="text-xs font-mono font-bold uppercase text-swiss-accent">
+				คำเตือน: การกระทำนี้ไม่สามารถย้อนกลับได้
+			</p>
+		</div>
+
+		<form method="post" class="space-y-4">
+			{% csrf_token %}
+			<div class="grid grid-cols-2 gap-3">
+				<button type="submit" class="w-full py-3 bg-swiss-accent hover:bg-black text-white font-mono font-bold text-xs uppercase tracking-widest border-2 border-black rounded-none transition-colors">
+					ยืนยันการลบ
+				</button>
+				<a href="{% url 'manage_promotion' %}" class="w-full py-3 bg-white hover:bg-black hover:text-white text-black font-mono font-bold text-xs uppercase tracking-widest border-2 border-black rounded-none text-center transition-colors flex items-center justify-center">
 					ยกเลิก
 				</a>
 			</div>
-
-			<a href="{% url 'manage_promotion' %}" class="block text-[#b16cff] hover:underline mt-4">← กลับไปยังรายการโปรโมชั่น</a>
-		</div>
+		</form>
 	</div>
 </div>
 {% endblock %}

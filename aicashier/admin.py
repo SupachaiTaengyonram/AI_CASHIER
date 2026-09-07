@@ -31,28 +31,28 @@ class CustomerChangeAdminForm(forms.ModelForm):
 
     class Meta:
         model = Customer
-        fields = ("username", "email", "contact_number", "password", "is_active", "is_staff", "is_superuser", "groups", "user_permissions")
+        fields = ("username", "email", "contact_number", "password", "is_active", "is_staff", "is_superuser", "staff_role", "groups", "user_permissions")
 
 @admin.register(Customer)
 class CustomerAdmin(BaseUserAdmin):
     form = CustomerChangeAdminForm
     add_form = CustomerCreationAdminForm
 
-    list_display = ("username", "email", "contact_number", "is_staff", "is_superuser", "is_active", "date_joined")
-    list_filter = ("is_staff", "is_superuser", "is_active")
+    list_display = ("username", "email", "contact_number", "staff_role", "is_staff", "is_superuser", "is_active", "date_joined")
+    list_filter = ("staff_role", "is_staff", "is_superuser", "is_active")
     search_fields = ("username", "email", "contact_number")
     ordering = ("id",)
 
     fieldsets = (
         (None, {"fields": ("username", "password")}),
         ("Personal info", {"fields": ("email", "contact_number")}),
-        ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
+        ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser", "staff_role", "groups", "user_permissions")}),
         ("Important dates", {"fields": ("last_login", "date_joined")}),
     )
     add_fieldsets = (
         (None, {
             "classes": ("wide",),
-            "fields": ("username", "email", "contact_number", "password1", "password2", "is_staff", "is_superuser", "is_active"),
+            "fields": ("username", "email", "contact_number", "password1", "password2", "is_staff", "is_superuser", "staff_role", "is_active"),
         }),
     )
 

@@ -1,101 +1,155 @@
 {% extends 'aicashier/base.html' %}
 {% load static %}
+
 {% block navbar %}
-<nav class="bg-[#23243a] py-4 px-8 flex items-center">
-  <span class="text-2xl font-bold text-[#b16cff] tracking-wide">AI CASHIER</span>
+<nav class="bg-white border-b-4 border-black py-4 px-6 sm:px-10 flex items-center justify-between">
+  <div class="flex items-center gap-3">
+    <div class="w-4 h-4 bg-[#FF3000]"></div>
+    <span class="text-xl sm:text-2xl font-black text-black tracking-tighter uppercase">AI CASHIER</span>
+  </div>
+  <div class="flex items-center gap-4">
+    <!-- Day / Night Mode Switch Button -->
+    <button type="button" onclick="toggleTheme()" class="theme-toggle-btn px-2.5 sm:px-3 py-1.5 border-2 border-black bg-white hover:bg-black hover:text-white text-black font-mono font-bold text-xs uppercase tracking-wider transition duration-150 flex items-center gap-1.5" title="Switch Day/Night Mode">
+      <span class="theme-toggle-icon">🌙</span>
+      <span class="theme-toggle-text hidden sm:inline">NIGHT</span>
+    </button>
+    <div class="text-xs font-mono font-bold tracking-widest text-neutral-500 uppercase">
+      TERMINAL // 02
+    </div>
+  </div>
 </nav>
 {% endblock %}
+
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-[#23243a] font-kanit">
-  <div class="flex flex-col md:flex-row bg-[#23243a] rounded-3xl shadow-lg overflow-hidden w-full max-w-5xl">
-    <!-- Left: Image -->
-    <div class="md:w-1/2 flex items-center justify-center p-8">
-      <img src="{% static 'images/leaf-8144517_1920.jpg' %}" alt="plant"
-           class="rounded-2xl object-cover w-[600px] h-[700px] shadow-lg" />
+<div class="min-h-[calc(100vh-68px)] flex items-center justify-center p-4 sm:p-8 bg-[#F2F2F2] swiss-grid-pattern">
+  <div class="w-full max-w-5xl bg-white border-4 border-black grid grid-cols-1 md:grid-cols-12 shadow-none">
+    
+    <!-- Left Asymmetric Architectural Column -->
+    <div class="md:col-span-5 bg-[#F2F2F2] border-b-4 md:border-b-0 md:border-r-4 border-black p-8 sm:p-12 flex flex-col justify-between swiss-dots">
+      <div>
+        
+        <h2 class="text-xs font-mono font-bold tracking-widest text-[#FF3000] uppercase mb-2">02 / REGISTRATION</h2>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter text-black uppercase leading-none mb-6">
+          CREATE<br>ACCOUNT
+        </h1>
+        <p class="text-xs sm:text-sm font-medium text-neutral-700 leading-relaxed max-w-xs">
+          ลงทะเบียนบัญชีผู้ใช้งานใหม่ เพื่อเข้าถึงระบบสั่งซื้อ ติดตามสถานะออเดอร์ และรับสิทธิประโยชน์ของร้านค้า
+        </p>
+      </div>
+
+      <div class="mt-8 pt-6 border-t-2 border-black space-y-2 text-xs font-mono">
+       
+      </div>
     </div>
 
-    <!-- Right: Form -->
-    <div class="md:w-1/2 flex flex-col justify-center p-10">
-      <div class="mb-8">
-        <h2 class="text-white text-2xl font-normal">
-          ยินดีต้อนรับสู่ <span class="text-[#b16cff] font-medium">AI CASHIER</span>
-        </h2>
-        <div class="flex items-center justify-between">
-          <h1 class="text-white text-6xl font-bold mt-2 mb-2">สมัครสมาชิก</h1>
-          <div class="text-right ml-4">
-            <p class="text-gray-300 text-xs">มีบัญชีแล้ว?</p>
-            <a href="{% url 'login' %}" class="text-[#b16cff] text-xs hover:underline">เข้าสู่ระบบ</a>
-          </div>
+    <!-- Right Form Column -->
+    <div class="md:col-span-7 p-8 sm:p-12 flex flex-col justify-center bg-white">
+      <div class="flex justify-between items-end mb-8">
+        <div>
+          <span class="text-xs font-mono font-bold tracking-widest text-[#FF3000] uppercase block mb-1">02.1 // ENROLLMENT</span>
+          <h2 class="text-2xl sm:text-3xl font-black text-black uppercase tracking-tight">สมัครสมาชิก</h2>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-bold uppercase tracking-wider text-neutral-500 block">มีบัญชีแล้ว?</span>
+          <a href="{% url 'login' %}" class="text-xs font-black text-[#FF3000] hover:text-black uppercase tracking-wider transition border-b border-[#FF3000]">
+            เข้าสู่ระบบ →
+          </a>
         </div>
       </div>
 
-      <form method="post" action="{% url 'sign_up' %}" class="space-y-4">
+      <form method="post" action="{% url 'sign_up' %}" class="space-y-5">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
-          <div class="text-red-400 text-sm mb-2">{{ form.non_field_errors }}</div>
+          <div class="border-2 border-[#FF3000] bg-[#FF3000]/10 p-3 text-xs font-bold text-[#FF3000] uppercase tracking-wide">
+            {{ form.non_field_errors }}
+          </div>
         {% endif %}
 
         <div>
-          <label class="block text-gray-300 text-sm mb-1">อีเมล</label>
-          <input name="email" type="email" required
-                 value="{{ form.email.value|default:'' }}"
-                 class="w-full rounded-md px-4 py-2 bg-[#393a5a] text-white focus:outline-none focus:ring-2 focus:ring-[#b16cff]"
-                 placeholder="Email" />
+          <label class="block text-xs font-black uppercase tracking-wider text-black mb-1.5">อีเมล / EMAIL ADDRESS *</label>
+          <input 
+            name="email" 
+            type="email" 
+            required
+            value="{{ form.email.value|default:'' }}"
+            class="w-full border-2 border-black px-4 py-2.5 bg-white text-black text-sm font-medium focus:border-[#FF3000] focus:outline-none transition placeholder:text-neutral-400"
+            placeholder="name@domain.com" 
+          />
           {% if form.email.errors %}
-            <div class="text-red-400 text-xs mt-1">{{ form.email.errors }}</div>
+            <div class="text-[#FF3000] text-xs font-bold mt-1 uppercase">{{ form.email.errors.0 }}</div>
           {% endif %}
         </div>
 
-        <div class="flex gap-4">
-          <div class="w-1/2">
-            <label class="block text-gray-300 text-sm mb-1">ชื่อผู้ใช้</label>
-            <input name="username" type="text" required
-                   value="{{ form.username.value|default:'' }}"
-                   class="w-full rounded-md px-4 py-2 bg-[#393a5a] text-white focus:outline-none focus:ring-2 focus:ring-[#b16cff]"
-                   placeholder="Username" />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-black uppercase tracking-wider text-black mb-1.5">ชื่อผู้ใช้ / USERNAME *</label>
+            <input 
+              name="username" 
+              type="text" 
+              required
+              value="{{ form.username.value|default:'' }}"
+              class="w-full border-2 border-black px-4 py-2.5 bg-white text-black text-sm font-medium focus:border-[#FF3000] focus:outline-none transition placeholder:text-neutral-400 uppercase"
+              placeholder="USERNAME" 
+            />
             {% if form.username.errors %}
-              <div class="text-red-400 text-xs mt-1">{{ form.username.errors }}</div>
+              <div class="text-[#FF3000] text-xs font-bold mt-1 uppercase">{{ form.username.errors.0 }}</div>
             {% endif %}
           </div>
-          <div class="w-1/2">
-            <label class="block text-gray-300 text-sm mb-1">เบอร์ติดต่อ</label>
-            <input name="contact_number" type="text" required
-                   value="{{ form.contact_number.value|default:'' }}"
-                   class="w-full rounded-md px-4 py-2 bg-[#393a5a] text-white focus:outline-none focus:ring-2 focus:ring-[#b16cff]"
-                   placeholder="Contact Number" />
+          <div>
+            <label class="block text-xs font-black uppercase tracking-wider text-black mb-1.5">เบอร์ติดต่อ / PHONE *</label>
+            <input 
+              name="contact_number" 
+              type="text" 
+              required
+              value="{{ form.contact_number.value|default:'' }}"
+              class="w-full border-2 border-black px-4 py-2.5 bg-white text-black text-sm font-medium focus:border-[#FF3000] focus:outline-none transition placeholder:text-neutral-400"
+              placeholder="08X-XXX-XXXX" 
+            />
             {% if form.contact_number.errors %}
-              <div class="text-red-400 text-xs mt-1">{{ form.contact_number.errors }}</div>
+              <div class="text-[#FF3000] text-xs font-bold mt-1 uppercase">{{ form.contact_number.errors.0 }}</div>
             {% endif %}
           </div>
         </div>
 
         <div>
-          <label class="block text-gray-300 text-sm mb-1">รหัสผ่าน</label>
-          <input name="password" type="password" required
-                 class="w-full rounded-md px-4 py-2 bg-[#393a5a] text-white focus:outline-none focus:ring-2 focus:ring-[#b16cff]"
-                 placeholder="Password" />
+          <label class="block text-xs font-black uppercase tracking-wider text-black mb-1.5">รหัสผ่าน / PASSWORD *</label>
+          <input 
+            name="password" 
+            type="password" 
+            required
+            class="w-full border-2 border-black px-4 py-2.5 bg-white text-black text-sm font-medium focus:border-[#FF3000] focus:outline-none transition placeholder:text-neutral-400"
+            placeholder="••••••••" 
+          />
           {% if form.password.errors %}
-            <div class="text-red-400 text-xs mt-1">{{ form.password.errors }}</div>
+            <div class="text-[#FF3000] text-xs font-bold mt-1 uppercase">{{ form.password.errors.0 }}</div>
           {% endif %}
         </div>
 
         <div>
-          <label class="block text-gray-300 text-sm mb-1">ยืนยันรหัสผ่าน</label>
-          <input name="confirm_password" type="password" required
-                 class="w-full rounded-md px-4 py-2 bg-[#393a5a] text-white focus:outline-none focus:ring-2 focus:ring-[#b16cff]"
-                 placeholder="Confirm Password" />
+          <label class="block text-xs font-black uppercase tracking-wider text-black mb-1.5">ยืนยันรหัสผ่าน / CONFIRM PASSWORD *</label>
+          <input 
+            name="confirm_password" 
+            type="password" 
+            required
+            class="w-full border-2 border-black px-4 py-2.5 bg-white text-black text-sm font-medium focus:border-[#FF3000] focus:outline-none transition placeholder:text-neutral-400"
+            placeholder="••••••••" 
+          />
           {% if form.confirm_password.errors %}
-            <div class="text-red-400 text-xs mt-1">{{ form.confirm_password.errors }}</div>
+            <div class="text-[#FF3000] text-xs font-bold mt-1 uppercase">{{ form.confirm_password.errors.0 }}</div>
           {% endif %}
         </div>
 
-        <button type="submit"
-                class="w-full mt-4 py-3 rounded-md bg-gradient-to-r from-[#b16cff] to-[#6f6cff] text-white text-lg font-medium hover:from-[#a259e6] hover:to-[#5a5ae6] transition">
-          สมัครสมาชิก
+        <button 
+          type="submit"
+          class="w-full mt-4 py-4 bg-black text-white text-sm font-black uppercase tracking-widest border-2 border-black hover:bg-[#FF3000] hover:text-white transition duration-150 flex items-center justify-center gap-2"
+        >
+          <span>สร้างบัญชี / REGISTER ACCOUNT</span>
+          <span>→</span>
         </button>
       </form>
     </div>
+
   </div>
 </div>
 {% endblock %}
