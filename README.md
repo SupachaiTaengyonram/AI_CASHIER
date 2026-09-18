@@ -553,7 +553,6 @@ Used for vector embeddings and semantic similarity search.
 
 -  Python 
 -  Django 
--  Django REST Framework 
 
 ## AI / Machine Learning
 
